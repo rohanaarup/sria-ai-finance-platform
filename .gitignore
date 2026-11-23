@@ -10,9 +10,12 @@ out/
 
 # SQLite databases & temp data
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
 sqlite.db
+sqlite.db*
 
 # Environment variables & secrets
 .env
