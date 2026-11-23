@@ -1,0 +1,17 @@
+{
+  "name": "@sria/contracts",
+  "version": "0.1.0",
+  "description": "Shared contracts, DTOs, and schemas for Sria Info Tech AI Finance",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"try { fs.rmSync('dist', { recursive: true, force: true }); } catch {}\""
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
+

@@ -1,0 +1,27 @@
+{
+  "name": "@sria/cap",
+  "version": "0.1.0",
+  "description": "SAP CAP Node.js Backend Service for Sria Info Tech AI Finance",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "cds watch",
+    "start": "cds-serve",
+    "build": "cds build --no-ws-pack",
+    "deploy": "cds deploy --to sqlite:sqlite.db",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/**/*.test.*"
+  },
+  "dependencies": {
+    "@cap-js/sqlite": "^3.1.3",
+    "@sap/cds": "^10.2.2",
+    "@sria/contracts": "*",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@sap/cds-dk": "^10.2.1",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3"
+  }
+}
+

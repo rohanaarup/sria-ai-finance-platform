@@ -1,0 +1,27 @@
+{
+  "name": "sria-info-tech-ai-finance",
+  "version": "0.1.0",
+  "description": "Sria Info Tech AI Finance Dashboard Generator - Monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:cap": "npm run dev --workspace=apps/cap",
+    "dev": "npm run dev --workspace=apps/cap"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
+
