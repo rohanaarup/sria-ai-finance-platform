@@ -1,0 +1,161 @@
+flowchart TB
+  USER["Business User / CEO"]
+  UI["Web UI: Chat, Dashboard Workspace, Admin Console"]
+  API["API Gateway / Backend-for-Frontend"]
+  AUTH["Identity, Tenant Context, Authorization"]
+
+  subgraph L1["LEVEL 1 — COMPUTE, HOSTING & OPERATING SYSTEM"]
+    direction LR
+    CLOUD["Cloud / On-prem Infrastructure"]
+    VM["VMs / Bare Metal / Managed Compute"]
+    OS["Linux OS / Windows Server where required"]
+    CONTAINER["Container Runtime / Kubernetes or Managed Platform"]
+    CLOUD --> VM --> OS --> CONTAINER
+  end
+
+  subgraph L2["LEVEL 2 — PLATFORM RUNTIME & NETWORK"]
+    direction LR
+    DNS["DNS / TLS / Load Balancing"]
+    NET["VPC / Subnets / Firewall / Private Connectivity"]
+    RUNTIME["Application Runtime: Python / Node.js"]
+    QUEUE["Message Broker / Job Queue"]
+    CACHE["Cache / Session Store"]
+    DNS --> NET
+    NET --> RUNTIME
+    RUNTIME <--> QUEUE
+    RUNTIME <--> CACHE
+  end
+
+  subgraph L3["LEVEL 3 — APPLICATION & API SERVICES"]
+    direction LR
+    FRONT["Frontend Service"]
+    BACK["Backend API Service"]
+    SESSION["Conversation / Dashboard Session Service"]
+    TENANT["Tenant & Configuration Service"]
+    JOB["Workflow / Background Job Service"]
+    FRONT --> BACK
+    BACK --> SESSION
+    BACK --> TENANT
+    BACK --> JOB
+  end
+
+  subgraph L4["LEVEL 4 — AI MODEL & INTELLIGENCE SERVICES"]
+    direction TB
+    LLMGW["LLM Gateway / Provider Abstraction"]
+    MODEL["Foundation Models"]
+    PARSE["Intent & Structured Request Extraction"]
+    PLANNER["Analytics Planner"]
+    TOOL["Tool / Function Calling"]
+    MEMORY["Conversation Context / State"]
+    EVAL["Model Evaluation & Guardrails"]
+    LLMGW --> MODEL --> PARSE --> PLANNER --> TOOL
+    MEMORY <--> PARSE
+    EVAL -. governs .-> LLMGW
+  end
+
+  subgraph L5["LEVEL 5 — BUSINESS SEMANTICS & KNOWLEDGE"]
+    direction LR
+    CATALOG["Metadata / Dataset Catalog"]
+    METRIC["Metric Definitions & Semantic Models"]
+    ONTOLOGY["Business Entities / Relationships"]
+    DOCS["Documentation / RAG Knowledge"]
+    POLICY["Business Rules & Data Policies"]
+  end
+
+  subgraph L6["LEVEL 6 — DATA ACCESS, QUERY & COMPUTE"]
+    direction LR
+    DISC["Dataset Discovery & Mapping"]
+    QPLAN["Logical Query Plan"]
+    SQL["Platform Query Generation"]
+    VALID["Query / Policy Validation"]
+    EXEC["Query Execution Controller"]
+    NORMAL["Result Normalization"]
+    QUALITY["Data Quality / Reconciliation"]
+    DISC --> QPLAN --> SQL --> VALID --> EXEC --> NORMAL --> QUALITY
+  end
+
+  subgraph L7["LEVEL 7 — CONNECTIVITY & PLATFORM ADAPTERS"]
+    direction LR
+    REG["Customer Architecture Registry"]
+    ADAPTER["Common Connector Contract"]
+    SAPA["SAP Adapter"]
+    BQA["BigQuery Adapter"]
+    SNOWA["Snowflake Adapter"]
+    FABA["Fabric Adapter"]
+    DBXA["Databricks Adapter"]
+    REG --> ADAPTER
+    ADAPTER --> SAPA
+    ADAPTER --> BQA
+    ADAPTER --> SNOWA
+    ADAPTER --> FABA
+    ADAPTER --> DBXA
+  end
+
+  subgraph L8["LEVEL 8 — ENTERPRISE DATA PLATFORMS"]
+    direction LR
+    SAP["SAP S/4HANA / BW / Datasphere / BDC / HANA"]
+    GOOGLE["Google Cloud / BigQuery"]
+    SNOW["Snowflake"]
+    FABRIC["Microsoft Fabric"]
+    DBX["Databricks Lakehouse"]
+    OTHER["Other Approved Sources / APIs"]
+  end
+
+  subgraph L9["LEVEL 9 — ANALYTICS & DASHBOARD COMPILATION"]
+    direction LR
+    COMPUTE["Derived Metrics / Comparisons"]
+    SPEC["DashboardSpec Compiler"]
+    SCHEMA["Dashboard Schema & Binding Validator"]
+    STORE["Dashboard / Version / Lineage Store"]
+    COMPUTE --> SPEC --> SCHEMA --> STORE
+  end
+
+  subgraph L10["LEVEL 10 — PRESENTATION & INTERACTION"]
+    direction LR
+    RENDER["Dashboard Renderer"]
+    CHART["Charts / KPI / Tables / Filters"]
+    FOLLOW["Follow-up / Edit / Drilldown"]
+    RENDER --> CHART --> FOLLOW
+  end
+
+  subgraph CROSS["CROSS-CUTTING — SECURITY, GOVERNANCE & OPERATIONS"]
+    direction LR
+    IAM["IAM / RBAC / Row & Column Security"]
+    VAULT["Secrets & Key Management"]
+    AUDIT["Audit / Data Lineage"]
+    OBS["Logs / Metrics / Traces / Alerts"]
+    CICD["CI/CD / IaC / Release Management"]
+    BACKUP["Backup / DR / Retention"]
+  end
+
+  USER --> UI --> API --> AUTH
+  AUTH --> FRONT
+  CONTAINER -. hosts .-> RUNTIME
+  OS -. supports .-> CONTAINER
+  RUNTIME -. runs .-> BACK
+  BACK --> LLMGW
+  TOOL --> DISC
+  CATALOG --> DISC
+  METRIC --> DISC
+  ONTOLOGY --> DISC
+  DOCS --> PARSE
+  POLICY --> VALID
+  QUALITY --> COMPUTE
+  EXEC --> REG
+  SAPA <--> SAP
+  BQA <--> GOOGLE
+  SNOWA <--> SNOW
+  FABA <--> FABRIC
+  DBXA <--> DBX
+  ADAPTER <--> OTHER
+  STORE --> RENDER
+  FOLLOW --> SESSION
+  IAM -. controls .-> AUTH
+  IAM -. controls .-> VALID
+  VAULT -. supplies credentials .-> ADAPTER
+  AUDIT -. records .-> EXEC
+  AUDIT -. records .-> STORE
+  OBS -. monitors .-> RUNTIME
+  OBS -. monitors .-> MODEL
+  CICD -. deploys .-> CONTAINER
+  BACKUP -. protects .-> STORE

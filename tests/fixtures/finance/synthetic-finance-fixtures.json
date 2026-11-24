@@ -1,0 +1,112 @@
+{
+  "notice": "SYNTHETIC_TEST_FIXTURE_DO_NOT_USE_IN_PRODUCTION",
+  "version": "1.0",
+  "description": "Deterministic synthetic finance records for testing without live SAP credentials",
+  "records": [
+    {
+      "recordId": "REC-1000-202601-01",
+      "companyCode": "1000",
+      "fiscalYear": 2026,
+      "fiscalPeriod": "01",
+      "postingDate": "2026-01-15",
+      "glAccount": "410000",
+      "accountType": "REVENUE",
+      "amount": 160000.00,
+      "currency": "USD",
+      "debitCredit": "C",
+      "businessUnit": "BU_COMMERCIAL"
+    },
+    {
+      "recordId": "REC-1000-202601-02",
+      "companyCode": "1000",
+      "fiscalYear": 2026,
+      "fiscalPeriod": "01",
+      "postingDate": "2026-01-28",
+      "glAccount": "410000",
+      "accountType": "REVENUE",
+      "amount": 10000.00,
+      "currency": "USD",
+      "debitCredit": "D",
+      "businessUnit": "BU_COMMERCIAL"
+    },
+    {
+      "recordId": "REC-1000-202601-03",
+      "companyCode": "1000",
+      "fiscalYear": 2026,
+      "fiscalPeriod": "01",
+      "postingDate": "2026-01-20",
+      "glAccount": "510000",
+      "accountType": "EXPENSE",
+      "amount": 60000.00,
+      "currency": "USD",
+      "debitCredit": "D",
+      "businessUnit": "BU_OPERATIONS"
+    },
+    {
+      "recordId": "REC-1000-202601-04",
+      "companyCode": "1000",
+      "fiscalYear": 2026,
+      "fiscalPeriod": "01",
+      "postingDate": "2026-01-30",
+      "glAccount": "520000",
+      "accountType": "EXPENSE",
+      "amount": 30000.00,
+      "currency": "USD",
+      "debitCredit": "D",
+      "businessUnit": "BU_ADMIN"
+    },
+    {
+      "recordId": "REC-1000-202602-01",
+      "companyCode": "1000",
+      "fiscalYear": 2026,
+      "fiscalPeriod": "02",
+      "postingDate": "2026-02-14",
+      "glAccount": "410000",
+      "accountType": "REVENUE",
+      "amount": 200000.00,
+      "currency": "USD",
+      "debitCredit": "C",
+      "businessUnit": "BU_COMMERCIAL"
+    },
+    {
+      "recordId": "REC-1000-202602-02",
+      "companyCode": "1000",
+      "fiscalYear": 2026,
+      "fiscalPeriod": "02",
+      "postingDate": "2026-02-22",
+      "glAccount": "510000",
+      "accountType": "EXPENSE",
+      "amount": 80000.00,
+      "currency": "USD",
+      "debitCredit": "D",
+      "businessUnit": "BU_OPERATIONS"
+    },
+    {
+      "recordId": "REC-1000-202602-03",
+      "companyCode": "1000",
+      "fiscalYear": 2026,
+      "fiscalPeriod": "02",
+      "postingDate": "2026-02-27",
+      "glAccount": "530000",
+      "accountType": "EXPENSE",
+      "amount": 60000.00,
+      "currency": "USD",
+      "debitCredit": "D",
+      "businessUnit": "BU_MARKETING"
+    }
+  ],
+  "expectedCalculations": {
+    "1000_01": {
+      "total_revenue": 150000.00,
+      "total_expenses": 90000.00,
+      "net_profit": 60000.00,
+      "profit_margin": 40.00
+    },
+    "1000_02": {
+      "total_revenue": 200000.00,
+      "total_expenses": 140000.00,
+      "net_profit": 60000.00,
+      "profit_margin": 30.00
+    }
+  }
+}

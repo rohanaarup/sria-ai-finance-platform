@@ -22,3 +22,4 @@ test('CAP Health Service contract check', () => {
   assert.equal(healthResponse.components.database.dialect, 'sqlite');
   assert.equal(healthResponse.components.dataProvider.mode, 'mock');
 });
+

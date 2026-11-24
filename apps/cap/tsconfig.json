@@ -10,6 +10,7 @@
     "allowJs": true,
     "checkJs": false,
     "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
     "noEmit": true
   },
   "include": ["srv/**/*", "test/**/*"]
