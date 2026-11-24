@@ -114,3 +114,4 @@ test('AuthGuard Security & Role Enforcement Suite', async (t) => {
     assert.doesNotThrow(() => AuthGuard.assertScope(adminReq, 'FinanceAnalyst'));
   });
 });
+

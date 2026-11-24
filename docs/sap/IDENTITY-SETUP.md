@@ -60,3 +60,4 @@ Role Collections group role templates into user-assignable bundles in the SAP BT
    - Select `SriaFinanceAnalyst` or `SriaFinanceManager` and click **Assign**.
 3. **Corporate Identity Provider (IdP) Federation**:
    - If using Azure AD, Okta, or SAP Cloud Identity Services, configure user group mappings under **Trust Configuration** → **Role Collection Mappings**.
+

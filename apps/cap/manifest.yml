@@ -12,3 +12,4 @@ applications:
       FINANCE_DATA_PROVIDER: mock
     services:
       - sria-xsuaa
+

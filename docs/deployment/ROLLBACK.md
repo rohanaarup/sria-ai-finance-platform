@@ -91,3 +91,4 @@ cf unmap-route sria-cap-srv-green <domain> --hostname sria-finance-api
 cf stop sria-cap-srv-green
 ```
 Zero downtime is experienced by end users.
+

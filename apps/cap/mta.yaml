@@ -78,3 +78,4 @@ resources:
       service-plan: lite
       config:
         HTML5Runtime_enabled: false
+
