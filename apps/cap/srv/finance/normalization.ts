@@ -104,3 +104,4 @@ export function formatPercentageValue(value: number, decimalPlaces = 2): string 
   }
   return `${value.toFixed(decimalPlaces)}%`;
 }
+

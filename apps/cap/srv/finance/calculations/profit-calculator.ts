@@ -77,3 +77,4 @@ export function calculateProfitMargin(
     dataState: evaluateDataState(hasSourceRecords ? 1 : 0, rounded)
   };
 }
+

@@ -68,3 +68,4 @@ export function calculateExpenses(
     dataState: evaluateDataState(filtered.length, rounded)
   };
 }
+

@@ -66,3 +66,4 @@ In compliance with **ADR-003** and **ADR-007**, no mathematical calculation is p
   - Building the interactive prompt input dialog.
   - Implementing the React visual widget renderer using Recharts (`kpi_card`, `bar_chart`, `line_chart`, `table`).
   - Connecting the frontend shell on `http://localhost:5173` to the live CAP backend on `http://localhost:4004`.
+

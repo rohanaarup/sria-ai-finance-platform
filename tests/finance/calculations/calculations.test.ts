@@ -120,3 +120,4 @@ describe('Phase 8: Finance Calculations & Normalization', () => {
     assert.deepEqual(summary.duplicateIds, ['DUP-01']);
   });
 });
+

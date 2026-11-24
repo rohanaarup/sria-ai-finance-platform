@@ -94,3 +94,4 @@ describe('Phase 8: DashboardSpec Compiler', () => {
     assert.ok(spec.freshnessNotice?.includes('Synthetic Test Fixtures'));
   });
 });
+

@@ -57,3 +57,4 @@ describe('CAP Workspace: DashboardSpecCompiler', () => {
     assert.doesNotThrow(() => DashboardSpecSchema.parse(spec));
   });
 });
+

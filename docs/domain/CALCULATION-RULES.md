@@ -47,3 +47,4 @@ Every compiled metric attaches provenance metadata:
 - `calculationVersion`: Version of the calculation logic (`1.0.0`)
 - `appliedFilters`: Exact filters applied (`companyCode`, `fiscalYear`, `fiscalPeriod`)
 - `isSynthetic`: Boolean indicator for auditability
+

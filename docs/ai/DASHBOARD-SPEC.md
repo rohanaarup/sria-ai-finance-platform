@@ -52,3 +52,4 @@ Only four widget types are permitted in `DashboardWidgetSpec.type`:
 - **Zero Dynamic Code Execution:** No `eval()`, `new Function()`, or `dangerouslySetInnerHTML`.
 - **Schema Strictness:** Any unexpected fields or unknown widget types are rejected by Zod validation during compilation.
 - **Auditable Provenance:** Every metric result and widget is linked directly to source system metadata.
+
