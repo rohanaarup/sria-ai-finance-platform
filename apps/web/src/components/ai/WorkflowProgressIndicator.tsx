@@ -72,3 +72,4 @@ export const WorkflowProgressIndicator: React.FC<WorkflowProgressIndicatorProps>
     </div>
   );
 };
+

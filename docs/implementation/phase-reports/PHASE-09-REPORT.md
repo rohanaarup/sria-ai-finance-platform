@@ -66,3 +66,4 @@ All visual rendering is schema-constrained by `DashboardSpec`—guaranteeing 100
   - Supporting conversational follow-up modifications (e.g. "now filter by period 01", "add profit margin").
   - Saving dashboard configurations to the application database (`apps/cap/sqlite.db`).
   - Loading saved dashboards from the database and refreshing figures on-demand.
+

@@ -51,3 +51,4 @@ export const ProvenanceBanner: React.FC<ProvenanceBannerProps> = ({
     </div>
   );
 };
+

@@ -235,6 +235,33 @@ export class DashboardRepository {
 
     return true;
   }
+
+  /**
+   * Record a non-sensitive audit event
+   */
+  public async recordAudit(
+    action: string,
+    targetId: string,
+    details: string,
+    ctx: TenantContext,
+    sourceSystem = 'sria-app',
+    metricVersion = '1.0'
+  ) {
+    const db = await cds.connect.to('db');
+    await db.run(
+      INSERT.into(ENTITY_NAMES.AuditEvents).entries({
+        ID: randomUUID(),
+        organizationId: ctx.organizationId,
+        workspaceId: '00000000-0000-0000-0000-000000000001',
+        userId: ctx.userId,
+        action,
+        targetId,
+        sourceSystem,
+        metricVersion,
+        details
+      })
+    );
+  }
 }
 
 export const defaultDashboardRepository = new DashboardRepository();

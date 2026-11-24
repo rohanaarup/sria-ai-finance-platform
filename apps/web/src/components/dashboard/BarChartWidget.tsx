@@ -71,3 +71,4 @@ export const BarChartWidget: React.FC<BarChartWidgetProps> = ({ title, metrics }
     </div>
   );
 };
+

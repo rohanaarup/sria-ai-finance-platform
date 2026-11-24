@@ -68,3 +68,4 @@ export const LineChartWidget: React.FC<LineChartWidgetProps> = ({ title }) => {
     </div>
   );
 };
+

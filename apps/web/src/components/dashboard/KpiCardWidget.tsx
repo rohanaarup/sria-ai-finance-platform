@@ -78,3 +78,4 @@ export const KpiCardWidget: React.FC<KpiCardWidgetProps> = ({ metric, subtitle }
     </div>
   );
 };
+

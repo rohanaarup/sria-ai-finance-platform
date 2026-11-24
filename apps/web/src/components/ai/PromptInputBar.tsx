@@ -100,3 +100,4 @@ export const PromptInputBar: React.FC<PromptInputBarProps> = ({ onSubmit, isLoad
     </div>
   );
 };
+

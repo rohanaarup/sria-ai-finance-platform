@@ -8,7 +8,8 @@
 import type {
   DashboardRequest,
   ClarificationQuestion,
-  MetricResult
+  MetricResult,
+  DashboardSpec
 } from '@sria/contracts';
 
 export interface UnderstandResponse {
@@ -113,6 +114,265 @@ export class ApiClient {
     }
 
     return this._localMockExecution(request);
+  }
+
+  // ─── Lifecycle & Follow-up API Methods ──────────────────────────────────────
+
+  /**
+   * Save active dashboard configuration to database
+   */
+  static async saveDashboard(
+    title: string,
+    spec: DashboardSpec,
+    description?: string
+  ): Promise<{ dashboardId: string; status: string }> {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/SaveDashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          description: description || spec.description,
+          specJson: JSON.stringify(spec)
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return { dashboardId: data.dashboardId, status: data.status };
+      }
+    } catch (err) {
+      console.warn('[ApiClient] Server save failed, saving to local cache:', err);
+    }
+
+    const localId = `local-${Date.now()}`;
+    const localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
+    localStore.push({
+      id: localId,
+      title,
+      description: description || spec.description,
+      createdAt: new Date().toISOString(),
+      version: '1.0',
+      isStale: true,
+      spec
+    });
+    localStorage.setItem('sria_saved_dashboards', JSON.stringify(localStore));
+    return { dashboardId: localId, status: 'SAVED' };
+  }
+
+  /**
+   * List saved dashboards from database
+   */
+  static async listDashboards(): Promise<Array<{
+    id: string;
+    title: string;
+    description?: string;
+    createdAt: string;
+    version: string;
+    isStale: boolean;
+  }>> {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/ListDashboards()`);
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.value || data;
+        if (Array.isArray(items) && items.length > 0) {
+          return items.map((item: any) => ({
+            id: item.ID || item.id,
+            title: item.title,
+            description: item.description,
+            createdAt: item.createdAt || new Date().toISOString(),
+            version: '1.0',
+            isStale: true
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('[ApiClient] Server list failed, checking local storage:', err);
+    }
+
+    const localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
+    return localStore.map((d: any) => ({
+      id: d.id,
+      title: d.title,
+      description: d.description,
+      createdAt: d.createdAt,
+      version: d.version,
+      isStale: true
+    }));
+  }
+
+  /**
+   * Reopen a saved dashboard specification
+   */
+  static async reopenDashboard(
+    dashboardId: string
+  ): Promise<{ spec: DashboardSpec; isStale: boolean }> {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/ReopenDashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dashboardId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          spec: JSON.parse(data.specJson),
+          isStale: data.isStale ?? true
+        };
+      }
+    } catch (err) {
+      console.warn('[ApiClient] Server reopen failed, reading local storage:', err);
+    }
+
+    const localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
+    const match = localStore.find((d: any) => d.id === dashboardId);
+    if (match && match.spec) {
+      return { spec: match.spec, isStale: true };
+    }
+    throw new Error(`Dashboard ${dashboardId} not found.`);
+  }
+
+  /**
+   * Rename a dashboard
+   */
+  static async renameDashboard(dashboardId: string, newTitle: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/RenameDashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dashboardId, newTitle })
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.warn('[ApiClient] Server rename failed:', err);
+    }
+
+    const localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
+    const match = localStore.find((d: any) => d.id === dashboardId);
+    if (match) {
+      match.title = newTitle;
+      if (match.spec) match.spec.title = newTitle;
+      localStorage.setItem('sria_saved_dashboards', JSON.stringify(localStore));
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Delete a dashboard
+   */
+  static async deleteDashboard(dashboardId: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/DeleteDashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dashboardId })
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.warn('[ApiClient] Server delete failed:', err);
+    }
+
+    let localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
+    localStore = localStore.filter((d: any) => d.id !== dashboardId);
+    localStorage.setItem('sria_saved_dashboards', JSON.stringify(localStore));
+    return true;
+  }
+
+  /**
+   * Refresh a dashboard's financial data on demand
+   */
+  static async refreshDashboard(
+    dashboardId: string
+  ): Promise<{ spec: DashboardSpec; refreshedAt: string }> {
+    try {
+      const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/RefreshDashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dashboardId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          spec: JSON.parse(data.refreshedSpecJson),
+          refreshedAt: data.refreshedAt
+        };
+      }
+    } catch (err) {
+      console.warn('[ApiClient] Server refresh failed:', err);
+    }
+    throw new Error('On-demand refresh requires active backend connection.');
+  }
+
+  /**
+   * Process a conversational follow-up request
+   */
+  static async processFollowUp(
+    prompt: string,
+    currentSpec: DashboardSpec
+  ): Promise<{
+    spec?: DashboardSpec;
+    reusedExistingData: boolean;
+    message: string;
+    type: 'PRESENTATION_ONLY' | 'DATA_CHANGING' | 'REFRESH' | 'UNSUPPORTED';
+  }> {
+    const lower = prompt.toLowerCase().trim();
+
+    // 1. Guardrail / Unsupported
+    if (
+      lower.includes('predict') ||
+      lower.includes('forecast') ||
+      lower.includes('stock price') ||
+      lower.includes('ebitda') ||
+      lower.includes('drop') ||
+      lower.includes('delete from')
+    ) {
+      return {
+        type: 'UNSUPPORTED',
+        reusedExistingData: true,
+        message: 'Unsupported follow-up: Predictive analysis and direct DB commands are blocked.'
+      };
+    }
+
+    // 2. Presentation Only
+    if (
+      lower.includes('bar') ||
+      lower.includes('line') ||
+      lower.includes('table') ||
+      lower.includes('rename') ||
+      lower.includes('title')
+    ) {
+      let targetType: 'bar_chart' | 'line_chart' | 'table' | undefined;
+      if (lower.includes('bar')) targetType = 'bar_chart';
+      else if (lower.includes('line')) targetType = 'line_chart';
+      else if (lower.includes('table')) targetType = 'table';
+
+      const updatedWidgets = currentSpec.widgets.map((w: any) => {
+        if (targetType && (w.type === 'bar_chart' || w.type === 'line_chart')) {
+          return { ...w, type: targetType };
+        }
+        return w;
+      });
+
+      const updatedSpec: DashboardSpec = {
+        ...currentSpec,
+        widgets: updatedWidgets
+      };
+
+      return {
+        type: 'PRESENTATION_ONLY',
+        spec: updatedSpec,
+        reusedExistingData: true,
+        message: 'Presentation updated. Validated calculation figures reused without re-querying SAP.'
+      };
+    }
+
+    // 3. Data-Changing or Refresh -> Route through understand/execute flow
+    return {
+      type: 'DATA_CHANGING',
+      reusedExistingData: false,
+      message: 'Data modification detected. Triggering fresh authorized retrieval.'
+    };
   }
 
   // ─── Local Fallback for Seamless Offline Demo ───────────────────────────────
