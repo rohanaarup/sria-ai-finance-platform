@@ -82,3 +82,4 @@ Total CAP Workspace Tests: 72 passed / 72 total (100%)
   - Building the deterministic `DashboardSpec` JSON compiler.
   - Assembling layout widgets (cards, line charts, bar charts, tables).
   - Stamping final source provenance metadata.
+

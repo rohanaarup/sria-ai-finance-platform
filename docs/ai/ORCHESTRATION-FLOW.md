@@ -86,3 +86,4 @@ export interface ExecutionTrace {
 
 > [!NOTE]
 > In compliance with the **Data Storage Policy**, the execution trace records only step metadata, timings, and status codes. Raw SAP transactional records are never retained in trace logs.
+

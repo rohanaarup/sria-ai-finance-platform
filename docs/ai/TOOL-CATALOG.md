@@ -69,3 +69,4 @@ The following tool calls are strictly intercepted and rejected by `ToolRegistry.
 | `run_shell_command` | Throws Error | Prevents remote code execution |
 | `fetch_arbitrary_url` | Throws Error | Prevents SSRF attacks and data exfiltration |
 | `query_sap_table` | Throws Error | Direct table queries bypass SAP business authorization |
+

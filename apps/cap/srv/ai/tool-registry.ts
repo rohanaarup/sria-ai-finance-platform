@@ -63,3 +63,4 @@ export class ToolRegistry {
     return await tool.execute(parsedParams, ctx);
   }
 }
+

@@ -70,3 +70,4 @@ export class WorkflowStateMachine {
     this._currentState = nextState;
   }
 }
+
