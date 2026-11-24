@@ -50,3 +50,4 @@ export const DashboardSpecSchema = z.object({
   freshnessNotice: z.string().optional()
 }).strict();
 export type DashboardSpec = z.infer<typeof DashboardSpecSchema>;
+

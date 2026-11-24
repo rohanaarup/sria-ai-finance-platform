@@ -1,8 +1,8 @@
 # Implementation Progress & Status Tracker
 ## Sria Info Tech AI Finance Dashboard Generator
 
-### Overall Delivery Progress: 20% / 100%
-**Current Phase**: Phase 02 Completed | **Next Phase**: Phase 03 Ready
+### Overall Delivery Progress: 28% / 100%
+**Current Phase**: Phase 03 Completed | **Next Phase**: Phase 04 Ready
 
 ---
 
@@ -13,8 +13,8 @@
 | **00** | **Project discovery & scope lock** | Foundation | **5%** | **5%** | **COMPLETED** | Verified empty repo; approved MVP scope, system architecture, decision log, access checklist, and Phase 00 report. |
 | **01** | **Repository foundation & local dev** | Foundation | **7%** | **12%** | **COMPLETED** | Monorepo established (`@sria/contracts`, `@sria/cap`, `@sria/web`); live CAP health endpoint verified on port 4004; all typechecks, tests, and builds passing cleanly. |
 | **02** | **Finance domain contracts & registry** | Domain foundation | **8%** | **20%** | **COMPLETED** | Versioned contracts with Zod validation; `FinanceMetricRegistry` allowlist; deterministic synthetic fixtures; 13/13 unit tests passed; FINANCE-METRICS.md & SAP-FIELD-MAPPING.md documented. |
-| **03** | CAP backend core & application persistence | SAP foundation | 8% | 28% | PENDING | Ready to implement CAP CDS persistence models and services. |
-| **04** | SAP BTP foundation, identity & first deployment | SAP foundation | 9% | 37% | PENDING | Requires Phase 03 and BTP account verification. |
+| **03** | **CAP backend core & persistence** | SAP foundation | **8%** | **28%** | **COMPLETED** | Modular CDS models (`tenant`, `dashboard`, `metric-config`); SQLite deployed; `DashboardRepository` with tenant isolation; 22/22 tests passing; DATA-STORAGE-POLICY.md, PERSISTENCE-MODEL.md & HANA runbook published. |
+| **04** | SAP BTP foundation, identity & first deployment | SAP foundation | 9% | 37% | PENDING | Cloud Foundry deployment and XSUAA/Identity configuration. |
 | **05** | SAP Finance data access & source adapter | SAP integration | 11% | 48% | PENDING | Mock provider + S/4HANA OData provider. |
 | **06** | AI request understanding & clarification engine | AI intelligence | 9% | 57% | PENDING | Structured request parsing and clarification prompt. |
 | **07** | AI planning, tool orchestration & controlled exec | AI intelligence | 10% | 67% | PENDING | State machine and bounded `get_finance_metrics` tool. |

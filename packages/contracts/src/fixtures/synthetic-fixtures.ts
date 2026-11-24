@@ -187,3 +187,4 @@ export const EXPECTED_FINANCE_CALCULATIONS = {
     profit_margin: -50.00 // (-25000 / 50000) * 100
   }
 };
+

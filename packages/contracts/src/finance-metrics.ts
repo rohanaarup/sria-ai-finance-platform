@@ -143,3 +143,4 @@ export const BASELINE_METRIC_CATALOG: Record<MetricId, MetricDefinition> = {
     }
   }
 };
+

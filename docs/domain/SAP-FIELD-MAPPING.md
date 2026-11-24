@@ -70,3 +70,4 @@ This worksheet documents the technical contract mapping between the Sria Info Te
 2. **Account Classification**: Does the customer use `GLAccountType` (`R` for revenue, `X` for expense), or is classification driven by specific G/L Account Number ranges?
 3. **Leading Ledger**: Should queries restrict to the leading ledger (e.g., `0L`) to avoid duplicate local ledger postings?
 4. **Communication User**: Will the BTP Destination authenticate via Basic Auth, OAuth2 SAML Bearer, or Principal Propagation?
+

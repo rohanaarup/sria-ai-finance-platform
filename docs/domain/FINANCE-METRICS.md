@@ -97,3 +97,4 @@ Only the following dimensions are allowlisted for the MVP pilot:
 ### 4. Multi-Currency & Fiscal Calendar Rules
 1. **Single Currency Rule**: For the MVP, all records are filtered and aggregated in the company code's local reporting currency (e.g., `USD`). Foreign currency translation and multi-currency consolidation are out of scope.
 2. **Standard Fiscal Year (K4)**: Calendar year (January to December) is assumed as baseline until custom fiscal variants (e.g., April to March) are approved by the Finance Reviewer.
+
