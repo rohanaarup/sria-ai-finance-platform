@@ -100,3 +100,4 @@ The evaluation test suite covers 13 test cases across 5 categories:
 1. **Decoupled Model Architecture (ADR-004):** The development agent (Gemini Flash) is strictly separated from the runtime LLM. The runtime model is abstracted behind `LLMProvider`, defaulting to `MockLLMProvider` until corporate governance approves an external API.
 2. **Server-Side Authorization Enforcement:** Model output never dictates tenant or user identity. `organizationId` and `userId` are injected directly by CAP authentication middleware (`AuthGuard`).
 3. **No Financial Row Data in Prompts:** Prompts contain only user instructions and metric metadata. Raw SAP transactions are never sent to any LLM.
+

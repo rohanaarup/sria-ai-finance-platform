@@ -83,3 +83,4 @@ You must respond with a JSON object matching one of these structures:
   "suggestedAlternatives": ["net_profit", "total_revenue"]
 }
 ```
+

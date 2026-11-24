@@ -43,3 +43,4 @@ export interface LLMProvider {
   /** Execute a chat completion call */
   complete(messages: LLMMessage[], options?: LLMCompletionOptions): Promise<LLMCompletionResponse>;
 }
+

@@ -25,3 +25,4 @@ service AiService @(path: '/api/ai') {
     supportedMetrics  : array of String;
   };
 }
+

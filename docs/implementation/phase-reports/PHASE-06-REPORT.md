@@ -87,3 +87,4 @@ Total Evaluation Matrix: 13 passed / 13 total (100% Accuracy)
   - Building the execution state machine.
   - Bounded tool calling (`get_finance_metrics`).
   - Strict step budget and loop prevention.
+
