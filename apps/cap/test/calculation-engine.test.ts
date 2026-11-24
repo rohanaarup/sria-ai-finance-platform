@@ -237,3 +237,4 @@ describe('CalculationEngine — calculateAllMetrics with SYNTHETIC_FINANCE_RECOR
     assert.equal(result.netProfit.value, 70000);
   });
 });
+

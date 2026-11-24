@@ -83,3 +83,4 @@ export interface FinanceDataProvider {
    */
   isAvailable(): Promise<boolean>;
 }
+

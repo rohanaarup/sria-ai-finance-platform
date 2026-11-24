@@ -206,3 +206,4 @@ export function calculateAllMetrics(
 
   return { totalRevenue, totalExpenses, netProfit, profitMargin };
 }
+

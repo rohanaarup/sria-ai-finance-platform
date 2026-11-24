@@ -55,3 +55,4 @@ service FinanceDataService @(path: '/api/finance') {
     statusMessage  : String;
   };
 }
+

@@ -107,3 +107,4 @@ export class S4HanaODataFinanceDataProvider implements FinanceDataProvider {
     );
   }
 }
+

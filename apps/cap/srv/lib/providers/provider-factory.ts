@@ -62,3 +62,4 @@ export function getFinanceDataProvider(overrideType?: ProviderType): FinanceData
 export function resetProviderSingleton(): void {
   _instance = null;
 }
+
