@@ -88,3 +88,4 @@ All financial accounting data remains inside SAP S/4HANA and is accessed transie
 ### 4. Database Adapters: SQLite vs. SAP HANA Cloud
 - **Local Development**: Uses `@cap-js/sqlite`. Zero cloud dependency; stored locally in `apps/cap/sqlite.db`.
 - **Production Target**: Configured in `.cdsrc.json` under profile `[production]` targeting SAP HANA Cloud via `@sap/hana-client`.
+

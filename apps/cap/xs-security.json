@@ -1,0 +1,66 @@
+{
+  "xsappname": "sria-finance-cap",
+  "tenant-mode": "dedicated",
+  "description": "Security descriptor for Sria Info Tech AI Finance Dashboard Generator",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.FinanceAnalyst",
+      "description": "Read financial dashboards and query approved finance metrics"
+    },
+    {
+      "name": "$XSAPPNAME.FinanceManager",
+      "description": "Create, modify, archive, and share financial dashboards"
+    },
+    {
+      "name": "$XSAPPNAME.TenantAdmin",
+      "description": "Administer workspaces, data source references, and audit logs"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "FinanceAnalyst",
+      "description": "Finance Analyst Role Template",
+      "scope-references": [
+        "$XSAPPNAME.FinanceAnalyst"
+      ]
+    },
+    {
+      "name": "FinanceManager",
+      "description": "Finance Manager Role Template",
+      "scope-references": [
+        "$XSAPPNAME.FinanceAnalyst",
+        "$XSAPPNAME.FinanceManager"
+      ]
+    },
+    {
+      "name": "TenantAdmin",
+      "description": "Tenant Administrator Role Template",
+      "scope-references": [
+        "$XSAPPNAME.TenantAdmin"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "SriaFinanceAnalyst",
+      "description": "View and interact with Sria Finance Dashboards",
+      "role-template-references": [
+        "$XSAPPNAME.FinanceAnalyst"
+      ]
+    },
+    {
+      "name": "SriaFinanceManager",
+      "description": "Create, edit, and share Sria Finance Dashboards",
+      "role-template-references": [
+        "$XSAPPNAME.FinanceManager"
+      ]
+    },
+    {
+      "name": "SriaTenantAdministrator",
+      "description": "Full administrative access to Sria Finance workspaces and connections",
+      "role-template-references": [
+        "$XSAPPNAME.TenantAdmin"
+      ]
+    }
+  ]
+}

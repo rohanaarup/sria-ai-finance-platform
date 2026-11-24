@@ -1,0 +1,80 @@
+_schema-version: '3.1.0'
+ID: sria-finance-app
+version: 0.1.0
+description: "Sria Info Tech AI Finance Dashboard Generator Multi-Target Application"
+
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm run build --workspaces
+
+modules:
+  # ------------------------------------------------------------------------
+  # SAP CAP Node.js Backend Service
+  # ------------------------------------------------------------------------
+  - name: sria-cap-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 512M
+      disk-quota: 1024M
+    properties:
+      NODE_ENV: production
+      CDS_ENV: production
+      FINANCE_DATA_PROVIDER: mock
+    requires:
+      - name: sria-xsuaa
+      - name: sria-destination
+        optional: true
+    provides:
+      - name: sria-srv-api
+        properties:
+          srv-url: ${default-url}
+
+  # ------------------------------------------------------------------------
+  # React + Vite Frontend Application (Static Web Bundle)
+  # ------------------------------------------------------------------------
+  - name: sria-web-ui
+    type: html5
+    path: ../web/dist
+    parameters:
+      buildpack: staticfile_buildpack
+      memory: 256M
+      disk-quota: 512M
+    requires:
+      - name: sria-srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          url: ~{srv-url}
+          forwardAuthToken: true
+
+resources:
+  # ------------------------------------------------------------------------
+  # XSUAA Service (Identity & Role Authentication)
+  # ------------------------------------------------------------------------
+  - name: sria-xsuaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: sria-finance-cap
+        tenant-mode: dedicated
+
+  # ------------------------------------------------------------------------
+  # Destination Service (For S/4HANA OData in Phase 05)
+  # ------------------------------------------------------------------------
+  - name: sria-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: false

@@ -62,3 +62,4 @@ cf service sria-finance-hdi
 Status must indicate `create succeeded`.
 
 If access or entitlements are unavailable, keep production persistence marked **BLOCKED** and proceed with local development using the SQLite adapter.
+

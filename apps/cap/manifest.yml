@@ -1,0 +1,14 @@
+---
+applications:
+  - name: sria-cap-srv
+    path: gen/srv
+    memory: 512M
+    disk_quota: 1024M
+    buildpacks:
+      - nodejs_buildpack
+    env:
+      NODE_ENV: production
+      CDS_ENV: production
+      FINANCE_DATA_PROVIDER: mock
+    services:
+      - sria-xsuaa

@@ -38,3 +38,4 @@ To prevent cross-tenant data leakage:
 1. **Mandatory Foreign Keys**: Every `Workspaces`, `Dashboards`, `DashboardSpecs`, and `AuditEvents` record contains an `organization_ID` column.
 2. **Server-Side Enforcement**: All database queries executed through `DashboardRepository` explicitly enforce `.where({ organization_ID: ctx.organizationId })`.
 3. **No UI-Only Security**: Even if a malicious client supplies a foreign dashboard UUID, the backend query resolves to zero rows (`null`), completely blocking cross-organization access.
+
