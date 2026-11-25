@@ -76,7 +76,20 @@ export class MockLLMProvider implements LLMProvider {
       lower.includes('delete from') ||
       lower.includes('select * from') ||
       lower.includes('grant admin') ||
-      lower.includes('bypass')
+      lower.includes('bypass') ||
+      lower.includes('jailbreak') ||
+      lower.includes('dan mode') ||
+      lower.includes('developer mode') ||
+      lower.includes('root administrator') ||
+      lower.includes('repeat instructions') ||
+      lower.includes('print instructions') ||
+      lower.includes('union select') ||
+      lower.includes("' or '1'='1") ||
+      lower.includes('1=1') ||
+      lower.includes('<script') ||
+      lower.includes('rm -rf') ||
+      lower.includes('webhook.site') ||
+      lower.includes('exfiltrat')
     ) {
       return {
         intentType: 'unsupported_request',

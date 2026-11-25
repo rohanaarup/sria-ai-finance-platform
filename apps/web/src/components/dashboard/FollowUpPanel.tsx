@@ -200,3 +200,4 @@ export const FollowUpPanel: React.FC<FollowUpPanelProps> = ({
     </div>
   );
 };
+

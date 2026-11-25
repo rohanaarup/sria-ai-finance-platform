@@ -65,11 +65,22 @@ export class FollowUpRouter {
       lower.includes('ebitda') ||
       lower.includes('drop') ||
       lower.includes('delete from') ||
-      lower.includes('select *')
+      lower.includes('select *') ||
+      lower.includes('ignore previous') ||
+      lower.includes('jailbreak') ||
+      lower.includes('developer mode') ||
+      lower.includes('dan mode') ||
+      lower.includes('union select') ||
+      lower.includes("' or '1'='1") ||
+      lower.includes('1=1') ||
+      lower.includes('<script') ||
+      lower.includes('rm -rf') ||
+      lower.includes('system prompt') ||
+      lower.includes('webhook.site')
     ) {
       return {
         type: 'UNSUPPORTED',
-        reason: 'Follow-up requests for predictive forecasting, unapproved metrics, or database commands are not supported.'
+        reason: 'Follow-up requests for predictive forecasting, unapproved metrics, security bypasses, or database commands are not supported.'
       };
     }
 

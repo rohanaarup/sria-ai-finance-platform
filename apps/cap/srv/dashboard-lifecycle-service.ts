@@ -13,6 +13,7 @@
 
 import cds from '@sap/cds';
 import type { Request } from '@sap/cds';
+import { randomUUID } from 'node:crypto';
 import { AuthGuard } from './lib/auth/auth-guard.ts';
 import { DashboardRepository } from './lib/repositories/dashboard-repository.ts';
 import { FollowUpRouter } from './ai/follow-up-router.ts';

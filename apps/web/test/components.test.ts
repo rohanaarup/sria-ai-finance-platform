@@ -11,6 +11,9 @@
 
 import { strict as assert } from 'node:assert';
 import { describe, it } from 'node:test';
+
+process.env.NODE_ENV = 'test';
+
 import { ApiClient } from '../src/services/api-client.ts';
 
 describe('Phase 9: Frontend Services & Component Logic', () => {

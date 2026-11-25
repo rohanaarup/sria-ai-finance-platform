@@ -207,3 +207,11 @@ export function calculateAllMetrics(
   return { totalRevenue, totalExpenses, netProfit, profitMargin };
 }
 
+export const CalculationEngine = {
+  calculateTotalRevenue,
+  calculateTotalExpenses,
+  calculateNetProfit,
+  calculateProfitMargin,
+  calculateAllMetrics
+};
+
