@@ -86,3 +86,4 @@ Tenant identity (`organizationId`), user identity (`userId`), and permissions (`
 | **Adversarial / Jailbreak** | 24 | 100% | Defeats prompt injections, system prompt leaks, SQL/command injections, and data exfiltration. |
 | **Malformed / Boundary** | 4 | 100% | Gracefully handles empty prompts, whitespace, 2,000+ char overflows, and unicode edge-cases. |
 | **Total Evaluation Cases** | **37** | **100%** | Zero security bypasses, zero hallucinated metrics, zero calculation discrepancies. |
+
