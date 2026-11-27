@@ -37,7 +37,7 @@ export interface AdapterContext {
   destinationName?: string;
 }
 
-export type AdapterErrorCode = 'UNAVAILABLE' | 'TIMEOUT' | 'ABORTED' | 'BAD_QUERY' | 'AUTH' | 'SOURCE_ERROR';
+export type AdapterErrorCode = 'UNAVAILABLE' | 'TIMEOUT' | 'ABORTED' | 'BAD_QUERY' | 'AUTH' | 'SOURCE_ERROR' | 'THROTTLED' | 'NOT_FOUND' | 'MALFORMED';
 
 export class AdapterError extends Error {
   readonly code: AdapterErrorCode;

@@ -1,0 +1,6 @@
+# Reconciliation report template (semicolon separated). Lines starting with # are ignored.
+# One row per company, fiscal period and metric, copied from the standard SAP report Finance chose.
+# Revenue and expenses as positive numbers; dot as decimal separator; no thousands separators.
+companyCode;fiscalYear;fiscalPeriod;metricId;currency;sapValue
+3000;2025;01;total_revenue;EUR;51000.00
+3000;2025;01;total_expenses;EUR;34500.00

@@ -15,7 +15,8 @@ export const QualityFlagCodeEnum = z.enum([
   'ZERO_VALUE',            // records exist but the value is exactly zero
   'CURRENCY_MIX',          // more than one currency in scope: reported per currency, not converted
   'DUPLICATE_POSTING_KEY', // the same posting key appears more than once
-  'ZERO_DENOMINATOR'       // a ratio's denominator is zero (value reported as 0)
+  'ZERO_DENOMINATOR',      // a ratio's denominator is zero (value reported as 0)
+  'UNMAPPED_ACCOUNT'       // postings on accounts that map to neither revenue nor expense are excluded from the metrics
 ]);
 export type QualityFlagCode = z.infer<typeof QualityFlagCodeEnum>;
 

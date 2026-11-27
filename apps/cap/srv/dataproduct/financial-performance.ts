@@ -25,7 +25,8 @@ import type { SemanticCatalog } from '../semantic/catalog.ts';
 import { MetricNotExecutableError } from '../semantic/catalog.ts';
 import { evaluateMetrics } from '../semantic/evaluate.ts';
 import { toApiNumber, toFixedString } from '../lib/finance/decimal.ts';
-import { MockSourceAdapter, S4HanaSourceAdapter, AdapterError, adapterFromV1Provider } from '../lib/providers/adapter-contract.ts';
+import { MockSourceAdapter, AdapterError, adapterFromV1Provider } from '../lib/providers/adapter-contract.ts';
+import { createS4Adapter } from '../lib/providers/s4hana/index.ts';
 import type { FinanceSourceAdapter } from '../lib/providers/adapter-contract.ts';
 import type { FinanceDataProvider } from '../lib/providers/finance-data-provider.ts';
 import { permittedEntities, tenantSourceRef, ensureAccessLoaded } from './access.ts';
@@ -74,9 +75,10 @@ const isAdapter = (s: DataSourceOverride): s is FinanceSourceAdapter => typeof (
 export function resolveAdapter(tenant: string, override?: DataSourceOverride): FinanceSourceAdapter {
   if (override) return isAdapter(override) ? override : adapterFromV1Provider(override);
   const ref = tenantSourceRef(tenant);
-  if (ref) return new S4HanaSourceAdapter(ref.alias);
+  if (ref) return createS4Adapter(ref.alias);
   const cfg = loadConfig();
-  return cfg.financeProvider === 's4hana' ? new S4HanaSourceAdapter(cfg.s4DestinationName) : new MockSourceAdapter();
+  // config validation guarantees a destination name when FINANCE_DATA_PROVIDER=s4hana
+  return cfg.financeProvider === 's4hana' ? createS4Adapter(cfg.s4DestinationName!) : new MockSourceAdapter();
 }
 
 export function queryHash(q: DataProductQuery, tenant: string, adapterId: string): string {
@@ -183,7 +185,9 @@ export async function getPerformance(input: DataProductQueryInput, ctx: DataProd
       if (e.code === 'TIMEOUT' || (e.code === 'ABORTED' && timeout.aborted)) throw new DataProductError('TIMEOUT', `The source did not answer within ${bounds.timeoutMs} ms.`);
       if (e.code === 'ABORTED') throw e;
       if (e.code === 'BAD_QUERY') throw new DataProductError('BAD_QUERY', e.message);
-      throw new DataProductError('SOURCE_UNAVAILABLE', e.message);
+      if (e.code === 'MALFORMED') throw new DataProductError('BAD_SOURCE_DATA', e.message);
+      // AUTH, THROTTLED, NOT_FOUND, SOURCE_ERROR, UNAVAILABLE: a clear typed error, never a silent fallback to mock data
+      throw new DataProductError('SOURCE_UNAVAILABLE', `[${e.code}] ${e.message}`);
     }
     throw e;
   }
@@ -213,6 +217,11 @@ export async function getPerformance(input: DataProductQueryInput, ctx: DataProd
     }
     const cur = [...new Set(mine.map((r) => r.currency))];
     if (cur.length > 1) flags.push({ code: 'CURRENCY_MIX', severity: 'warning', message: `Company ${cc} has postings in ${cur.join(', ')}; results are reported per currency and not converted.`, companyCode: cc });
+  }
+  const unmapped = records.filter((r) => r.accountType === 'OTHER');
+  if (unmapped.length) {
+    const accounts = [...new Set(unmapped.map((r) => r.glAccount))].sort();
+    flags.push({ code: 'UNMAPPED_ACCOUNT', severity: 'warning', message: `${unmapped.length} posting(s) on ${accounts.length} account(s) that map to neither revenue nor expense are excluded from the metrics (e.g. ${accounts.slice(0, 5).join(', ')}).` });
   }
   const currencies = [...new Set(records.map((r) => r.currency))].sort();
   if (currencies.length > 1 && !flags.some((f) => f.code === 'CURRENCY_MIX')) {
