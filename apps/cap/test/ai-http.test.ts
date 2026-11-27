@@ -72,7 +72,8 @@ describe('model-call log (ModelCalls): metadata only and tenant-filtered', () =>
     const rows = res.data.value;
     assert.ok(rows.length >= 1);
     assert.ok(rows.every((r: any) => r.tenantId === 'TENANT_A'), "the other organisation's call is not visible");
-    const a = rows[rows.length - 1];
+    const a = rows.find((r: any) => JSON.parse(r.redactionCounts ?? '{}').ID >= 1);
+    assert.ok(a, 'the call whose request contained an invoice number is logged, with the redaction counted');
     assert.equal(a.promptId, 'goal-understanding'); assert.equal(a.promptVersion, '2.0.1'); assert.match(a.promptHash, /^[a-f0-9]{64}$/);
     assert.equal(a.mode, 'mock'); assert.ok(a.inputTokens > 0 && a.outputTokens > 0 && a.latencyMs >= 0); assert.equal(a.outcome, 'OK');
     assert.ok(JSON.parse(a.redactionCounts).ID >= 1, 'the invoice number was redacted and counted');
