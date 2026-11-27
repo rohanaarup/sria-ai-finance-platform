@@ -9,6 +9,8 @@
 - **ADR-005**: Dual Data Provider Strategy (Mock-First Development & Gated Live SAP)
 - **ADR-006**: Tiered Application Persistence (Local SQLite & Conditional SAP HANA Cloud)
 - **ADR-007**: Schema-Constrained `DashboardSpec` vs. Dynamic Code/HTML Generation
+- **ADR-011**: Finance semantic layer as versioned data (G2-01)
+- **ADR-013**: Decimal arithmetic for money (G2-01)
 
 ---
 
@@ -83,3 +85,18 @@
   - *Positive*: Complete XSS immunity from model output; uniform enterprise styling; robust error boundary protection.
   - *Negative*: Visual layouts are constrained to the pre-built widget catalog.
 
+
+---
+
+### ADR-011: Finance semantic layer as versioned data (G2-01)
+- **Status:** Accepted (2026-11-27)
+- **Context:** Metric meaning lived in four hard-coded objects and in prompt text; the approval gate was not enforced (F-03) and unused entities existed (F-13).
+- **Decision:** Metric definitions, immutable versions with approval status and effective date, formula dependencies (DAG, cycle-checked at write time), dimensions and hierarchies, fiscal calendars, glossary aliases and source lineage are relational CDS tables (`apps/cap/db/semantic.cds`). The planner, the `get_finance_metrics` tool, the intent service and the calculator all read the same `SemanticCatalog` snapshot. Changes go through `SemanticService.proposeMetricVersion` → `approveMetricVersion` (MetricApprover scope, four-eyes). Glossary resolution runs before any model call. `SEMANTIC_LAYER=off` restores the legacy catalog as a rollback switch.
+- **Consequences:** Results carry the metric version used. Tenant-specific metrics can be defined and approved, but executing new metric ids through the dashboard pipeline still requires widening `MetricIdEnum` (planned with the tool platform, G2-06).
+- **Revisit when:** more than ~20 metrics or a BI semantic layer (Datasphere) becomes the source of meaning.
+
+### ADR-013: Decimal arithmetic for money (G2-01, decision D-03)
+- **Status:** Accepted (2026-11-27)
+- **Decision:** decimal.js (arbitrary-precision decimal) instead of integer minor units, because ratios and percentages need division. Provider amounts are converted through their string form. Rounding is ROUND_HALF_UP to each metric's declared decimals, once per metric; derived metrics use their dependencies' rounded values.
+- **Enforcement:** a test scans calculation code for binary floating-point money operations (`Math.round`, `parseFloat`, arithmetic on `.amount`).
+- **Revisit when:** a Finance policy requires banker's rounding or currency-specific minor units.

@@ -84,12 +84,17 @@ export class SemanticCatalog {
     return this.versionsOf(metricId, tenant).find((v) => v.status === 'APPROVED' && v.effectiveFrom <= asOf) ?? null;
   }
 
+  /** Latest version of any status, including the tenant's own proposals (what is under review). */
   latestVersion(metricId: string, tenant = GLOBAL): MetricVersion | null {
-    return this.versionsOf(metricId, tenant)[0] ?? null;
+    return this.allVersions(metricId, tenant)[0] ?? null;
   }
 
+  /** Full history visible to the tenant: its own versions and the global ones, newest first. */
   allVersions(metricId: string, tenant = GLOBAL): MetricVersion[] {
-    return this.versionsOf(metricId, tenant);
+    return this.rows.versions
+      .filter((v) => v.metricId === metricId && visible(v.tenantId, tenant))
+      .map((v) => this.toVersion(v))
+      .sort((a, b) => b.version - a.version);
   }
 
   /**
@@ -213,16 +218,21 @@ export class SemanticCatalog {
       .map((g) => ({ term: g.term, metricId: g.metricId, status: g.status }))
       .concat(this.metricIds(tenant).map((m) => ({ term: m, metricId: m, status: 'RESOLVES' })))
       .sort((a, b) => b.term.length - a.term.length);
-    const metricIds: string[] = [], unsupported: string[] = [], matches: Array<{ term: string; metricId: string | null }> = [];
+    const found: Array<{ term: string; metricId: string | null; status: string; at: number }> = [];
     for (const g of terms) {
       const needle = ` ${g.term} `;
-      if (!hay.includes(needle)) continue;
+      const at = hay.indexOf(needle);
+      if (at < 0) continue;
       hay = hay.split(needle).join(' '.repeat(needle.length)); // consume so "profit margin" does not also match "profit"
-      matches.push({ term: g.term, metricId: g.metricId });
-      if (g.status === 'UNSUPPORTED') unsupported.push(g.term);
-      else if (g.metricId && !metricIds.includes(g.metricId)) metricIds.push(g.metricId);
+      found.push({ ...g, at });
     }
-    return { metricIds, unsupported, matches };
+    found.sort((a, b) => a.at - b.at); // report in the order the user wrote them
+    const metricIds: string[] = [], unsupported: string[] = [];
+    for (const f of found) {
+      if (f.status === 'UNSUPPORTED') unsupported.push(f.term);
+      else if (f.metricId && !metricIds.includes(f.metricId)) metricIds.push(f.metricId);
+    }
+    return { metricIds, unsupported, matches: found.map((f) => ({ term: f.term, metricId: f.metricId })) };
   }
 
   catalogEntries(tier: EnvironmentTier, tenant = GLOBAL): MetricCatalogEntry[] {
