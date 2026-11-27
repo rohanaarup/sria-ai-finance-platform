@@ -152,7 +152,11 @@ export async function getPerformance(input: DataProductQueryInput, ctx: DataProd
   }
 
   // 5. paged, bounded, cancellable retrieval
-  const timeout = AbortSignal.timeout(bounds.timeoutMs);
+  // An explicit controller + referenced timer (AbortSignal.timeout uses an unref'd timer, which lets
+  // the event loop exit before it fires on some Node versions). Cleared in `finally` below.
+  const timeoutCtl = new AbortController();
+  const timer = setTimeout(() => timeoutCtl.abort(), bounds.timeoutMs);
+  const timeout = timeoutCtl.signal;
   const signal = ctx.signal ? AbortSignal.any([ctx.signal, timeout]) : timeout;
   const records: FinanceRecord[] = [];
   const retrievedAt = new Date().toISOString();
@@ -171,7 +175,9 @@ export async function getPerformance(input: DataProductQueryInput, ctx: DataProd
       }
       cursor = page.nextCursor;
     } while (cursor);
+    clearTimeout(timer);
   } catch (e) {
+    clearTimeout(timer);
     if (e instanceof DataProductError) throw e;
     if (e instanceof AdapterError) {
       if (e.code === 'TIMEOUT' || (e.code === 'ABORTED' && timeout.aborted)) throw new DataProductError('TIMEOUT', `The source did not answer within ${bounds.timeoutMs} ms.`);

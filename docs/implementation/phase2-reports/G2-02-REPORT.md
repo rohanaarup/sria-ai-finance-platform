@@ -27,6 +27,8 @@ Date: 2026-11-27 · Branch: `master` · Repository: https://github.com/rohanaaru
 
 G2-01 ended at 299. New: data-product suite (19), adapter conformance suite (11 incl. blocked S/4 and v1 shim), HTTP data-product checks (2), provenance UI tests (13). `npm run typecheck` and `npm run build` pass.
 
+CI note: the first push failed on Node 22 only. `AbortSignal.timeout` uses an unreferenced timer, so with nothing else keeping the process alive the event loop exited before the timeout fired. The data product now uses an explicit `AbortController` with a referenced timer, cleared when retrieval finishes. The whole suite was then run locally on Node 22.23 and Node 24.18 with no `sqlite.db` present: 344/344 on both.
+
 ## Acceptance criteria
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
