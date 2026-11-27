@@ -30,3 +30,7 @@ export * from './semantic.js';
 
 // Data product (G2-02): FinancialPerformance query/result, provenance v2, quality flags, adapter capabilities
 export * from './data-product.js';
+
+// G2-04: AgentGoal and evaluation case formats
+export * from './agent-goal.js';
+export * from './eval-case.js';

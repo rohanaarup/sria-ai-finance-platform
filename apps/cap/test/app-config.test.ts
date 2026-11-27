@@ -32,7 +32,7 @@ describe('AppConfig', () => {
   it('requires a destination for s4hana and credentials for a real AI provider', () => {
     assert.throws(() => loadConfig({ FINANCE_DATA_PROVIDER: 's4hana' }), /FINANCE_S4HANA_DESTINATION_NAME/);
     assert.throws(() => loadConfig({ AI_RUNTIME_PROVIDER: 'openai' }), /AI_RUNTIME_API_KEY/);
-    const ok = loadConfig({ FINANCE_DATA_PROVIDER: 's4hana', FINANCE_S4HANA_DESTINATION_NAME: 'DEST', AI_RUNTIME_PROVIDER: 'openai', AI_RUNTIME_API_KEY: 'k', AI_RUNTIME_ENDPOINT: 'https://example.invalid/v1' });
+    const ok = loadConfig({ FINANCE_DATA_PROVIDER: 's4hana', FINANCE_S4HANA_DESTINATION_NAME: 'DEST', AI_RUNTIME_PROVIDER: 'openai', AI_PROVIDER_APPROVED: 'true', AI_RUNTIME_MODEL: 'some-model', AI_RUNTIME_API_KEY: 'k', AI_RUNTIME_ENDPOINT: 'https://example.invalid/v1' });
     assert.equal(ok.isSynthetic, false);
   });
 

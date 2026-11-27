@@ -10,12 +10,14 @@
  */
 
 import {
+  AgentGoalSchema,
   BASELINE_METRIC_CATALOG,
   MetricCatalogEntrySchema,
   ProvenanceV2Schema,
   SYNTHETIC_FINANCE_RECORDS,
 } from '@sria/contracts';
 import type {
+  AgentGoal,
   MetricCatalogEntry,
   MetricVersion,
   DashboardRequest,
@@ -51,8 +53,119 @@ export class ApiUnavailableError extends Error {
   }
 }
 
+export type AiMode = 'mock' | 'replay' | 'live';
+
+export interface AiEngineStatus {
+  provider: string;
+  mode: AiMode | 'unknown';
+  model: string | null;
+  approved: boolean;
+}
+
+export const UNKNOWN_AI_ENGINE: AiEngineStatus = { provider: 'unknown', mode: 'unknown', model: null, approved: false };
+
+/** Read components.aiEngine from a /health body; anything malformed degrades to unknown. */
+export function parseAiEngine(raw: unknown): AiEngineStatus {
+  const r = raw as Record<string, unknown> | null | undefined;
+  if (!r || typeof r !== 'object') return { ...UNKNOWN_AI_ENGINE };
+  const mode = r.mode === 'mock' || r.mode === 'replay' || r.mode === 'live' ? r.mode : 'unknown';
+  return {
+    provider: typeof r.provider === 'string' && r.provider ? r.provider : 'unknown',
+    mode,
+    model: typeof r.model === 'string' && r.model ? r.model : null,
+    approved: r.approved === true,
+  };
+}
+
+/** Parse the `agentGoalJson` string from UnderstandRequest. Invalid -> undefined + console.warn, never throws. */
+export function parseAgentGoal(raw: unknown): AgentGoal | undefined {
+  if (raw === null || raw === undefined || raw === '') return undefined;
+  try {
+    const parsed = AgentGoalSchema.safeParse(typeof raw === 'string' ? JSON.parse(raw) : raw);
+    if (parsed.success) return parsed.data;
+    console.warn('[ApiClient] agentGoalJson is invalid; the understanding card is hidden.', parsed.error.issues[0]);
+  } catch (err) {
+    console.warn('[ApiClient] agentGoalJson is not valid JSON; the understanding card is hidden.', err);
+  }
+  return undefined;
+}
+
+const KNOWN_MISSING = ['companyCode', 'fiscalYear', 'period', 'metric', 'comparisonTarget', 'dashboardContext'] as const;
+
+/** Best-effort AgentGoal from the local (demo-mode) legacy understanding result. */
+export function buildDemoAgentGoal(prompt: string, res: UnderstandResponse): AgentGoal | undefined {
+  const emptyPeriod = { fiscalYear: null, periodFrom: null, periodTo: null };
+  const base = {
+    goalVersion: '1' as const,
+    comparisonPeriod: null,
+    dimensions: [] as string[],
+    constraints: [] as { kind: 'filter'; description: string }[],
+  };
+  let goal: AgentGoal;
+  if (res.status === 'REJECTED') {
+    goal = {
+      ...base,
+      taskType: 'unsupported',
+      entities: [],
+      period: emptyPeriod,
+      metrics: [],
+      assumptions: [],
+      missingInformation: [],
+      rationale: 'I could not turn this request into a supported finance task.',
+      unsupportedReason: (res.rejectionReason || 'Request could not be understood.').slice(0, 300),
+    };
+  } else if (res.status === 'CLARIFICATION_REQUIRED') {
+    goal = {
+      ...base,
+      taskType: 'create_dashboard',
+      entities: [],
+      period: emptyPeriod,
+      metrics: [],
+      assumptions: [],
+      missingInformation: (res.clarifications ?? []).map((q) => ({
+        parameter: (KNOWN_MISSING as readonly string[]).includes(q.parameterName)
+          ? (q.parameterName as (typeof KNOWN_MISSING)[number])
+          : 'dashboardContext',
+        question: (q.prompt || 'More information is needed.').slice(0, 300),
+        options: q.options ? q.options.map((o) => String(o).slice(0, 60)).slice(0, 8) : null,
+      })),
+      rationale: 'I need a little more information before I can build this.',
+      unsupportedReason: null,
+    };
+  } else if (res.resolvedRequest) {
+    const f = res.resolvedRequest.filters ?? {};
+    const lower = prompt.toLowerCase();
+    const assumptions: string[] = [];
+    if (!/\b20\d\d\b/.test(prompt)) assumptions.push(`Fiscal year ${f.fiscalYear ?? 2026} (not stated)`);
+    const code = f.companyCode ? String(f.companyCode) : '1000';
+    goal = {
+      ...base,
+      taskType: lower.includes('compare') || lower.includes('comparison') ? 'compare' : 'create_dashboard',
+      entities: /^[A-Za-z0-9_]{1,10}$/.test(code) ? [code] : [],
+      period: {
+        fiscalYear: typeof f.fiscalYear === 'number' ? f.fiscalYear : null,
+        periodFrom: f.periodFrom ?? null,
+        periodTo: f.periodTo ?? null,
+      },
+      metrics: res.resolvedRequest.metricIds.map(String),
+      assumptions,
+      missingInformation: [],
+      rationale: `I will build a finance view of ${res.resolvedRequest.metricIds.length} metric(s) for company ${code}.`,
+      unsupportedReason: null,
+    };
+  } else {
+    return undefined;
+  }
+  const check = AgentGoalSchema.safeParse(goal);
+  return check.success ? check.data : undefined;
+}
+
 export interface UnderstandResponse {
   status: 'RESOLVED' | 'CLARIFICATION_REQUIRED' | 'REJECTED';
+  /** Validated structured meaning of the request (G2-04); absent for older backends. */
+  agentGoal?: AgentGoal;
+  aiMode?: AiMode;
+  modelId?: string;
   resolvedRequest?: DashboardRequest;
   clarifications?: ClarificationQuestion[];
   rejectionReason?: string;
@@ -76,6 +189,7 @@ export interface SystemHealthStatus {
   aiProvider: string;
   databaseDialect: string;
   environmentTier: EnvironmentTier;
+  aiEngine?: AiEngineStatus;
 }
 
 export interface ApprovedMetricSummary {
@@ -474,6 +588,7 @@ export class ApiClient {
         aiProvider: 'mock',
         databaseDialect: 'sqlite',
         environmentTier: 'unknown',
+        aiEngine: { ...UNKNOWN_AI_ENGINE },
       };
     }
 
@@ -509,6 +624,7 @@ export class ApiClient {
         aiProvider: healthData?.components?.aiEngine?.provider || 'mock',
         databaseDialect: healthData?.components?.database?.dialect || 'sqlite',
         environmentTier: normalizeTier(healthData?.environmentTier),
+        aiEngine: parseAiEngine(healthData?.components?.aiEngine),
       };
     } catch {
       return {
@@ -522,6 +638,7 @@ export class ApiClient {
         aiProvider: 'mock',
         databaseDialect: isDemoMode() ? 'localStorage' : 'unknown',
         environmentTier: 'unknown',
+        aiEngine: { ...UNKNOWN_AI_ENGINE },
       };
     }
   }
@@ -590,7 +707,7 @@ export class ApiClient {
    */
   static async understandPrompt(prompt: string): Promise<UnderstandResponse> {
     if (localOnly()) {
-      return this._localMockUnderstand(prompt);
+      return this._withDemoGoal(prompt, this._localMockUnderstand(prompt));
     }
     try {
       const res = await fetch(`${getBaseUrl()}/api/ai/UnderstandRequest`, {
@@ -603,27 +720,41 @@ export class ApiClient {
       assertOk(res, 'UnderstandRequest');
 
       const data = await res.json();
+      const extra: Pick<UnderstandResponse, 'agentGoal' | 'aiMode' | 'modelId'> = {};
+      const agentGoal = parseAgentGoal(data.agentGoalJson);
+      if (agentGoal) extra.agentGoal = agentGoal;
+      if (data.aiMode === 'mock' || data.aiMode === 'replay' || data.aiMode === 'live') extra.aiMode = data.aiMode;
+      if (typeof data.modelId === 'string' && data.modelId) extra.modelId = data.modelId;
       if (data.status === 'RESOLVED' && data.resolvedRequest) {
         return {
           status: 'RESOLVED',
           resolvedRequest: JSON.parse(data.resolvedRequest),
+          ...extra,
         };
       }
       if (data.status === 'CLARIFICATION_REQUIRED' && data.clarificationJson) {
         return {
           status: 'CLARIFICATION_REQUIRED',
           clarifications: JSON.parse(data.clarificationJson),
+          ...extra,
         };
       }
       return {
+        ...extra,
         status: 'REJECTED',
         rejectionReason: data.rejectionReason || 'Request could not be understood.',
         supportedMetrics: data.supportedMetrics || [],
       };
     } catch (err) {
       failOrFallback(err, 'UnderstandRequest');
-      return this._localMockUnderstand(prompt);
+      return this._withDemoGoal(prompt, this._localMockUnderstand(prompt));
     }
+  }
+
+  /** Demo-mode only: attach a best-effort goal built from the local legacy result, marked mock. */
+  private static _withDemoGoal(prompt: string, res: UnderstandResponse): UnderstandResponse {
+    const agentGoal = buildDemoAgentGoal(prompt, res);
+    return { ...res, ...(agentGoal ? { agentGoal } : {}), aiMode: 'mock', modelId: 'local-demo' };
   }
 
   /**

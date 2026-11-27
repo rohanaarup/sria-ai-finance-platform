@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import type { AgentGoal } from '@sria/contracts';
 import {
   MetricIdEnum,
   SupportedDimensionEnum,
@@ -62,16 +63,19 @@ export type IntentProcessingResult =
         currency?: string;
       };
       rawPrompt: string;
+      goal?: AgentGoal; aiMode?: string; modelId?: string;
     }
   | {
       status: 'CLARIFICATION_REQUIRED';
       questions: z.infer<typeof ClarificationQuestionSchema>[];
       rawPrompt: string;
+      goal?: AgentGoal; aiMode?: string; modelId?: string;
     }
   | {
       status: 'REJECTED';
       reason: string;
       supportedMetrics: string[];
       rawPrompt: string;
+      goal?: AgentGoal; aiMode?: string; modelId?: string;
     };
 

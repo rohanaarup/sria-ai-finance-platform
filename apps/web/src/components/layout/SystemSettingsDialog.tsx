@@ -1,8 +1,9 @@
 import React from 'react';
-import { CheckCircle2, Database, Server, Shield } from 'lucide-react';
+import { Bot, CheckCircle2, Database, Server, Shield } from 'lucide-react';
 import { Dialog } from '../ui/Dialog';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { modeLabel, modeTone } from '../ai/goal-format';
 import type { ApprovedMetricSummary, SystemHealthStatus } from '../../services/api-client';
 
 interface SystemSettingsDialogProps {
@@ -86,6 +87,27 @@ export const SystemSettingsDialog: React.FC<SystemSettingsDialogProps> = ({
             </div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>Deterministic TS Engine</div>
           </div>
+        </div>
+
+        {/* AI engine */}
+        <div
+          data-testid="ai-engine-row"
+          style={{ padding: 12, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface-subtle)' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>
+            <Bot size={12} />
+            <span>AI engine</span>
+          </div>
+          {systemStatus?.aiEngine && systemStatus.aiEngine.mode !== 'unknown' ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, fontSize: 13 }}>
+              <span><strong>Provider:</strong> {systemStatus.aiEngine.provider}</span>
+              <span><strong>Model:</strong> {systemStatus.aiEngine.model ?? 'none'}</span>
+              <Badge tone={modeTone(systemStatus.aiEngine.mode)}>{modeLabel(systemStatus.aiEngine.mode)}</Badge>
+              <span><strong>Approved:</strong> {systemStatus.aiEngine.approved ? 'yes' : 'no'}</span>
+            </div>
+          ) : (
+            <div style={{ fontSize: 13, fontWeight: 600 }}>AI: unknown</div>
+          )}
         </div>
 
         {/* Approved Metric Registry Table */}

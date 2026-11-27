@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import type { DashboardSpec, ClarificationQuestion, MetricResult, MetricId } from '@sria/contracts';
+import type { AgentGoal, DashboardSpec, ClarificationQuestion, MetricResult, MetricId } from '@sria/contracts';
 import type { AppNavView } from '../components/layout/AppShell';
 import type { ProgressStep } from '../components/ai/WorkflowProgressIndicator';
 import type { DashboardTemplate } from '../components/ai/TemplateGallery';
@@ -135,6 +135,7 @@ export function useFinanceWorkspace() {
   const [currentStep, setCurrentStep] = useState<ProgressStep | null>(null);
   const [clarifications, setClarifications] = useState<ClarificationQuestion[] | null>(null);
   const [pendingPrompt, setPendingPrompt] = useState('');
+  const [understood, setUnderstood] = useState<{ goal: AgentGoal; aiMode?: 'mock' | 'replay' | 'live'; modelId?: string } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [isStale, setIsStale] = useState(false);
@@ -264,6 +265,7 @@ export function useFinanceWorkspace() {
     setErrorMessage(null);
     setClarifications(null);
     setExplanationNote(null);
+    setUnderstood(null);
     setPendingPrompt(promptText);
 
     const wantsComparison =
@@ -275,6 +277,11 @@ export function useFinanceWorkspace() {
     try {
       setCurrentStep('INTERPRETING');
       const understand = await ApiClient.understandPrompt(promptText);
+      setUnderstood(
+        understand.agentGoal
+          ? { goal: understand.agentGoal, aiMode: understand.aiMode, modelId: understand.modelId }
+          : null
+      );
 
       if (understand.status === 'CLARIFICATION_REQUIRED' && understand.clarifications) {
         setClarifications(understand.clarifications);
@@ -644,6 +651,7 @@ export function useFinanceWorkspace() {
     currentStep,
     clarifications,
     setClarifications,
+    understood,
     errorMessage,
     setErrorMessage,
     isStale,

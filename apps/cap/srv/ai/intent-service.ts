@@ -25,6 +25,9 @@ import { MockLLMProvider } from './mock-llm-provider.ts';
 import { ApprovedLLMProvider } from './approved-provider.ts';
 import { loadConfig } from '../lib/config/app-config.ts';
 import { getSemanticCatalog } from '../semantic/runtime.ts';
+import { GoalService } from './goal/goal-service.ts';
+import type { GoalOutcome } from './goal/goal-service.ts';
+import { TASK_DESCRIPTIONS } from './goal/task-taxonomy.ts';
 
 export interface UserContext {
   organizationId: string;
@@ -34,12 +37,15 @@ export interface UserContext {
 export class IntentService {
   private readonly _llmProvider: LLMProvider;
   private readonly _maxRetries: number;
+  /** G2-04: AgentGoal understanding through the gateway. Used unless a legacy provider is injected or AGENT_GOAL=off. */
+  private readonly _goalService?: GoalService;
 
-  constructor(provider?: LLMProvider, maxRetries = 2) {
-    this._llmProvider = provider ?? (loadConfig().aiProvider === 'mock'
+  constructor(provider?: LLMProvider, maxRetries = 2, goalService?: GoalService) {
+    this._llmProvider = provider ?? (loadConfig().aiProvider === 'mock' || loadConfig().aiProvider === 'replay'
       ? new MockLLMProvider()
       : new ApprovedLLMProvider());
     this._maxRetries = maxRetries;
+    this._goalService = goalService ?? (!provider && loadConfig().agentGoal ? new GoalService() : undefined);
   }
 
   /**
@@ -72,6 +78,12 @@ export class IntentService {
         supportedMetrics: Object.keys(BASELINE_METRIC_CATALOG),
         rawPrompt: trimmed.slice(0, 100) + '...'
       };
+    }
+
+    // G2-04: AgentGoal path (gateway, redaction, validation, hardening)
+    if (this._goalService) {
+      const outcome = await this._goalService.understand(trimmed, { tenant: userCtx.organizationId, userId: userCtx.userId });
+      return this._toLegacy(outcome, trimmed, userCtx.organizationId);
     }
 
     // 2. Deterministic glossary resolution BEFORE any model call (G2-01).
@@ -120,6 +132,39 @@ export class IntentService {
 
     // Strict validation against shared contracts schema
     return DashboardRequestSchema.parse(payload);
+  }
+
+  /**
+   * Map an AgentGoal onto the legacy result the dashboard flow understands. Task types the platform
+   * cannot execute yet are refused honestly (the goal is still returned so the UI can show it).
+   */
+  private _toLegacy(o: GoalOutcome, rawPrompt: string, tenant: string): IntentProcessingResult {
+    const g = o.goal;
+    const extra = { goal: g, aiMode: o.aiMode, modelId: o.modelId };
+    const executable = getSemanticCatalog().listExecutable(loadConfig().tier, tenant);
+    if (g.taskType === 'unsupported') return { status: 'REJECTED', reason: g.unsupportedReason ?? 'This request is not supported.', supportedMetrics: executable, rawPrompt, ...extra };
+    const info = TASK_DESCRIPTIONS[g.taskType];
+    if (!info.executableToday) return { status: 'REJECTED', reason: `${info.label}: ${info.note}`, supportedMetrics: executable, rawPrompt, ...extra };
+    if (g.missingInformation.length) {
+      const reasons: Record<string, string> = { companyCode: 'Company code is required to identify the legal reporting entity.', fiscalYear: 'Fiscal year is required to scope the accounting period.', period: 'A period is needed to scope the figures.', metric: 'At least one approved metric is required to generate a dashboard.' };
+      const param = (p: string) => (['companyCode', 'fiscalYear', 'period', 'metric'].includes(p) ? p : 'dimension') as 'companyCode' | 'fiscalYear' | 'period' | 'metric' | 'dimension';
+      return {
+        status: 'CLARIFICATION_REQUIRED', rawPrompt, ...extra,
+        questions: g.missingInformation.map((m) => ({
+          questionId: `clarify-${m.parameter}`, parameterName: param(m.parameter), prompt: m.question, reason: reasons[m.parameter] ?? 'More information is needed.',
+          ...(m.options?.length ? { options: m.options, suggestedDefault: m.parameter === 'fiscalYear' ? m.options[m.options.length - 1]! : m.options[0]! } : {})
+        }))
+      };
+    }
+    const metricIds = g.metrics.filter((m): m is MetricId => (MetricIdEnum.options as readonly string[]).includes(m));
+    if (g.entities.length !== 1 || !metricIds.length || g.period.fiscalYear === null) {
+      return { status: 'REJECTED', reason: g.entities.length > 1 ? 'Multi-company dashboards arrive with the agent runtime; please choose one company code for now.' : 'This request cannot be shown as a dashboard yet.', supportedMetrics: executable, rawPrompt, ...extra };
+    }
+    const dims = g.dimensions.filter((d): d is SupportedDimension => (SupportedDimensionEnum.options as readonly string[]).includes(d));
+    return {
+      status: 'RESOLVED', rawPrompt, ...extra, metricIds, dimensions: dims.length ? dims : ['fiscal_period'],
+      filters: { companyCode: g.entities[0]!, fiscalYear: g.period.fiscalYear, ...(g.period.periodFrom ? { periodFrom: g.period.periodFrom } : {}), ...(g.period.periodTo ? { periodTo: g.period.periodTo } : {}) }
+    };
   }
 
   // ─── Private Orchestration Methods ──────────────────────────────────────────

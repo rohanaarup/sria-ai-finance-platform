@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, X, ArrowRight, BarChart2 } from 'lucide-react';
-import type { DashboardSpec, ClarificationQuestion } from '@sria/contracts';
+import type { AgentGoal, DashboardSpec, ClarificationQuestion } from '@sria/contracts';
 import { PromptComposer } from '../components/ai/PromptComposer';
 import { TemplateGallery, type DashboardTemplate } from '../components/ai/TemplateGallery';
 import { WorkflowProgressIndicator, type ProgressStep } from '../components/ai/WorkflowProgressIndicator';
 import { ClarificationModal } from '../components/ai/ClarificationModal';
+import { UnderstoodCard } from '../components/ai/UnderstoodCard';
 import { DashboardToolbar, type VisibleSections } from '../components/dashboard/DashboardToolbar';
 import { DashboardRenderer } from '../components/dashboard/DashboardRenderer';
 import { FollowUpComposer } from '../components/dashboard/FollowUpComposer';
@@ -28,6 +29,7 @@ interface WorkspacePageProps {
   isLoading: boolean;
   currentStep: ProgressStep | null;
   clarifications: ClarificationQuestion[] | null;
+  understood?: { goal: AgentGoal; aiMode?: 'mock' | 'replay' | 'live'; modelId?: string } | null;
   errorMessage: string | null;
   isStale: boolean;
   hasUnsavedChanges: boolean;
@@ -74,6 +76,7 @@ export const WorkspacePage: React.FC<WorkspacePageProps> = ({
   isLoading,
   currentStep,
   clarifications,
+  understood,
   errorMessage,
   isStale,
   hasUnsavedChanges,
@@ -145,6 +148,8 @@ export const WorkspacePage: React.FC<WorkspacePageProps> = ({
 
           {currentStep && <WorkflowProgressIndicator currentStep={currentStep} />}
 
+          {understood && <UnderstoodCard goal={understood.goal} aiMode={understood.aiMode} modelId={understood.modelId} />}
+
           {errorMessage && (
             <div
               role="alert"
@@ -181,6 +186,12 @@ export const WorkspacePage: React.FC<WorkspacePageProps> = ({
       ) : (
         <div className="workspace-container animate-fade-in">
           {currentStep && <WorkflowProgressIndicator currentStep={currentStep} />}
+
+          {understood && (
+            <div style={{ marginBottom: 18 }}>
+              <UnderstoodCard goal={understood.goal} aiMode={understood.aiMode} modelId={understood.modelId} />
+            </div>
+          )}
 
           {errorMessage && (
             <div

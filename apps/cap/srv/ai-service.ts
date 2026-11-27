@@ -12,6 +12,11 @@ import { AuthGuard } from './lib/auth/auth-guard.ts';
 import { IntentService } from './ai/intent-service.ts';
 import { ensureSemanticLoaded } from './semantic/runtime.ts';
 
+/** G2-04: the AgentGoal and the AI mode travel alongside the legacy fields (null when the legacy path produced the result). */
+function goalFields(r: { goal?: unknown; aiMode?: string; modelId?: string }) {
+  return { agentGoalJson: r.goal ? JSON.stringify(r.goal) : null, aiMode: r.aiMode ?? null, modelId: r.modelId ?? null };
+}
+
 export default class AiServiceHandler extends cds.ApplicationService {
   private _intentService!: IntentService;
 
@@ -43,7 +48,8 @@ export default class AiServiceHandler extends cds.ApplicationService {
         resolvedRequest: JSON.stringify(dashboardReq),
         clarificationJson: null,
         rejectionReason: null,
-        supportedMetrics: []
+        supportedMetrics: [],
+        ...goalFields(result)
       };
     }
 
@@ -53,7 +59,8 @@ export default class AiServiceHandler extends cds.ApplicationService {
         resolvedRequest: null,
         clarificationJson: JSON.stringify(result.questions),
         rejectionReason: null,
-        supportedMetrics: []
+        supportedMetrics: [],
+        ...goalFields(result)
       };
     }
 
@@ -63,7 +70,8 @@ export default class AiServiceHandler extends cds.ApplicationService {
       resolvedRequest: null,
       clarificationJson: null,
       rejectionReason: result.reason,
-      supportedMetrics: result.supportedMetrics
+      supportedMetrics: result.supportedMetrics,
+      ...goalFields(result)
     };
   }
 }

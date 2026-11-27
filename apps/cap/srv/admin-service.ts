@@ -12,6 +12,7 @@ export default class AdminService extends cds.ApplicationService {
       Workspaces: (t) => ({ organization_ID: t }),
       AuditEvents: (t) => ({ organizationId: t }),
       EntityAccess: (t) => ({ tenantId: t }),
+      ModelCalls: (t) => ({ tenantId: t }),
       DataSourceReferences: (t) => ({ 'workspace.organization_ID': t })
     };
     for (const [entity, where] of Object.entries(filters)) {

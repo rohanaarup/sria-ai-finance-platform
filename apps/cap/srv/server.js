@@ -39,7 +39,7 @@ cds.on('bootstrap', (app) => {
         capService: { status: 'UP', profile: cds.env.profile || 'development' },
         database: { status: 'UP', dialect: cds.env.requires?.db?.kind || 'unknown' },
         dataProvider: { status: 'UP', mode: config.financeProvider },
-        aiEngine: { status: 'UP', provider: config.aiProvider }
+        aiEngine: { status: 'UP', provider: config.aiProvider, mode: config.aiMode, model: config.aiMode === 'live' ? (config.aiModels.goal ?? null) : 'mock-goal-model-v2', approved: config.aiApproved || config.aiMode !== 'live' }
       }
     });
   });

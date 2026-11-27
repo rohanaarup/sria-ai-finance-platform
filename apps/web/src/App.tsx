@@ -72,6 +72,7 @@ export default function App() {
           isLoading={ws.isLoading}
           currentStep={ws.currentStep}
           clarifications={ws.clarifications}
+          understood={ws.understood}
           errorMessage={ws.errorMessage}
           isStale={ws.isStale}
           hasUnsavedChanges={ws.hasUnsavedChanges}

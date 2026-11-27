@@ -23,6 +23,9 @@ service AiService @(path: '/api/ai', requires: ['FinanceAnalyst','FinanceManager
     clarificationJson : String;   // Serialized ClarificationQuestion[] JSON (if CLARIFICATION_REQUIRED)
     rejectionReason   : String;   // Human-readable reason (if REJECTED)
     supportedMetrics  : array of String;
+    agentGoalJson     : LargeString; // G2-04: JSON of the validated AgentGoal (null on the legacy path)
+    aiMode            : String;      // mock | replay | live
+    modelId           : String;
   };
 }
 

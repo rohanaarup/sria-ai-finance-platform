@@ -24,6 +24,7 @@ import {
 import { clsx } from 'clsx';
 import { SriaLogo } from '../brand/SriaLogo';
 import { Badge } from '../ui/Badge';
+import { aiBadgeText, modeTone } from '../ai/goal-format';
 import { Popover } from '../ui/Popover';
 import { ApiClient } from '../../services/api-client';
 import type { SystemHealthStatus } from '../../services/api-client';
@@ -86,6 +87,9 @@ export const AppShell: React.FC<AppShellProps> = ({
   const backendUp = systemStatus?.backendReachable ?? false;
   const demoMode = ApiClient.isDemoMode();
   const tier = systemStatus?.environmentTier ?? 'unknown';
+  const aiEngine = systemStatus?.aiEngine;
+  const aiTone = modeTone(aiEngine?.mode);
+  const aiText = aiBadgeText(aiEngine);
   const tierTone =
     tier === 'production' ? 'positive' : tier === 'pilot' ? 'info' : tier === 'unknown' ? 'neutral' : 'warning';
 
@@ -388,6 +392,11 @@ export const AppShell: React.FC<AppShellProps> = ({
             <span role="status" aria-label={`Environment tier: ${tier}`} data-testid="env-tier-badge">
               <Badge tone={tierTone} dot>
                 Env: {tier}
+              </Badge>
+            </span>
+            <span role="status" aria-label={aiText} data-testid="ai-engine-badge">
+              <Badge tone={aiTone} dot>
+                {aiText}
               </Badge>
             </span>
             {onOpenCommandPalette && (

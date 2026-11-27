@@ -31,7 +31,23 @@ const EnvSchema = z.object({
   APP_ENV_TIER: z.enum(ENVIRONMENT_TIERS).optional(),
   FINANCE_DATA_PROVIDER: z.enum(['mock', 's4hana']).default('mock'),
   FINANCE_S4HANA_DESTINATION_NAME: z.string().min(1).optional(),
-  AI_RUNTIME_PROVIDER: z.enum(['mock', 'openai', 'azure-openai', 'gemini-api']).default('mock'),
+  // mock = deterministic test double · replay = recorded answers (CI) · openai/anthropic = live adapters
+  // (azure-openai and gemini-api are accepted names but have no adapter yet; startup fails clearly if selected)
+  AI_RUNTIME_PROVIDER: z.enum(['mock', 'replay', 'openai', 'anthropic', 'azure-openai', 'gemini-api']).default('mock'),
+  // Live providers refuse to start unless this is 'true' AND docs/ai/PROVIDER-APPROVAL.md records the approval (D-08/D-09)
+  AI_PROVIDER_APPROVED: z.enum(['true', 'false']).default('false'),
+  AI_REPLAY_FILE: z.string().min(1).optional(),
+  // Model routing: a smaller model for goal parsing, a stronger one for planning. Falls back to AI_RUNTIME_MODEL.
+  AI_MODEL_GOAL: z.string().min(1).optional(),
+  AI_MODEL_PLANNER: z.string().min(1).optional(),
+  AI_TIMEOUT_MS: z.coerce.number().int().min(500).max(120_000).default(20_000),
+  AI_MAX_RETRIES: z.coerce.number().int().min(0).max(5).default(2),
+  AI_MAX_TOKENS_PER_RUN: z.coerce.number().int().min(100).max(2_000_000).default(20_000),
+  AI_MAX_TOKENS_PER_TENANT_DAY: z.coerce.number().int().min(100).max(100_000_000).default(500_000),
+  // Cost estimate inputs (USD per million tokens). Default 0 = unknown; set from your provider's price list.
+  AI_PRICE_IN_PER_MTOK: z.coerce.number().min(0).default(0),
+  AI_PRICE_OUT_PER_MTOK: z.coerce.number().min(0).default(0),
+  AGENT_GOAL: z.enum(['on', 'off']).default('on'),
   AI_RUNTIME_API_KEY: z.string().min(1).optional(),
   AI_RUNTIME_ENDPOINT: z.string().url().optional(),
   AI_RUNTIME_MODEL: z.string().min(1).optional(),
@@ -56,10 +72,19 @@ export interface AppConfig {
   tier: EnvironmentTier;
   financeProvider: 'mock' | 's4hana';
   s4DestinationName?: string;
-  aiProvider: 'mock' | 'openai' | 'azure-openai' | 'gemini-api';
+  aiProvider: 'mock' | 'replay' | 'openai' | 'anthropic' | 'azure-openai' | 'gemini-api';
   aiApiKey?: string;
   aiEndpoint?: string;
   aiModel?: string;
+  /** G2-04 */
+  aiApproved: boolean;
+  /** 'live' only for a real provider; mock and replay are never live */
+  aiMode: 'mock' | 'replay' | 'live';
+  aiReplayFile?: string;
+  aiModels: { goal?: string; planner?: string };
+  ai: { timeoutMs: number; maxRetries: number; maxTokensPerRun: number; maxTokensPerTenantDay: number; priceInPerMTok: number; priceOutPerMTok: number };
+  /** AgentGoal understanding (G2-04); 'off' keeps the legacy keyword-intent path */
+  agentGoal: boolean;
   corsAllowedOrigins: string[];
   /** G2-01: semantic layer drives gate and formulas; 'off' = legacy hard-coded catalog (rollback). */
   semanticLayer: boolean;
@@ -103,9 +128,17 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   if (e.FINANCE_DATA_PROVIDER === 's4hana' && !e.FINANCE_S4HANA_DESTINATION_NAME) {
     problems.push('FINANCE_S4HANA_DESTINATION_NAME is required when FINANCE_DATA_PROVIDER=s4hana');
   }
-  if (e.AI_RUNTIME_PROVIDER !== 'mock' && (!e.AI_RUNTIME_API_KEY || !e.AI_RUNTIME_ENDPOINT)) {
-    problems.push(`AI_RUNTIME_API_KEY and AI_RUNTIME_ENDPOINT are required when AI_RUNTIME_PROVIDER=${e.AI_RUNTIME_PROVIDER}`);
+  const p = e.AI_RUNTIME_PROVIDER;
+  const isLive = p !== 'mock' && p !== 'replay';
+  if (isLive) {
+    if (p === 'azure-openai' || p === 'gemini-api') problems.push(`AI_RUNTIME_PROVIDER=${p} has no adapter yet; use 'openai' (any OpenAI-compatible endpoint) or 'anthropic'`);
+    if (e.AI_PROVIDER_APPROVED !== 'true') problems.push(`AI_RUNTIME_PROVIDER=${p} is a live provider and may not start until it is approved: record the approval in docs/ai/PROVIDER-APPROVAL.md, then set AI_PROVIDER_APPROVED=true`);
+    if (!e.AI_RUNTIME_API_KEY) problems.push(`AI_RUNTIME_API_KEY is required when AI_RUNTIME_PROVIDER=${p} (set it in the secret store or a local .env, never in git)`);
+    if (p === 'openai' && !e.AI_RUNTIME_ENDPOINT) problems.push('AI_RUNTIME_ENDPOINT is required for AI_RUNTIME_PROVIDER=openai (for example your provider base URL ending in /v1)');
+    if (!(e.AI_MODEL_GOAL ?? e.AI_RUNTIME_MODEL)) problems.push('AI_RUNTIME_MODEL (or AI_MODEL_GOAL) is required for a live provider; no model is chosen by default');
   }
+  if (p === 'replay' && !e.AI_REPLAY_FILE) problems.push('AI_REPLAY_FILE is required when AI_RUNTIME_PROVIDER=replay');
+  if (tier === 'production' && p === 'replay') problems.push('APP_ENV_TIER=production cannot use the replay AI provider');
   if (problems.length) throw new ConfigError(problems);
 
   let corsAllowedOrigins: string[];
@@ -127,12 +160,18 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     aiApiKey: e.AI_RUNTIME_API_KEY,
     aiEndpoint: e.AI_RUNTIME_ENDPOINT,
     aiModel: e.AI_RUNTIME_MODEL,
+    aiApproved: e.AI_PROVIDER_APPROVED === 'true',
+    aiMode: isLive ? 'live' : p,
+    aiReplayFile: e.AI_REPLAY_FILE,
+    aiModels: { goal: e.AI_MODEL_GOAL ?? e.AI_RUNTIME_MODEL, planner: e.AI_MODEL_PLANNER ?? e.AI_RUNTIME_MODEL },
+    ai: { timeoutMs: e.AI_TIMEOUT_MS, maxRetries: e.AI_MAX_RETRIES, maxTokensPerRun: e.AI_MAX_TOKENS_PER_RUN, maxTokensPerTenantDay: e.AI_MAX_TOKENS_PER_TENANT_DAY, priceInPerMTok: e.AI_PRICE_IN_PER_MTOK, priceOutPerMTok: e.AI_PRICE_OUT_PER_MTOK },
+    agentGoal: e.AGENT_GOAL === 'on',
     corsAllowedOrigins,
     semanticLayer: e.SEMANTIC_LAYER === 'on',
     dataProduct: e.DATA_PRODUCT === 'on',
     s4: { serviceRoot: e.S4_SERVICE_ROOT, entitySet: e.S4_ENTITY_SET, ledger: e.S4_LEDGER, amountConvention: e.S4_AMOUNT_CONVENTION, revenueAccounts: e.S4_REVENUE_ACCOUNTS, expenseAccounts: e.S4_EXPENSE_ACCOUNTS },
     bounds: { maxEntities: e.DP_MAX_ENTITIES, maxPeriods: e.DP_MAX_PERIODS, maxRows: e.DP_MAX_ROWS, timeoutMs: e.DP_TIMEOUT_MS },
-    isSynthetic: e.FINANCE_DATA_PROVIDER === 'mock' || e.AI_RUNTIME_PROVIDER === 'mock'
+    isSynthetic: e.FINANCE_DATA_PROVIDER === 'mock' || !isLive
   };
 }
 
