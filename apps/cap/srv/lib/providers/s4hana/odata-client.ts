@@ -75,9 +75,10 @@ export class DestinationTransport implements ODataTransport {
       throw new AdapterError('UNAVAILABLE', 'The SAP Cloud SDK is not installed.');
     }
     try {
+      // The query string is encoded here (not via `params`): the SDK would send spaces and quotes of a $filter unescaped.
       const call = executeHttpRequest(
         { destinationName: this.destinationName, ...(this.jwt ? { jwt: this.jwt } : {}) },
-        { method: 'GET', url: path, params: query, headers: { Accept: opts.accept === 'xml' ? 'application/xml' : 'application/json' }, timeout: opts.timeoutMs },
+        { method: 'GET', url: `${path}${qs(query)}`, headers: { Accept: opts.accept === 'xml' ? 'application/xml' : 'application/json' }, timeout: opts.timeoutMs },
         { fetchCsrfToken: false }
       );
       // The SDK does not take an AbortSignal for the whole call; race it so cancellation is prompt.

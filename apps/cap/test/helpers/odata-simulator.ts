@@ -77,6 +77,8 @@ export interface SimOptions {
   serverPageSize?: number;
   requireAuth?: boolean;
   omitMetadataField?: string;
+  /** Fixed port (standalone use); default 0 = any free port. */
+  port?: number;
 }
 export interface SimRequest { method: string; path: string; query: Record<string, string>; authorized: boolean }
 
@@ -140,7 +142,7 @@ export async function startSimulator(opts: SimOptions = {}): Promise<Simulator> 
     return send(200, JSON.stringify({ d }));
   });
 
-  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await new Promise<void>((resolve) => server.listen(opts.port ?? 0, '127.0.0.1', resolve));
   const port = (server.address() as { port: number }).port;
   return {
     baseUrl: `http://127.0.0.1:${port}`,

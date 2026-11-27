@@ -45,7 +45,7 @@ A **Destination** is a named connection stored in BTP. The app asks for "the fin
 4. Authentication: whatever the SAP administrator provides for the read-only communication user. Typical options are basic authentication, OAuth2 client credentials, or OAuth2 SAML bearer assertion. Enter the credentials **only in this screen**.
 5. Save, then use the cockpit's "Check connection" if offered.
 
-**Local testing without BTP (optional):** the SAP Cloud SDK can read destinations from an environment variable named `destinations` (a JSON list). Put it in a local `.env` file, which git ignores, and never in a committed file. Check the current SAP Cloud SDK documentation for the exact format.
+**Local practice without BTP (works today, verified by a test):** the SAP Cloud SDK can read destinations from an environment variable named `destinations`. Start the simulator with `node apps/cap/scripts/run-simulator.ts --port 4010`, then in a local `.env` file (git ignores it; never commit it) set `destinations=[{"name":"SIM_LOCAL","url":"http://127.0.0.1:4010"}]`. The simulator serves **synthetic** data shaped like the candidate API, so this teaches the mechanics (Destination by name, `$metadata`, OData queries) but proves nothing about SAP. For a real system, check the current SAP Cloud SDK documentation for the extra fields (authentication) and keep any credentials out of files in the repository.
 
 **I do:** nothing to build here; the adapter already resolves the Destination by name. When you have created it, we run `node apps/cap/scripts/s4-discover.ts --destination <NAME>` together (needs the app environment to see the Destination; if that is awkward, use step 4's file route).
 **Confirm:** the connection check or the discovery run returns the service description without an authentication error. If you get 401/403, the cause is almost always the communication user or its role, not our code (see "Troubleshooting").
@@ -101,4 +101,7 @@ The adapter reports typed errors; the dashboard and logs show the type in bracke
 When SAP is down the dashboard shows the typed error. It never falls back to demo data.
 
 ## While you wait for access
+If SAP's trial shows "temporarily offline", that is SAP maintenance: wait and retry; do not create extra accounts. Meanwhile:
+- Run the simulator (`node apps/cap/scripts/run-simulator.ts`) and open its `$metadata` and data URLs in a browser to see what OData looks like.
+- Run the discovery tool on that metadata and read every line of its output.
 The platform runs on synthetic data and everything else in the roadmap (G2-04 onward) does not depend on SAP. You can still learn the SAP side without a system: read the field table in `SAP-FIELD-MAPPING.md`, run `node apps/cap/scripts/s4-discover.ts --file <path>` against the simulator's metadata (see `apps/cap/test/helpers/odata-simulator.ts`), and study the OData query the adapter builds in `adapter.ts` (`baseQuery`).

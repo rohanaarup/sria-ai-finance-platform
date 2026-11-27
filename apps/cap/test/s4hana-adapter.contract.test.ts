@@ -14,7 +14,7 @@ import { AdapterError } from '../srv/lib/providers/adapter-contract.ts';
 import type { AdapterQuery } from '../srv/lib/providers/adapter-contract.ts';
 import { S4HanaODataAdapter } from '../srv/lib/providers/s4hana/adapter.ts';
 import type { S4AdapterOptions, S4AuditEvent } from '../srv/lib/providers/s4hana/adapter.ts';
-import { FetchTransport, ReplayTransport } from '../srv/lib/providers/s4hana/odata-client.ts';
+import { FetchTransport, ReplayTransport, DestinationTransport } from '../srv/lib/providers/s4hana/odata-client.ts';
 import type { ODataTransport } from '../srv/lib/providers/s4hana/odata-client.ts';
 import { parseMetadata, assertFieldsInMetadata, traceabilityTable } from '../srv/lib/providers/s4hana/metadata.ts';
 import { mapRow, classifyAccount, parseODataDate, SELECTED_FIELDS } from '../srv/lib/providers/s4hana/mapper.ts';
@@ -208,6 +208,30 @@ describe('evidence rule: only fields present in the system metadata are read', (
     assert.equal(t.find((x) => x.field === 'AmountInCompanyCodeCurrency')!.edmType, 'Edm.Decimal');
     assert.equal(t.find((x) => x.field === 'NotAField')!.inMetadata, false);
     assert.throws(() => parseMetadata('<html>not edmx</html>'), (e) => code(e) === 'MALFORMED');
+  });
+});
+
+describe('real SAP Cloud SDK Destination path, against the simulator via a local `destinations` variable', () => {
+  it('reads $metadata and pages through data using DestinationTransport (spaces and quotes in $filter survive)', async () => {
+    const saved = process.env['destinations'];
+    process.env['destinations'] = JSON.stringify([{ name: 'SIM_LOCAL', url: sim.baseUrl }]);
+    try {
+      const a = new S4HanaODataAdapter({ transport: new DestinationTransport('SIM_LOCAL'), serviceRoot: SIM_ROOT, entitySet: SIM_ENTITY, mapper: MAPPER, maxPageSize: 50, sleep: noSleep });
+      assert.equal(await a.isAvailable(), true);
+      const got = await drain(a, { companyCodes: ['3000'], fiscalYear: 2025, periodFrom: '01', periodTo: '03' }, 7);
+      const want = expectedData.filter((r) => r.companyCode === '3000' && r.fiscalYear === 2025 && r.fiscalPeriod <= '03');
+      assert.deepEqual(got.map((r) => JSON.stringify(r)).sort(), want.map((r) => JSON.stringify(r)).sort());
+      const metaReq = sim.requests.filter((r) => r.path.endsWith('$metadata')).at(-1);
+      assert.ok(metaReq, 'metadata was requested through the SDK');
+    } finally { if (saved === undefined) delete process.env['destinations']; else process.env['destinations'] = saved; }
+  });
+  it('an unknown destination name is a configuration error (NOT_FOUND), not an outage, and is not retried', async () => {
+    const saved = process.env['destinations'];
+    process.env['destinations'] = JSON.stringify([{ name: 'SIM_LOCAL', url: sim.baseUrl }]);
+    try {
+      const a = new S4HanaODataAdapter({ transport: new DestinationTransport('NOT_THERE'), serviceRoot: SIM_ROOT, entitySet: SIM_ENTITY, mapper: MAPPER, sleep: noSleep });
+      await assert.rejects(a.fetchPage(Q, ctx, { pageSize: 5 }), (e) => code(e) === 'NOT_FOUND' && /NOT_THERE/.test((e as Error).message));
+    } finally { if (saved === undefined) delete process.env['destinations']; else process.env['destinations'] = saved; }
   });
 });
 
