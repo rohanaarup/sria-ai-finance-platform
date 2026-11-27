@@ -35,6 +35,8 @@ export interface S4AdapterOptions {
   serviceRoot: string;
   entitySet: string;
   mapper: MapperConfig;
+  /** Ledger to read (default '0L', the usual leading ledger — CANDIDATE until Finance confirms). `null` disables the filter and risks double counting across ledgers. */
+  ledger?: string | null;
   maxPageSize?: number;
   /** Per-HTTP-call timeout. */
   callTimeoutMs?: number;
@@ -174,6 +176,7 @@ export class S4HanaODataAdapter implements FinanceSourceAdapter {
       `FiscalYear eq '${q.fiscalYear}'`,
       `FiscalPeriod ge '${q.periodFrom.padStart(3, '0')}'`,
       `FiscalPeriod le '${q.periodTo.padStart(3, '0')}'`,
+      ...(this.o.ledger === null ? [] : [`Ledger eq '${esc(this.o.ledger ?? '0L')}'`]),
       ...(q.businessUnit ? [`Segment eq '${esc(q.businessUnit)}'`] : [])
     ].join(' and ');
     return {

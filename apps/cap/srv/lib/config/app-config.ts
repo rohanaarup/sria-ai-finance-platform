@@ -45,6 +45,7 @@ const EnvSchema = z.object({
   // G2-03 S/4HANA adapter. All values are candidates until confirmed against the real system's $metadata.
   S4_SERVICE_ROOT: z.string().regex(/^\/[A-Za-z0-9_\-\/.]+$/, 'must be a URL path starting with /').default('/sap/opu/odata/sap/API_JOURNALENTRYITEMBASIC_SRV'),
   S4_ENTITY_SET: z.string().regex(/^[A-Za-z0-9_]+$/).default('A_JournalEntryItemBasic'),
+  S4_LEDGER: z.string().regex(/^[A-Za-z0-9]{1,4}$/, 'ledger code, 1-4 characters').default('0L'),
   S4_AMOUNT_CONVENTION: z.enum(['INDICATOR', 'SIGNED_DEBIT_POSITIVE']).default('INDICATOR'),
   S4_REVENUE_ACCOUNTS: z.string().regex(/^\d{1,10}-\d{1,10}(,\d{1,10}-\d{1,10})*$/).default('400000-499999'),
   S4_EXPENSE_ACCOUNTS: z.string().regex(/^\d{1,10}-\d{1,10}(,\d{1,10}-\d{1,10})*$/).default('500000-699999')
@@ -67,7 +68,7 @@ export interface AppConfig {
   /** G2-02 retrieval bounds: queries beyond them are rejected, never silently cut short. */
   bounds: { maxEntities: number; maxPeriods: number; maxRows: number; timeoutMs: number };
   /** G2-03: S/4HANA adapter settings (candidates until confirmed from the real system's metadata). */
-  s4: { serviceRoot: string; entitySet: string; amountConvention: 'INDICATOR' | 'SIGNED_DEBIT_POSITIVE'; revenueAccounts: string; expenseAccounts: string };
+  s4: { serviceRoot: string; entitySet: string; ledger: string; amountConvention: 'INDICATOR' | 'SIGNED_DEBIT_POSITIVE'; revenueAccounts: string; expenseAccounts: string };
   /** true when answers are built from synthetic data or the mock model */
   isSynthetic: boolean;
 }
@@ -129,7 +130,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     corsAllowedOrigins,
     semanticLayer: e.SEMANTIC_LAYER === 'on',
     dataProduct: e.DATA_PRODUCT === 'on',
-    s4: { serviceRoot: e.S4_SERVICE_ROOT, entitySet: e.S4_ENTITY_SET, amountConvention: e.S4_AMOUNT_CONVENTION, revenueAccounts: e.S4_REVENUE_ACCOUNTS, expenseAccounts: e.S4_EXPENSE_ACCOUNTS },
+    s4: { serviceRoot: e.S4_SERVICE_ROOT, entitySet: e.S4_ENTITY_SET, ledger: e.S4_LEDGER, amountConvention: e.S4_AMOUNT_CONVENTION, revenueAccounts: e.S4_REVENUE_ACCOUNTS, expenseAccounts: e.S4_EXPENSE_ACCOUNTS },
     bounds: { maxEntities: e.DP_MAX_ENTITIES, maxPeriods: e.DP_MAX_PERIODS, maxRows: e.DP_MAX_ROWS, timeoutMs: e.DP_TIMEOUT_MS },
     isSynthetic: e.FINANCE_DATA_PROVIDER === 'mock' || e.AI_RUNTIME_PROVIDER === 'mock'
   };

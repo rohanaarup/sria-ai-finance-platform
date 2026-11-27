@@ -20,6 +20,8 @@ import { parseMetadata, assertFieldsInMetadata, traceabilityTable } from '../srv
 import { mapRow, classifyAccount, parseODataDate, SELECTED_FIELDS } from '../srv/lib/providers/s4hana/mapper.ts';
 import { startSimulator, expectedRecord, toSapRow, metadataXml, SIM_ENTITY, SIM_ROOT } from './helpers/odata-simulator.ts';
 import { getPerformance } from '../srv/dataproduct/financial-performance.ts';
+import { renderEvidence } from '../scripts/s4-discover.ts';
+import { loadConfig } from '../srv/lib/config/app-config.ts';
 import { runConformance } from '../../../tests/dataproduct/conformance-suite.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -72,7 +74,7 @@ describe('query construction is read-only, minimal and bounded', () => {
     const data = reqs.find((r) => r.path.endsWith(SIM_ENTITY))!;
     assert.equal(data.query.$select, SELECTED_FIELDS.join(','));
     assert.equal(data.query.$top, '25');
-    assert.equal(data.query.$filter, "(CompanyCode eq '1000' or CompanyCode eq '2000') and FiscalYear eq '2026' and FiscalPeriod ge '001' and FiscalPeriod le '002' and Segment eq 'BU''X'");
+    assert.equal(data.query.$filter, "(CompanyCode eq '1000' or CompanyCode eq '2000') and FiscalYear eq '2026' and FiscalPeriod ge '001' and FiscalPeriod le '002' and Ledger eq '0L' and Segment eq 'BU''X'");
     assert.ok(!JSON.stringify(reqs).match(/password|secret|token/i));
   });
   it('rejects injection-shaped company codes and oversize pages before any request', async () => {
@@ -80,6 +82,20 @@ describe('query construction is read-only, minimal and bounded', () => {
     await assert.rejects(a.fetchPage({ ...Q, companyCodes: ["1000' or '1'='1"] }, ctx, { pageSize: 10 }), (e) => code(e) === 'BAD_QUERY');
     await assert.rejects(a.fetchPage(Q, ctx, { pageSize: 51 }), (e) => code(e) === 'BAD_QUERY');
     assert.equal(sim.requests.length, before, 'no HTTP call was made');
+  });
+});
+
+describe('ledger filter (avoids double counting across ledgers)', () => {
+  it('reads only the configured ledger; other ledgers in the system are excluded; null disables the filter', async () => {
+    const base = SYNTHETIC_FINANCE_RECORDS_V2.filter((r) => r.companyCode === '3000' && r.fiscalYear === 2025 && r.fiscalPeriod === '01');
+    const rows = [...base.map(toSapRow), ...base.map((r) => ({ ...toSapRow(r), Ledger: '2L', AccountingDocument: '9' + toSapRow(r).AccountingDocument }))];
+    const s = await startSimulator({ rows });
+    try {
+      const q = { companyCodes: ['3000'], fiscalYear: 2025, periodFrom: '01', periodTo: '01' };
+      assert.equal((await drain(make(s), q)).length, base.length, 'default 0L only');
+      assert.equal((await drain(make(s, { ledger: '2L' }), q)).length, base.length);
+      assert.equal((await drain(make(s, { ledger: null }), q)).length, base.length * 2, 'no filter doubles the lines');
+    } finally { await s.close(); }
   });
 });
 
@@ -192,6 +208,35 @@ describe('evidence rule: only fields present in the system metadata are read', (
     assert.equal(t.find((x) => x.field === 'AmountInCompanyCodeCurrency')!.edmType, 'Edm.Decimal');
     assert.equal(t.find((x) => x.field === 'NotAField')!.inMetadata, false);
     assert.throws(() => parseMetadata('<html>not edmx</html>'), (e) => code(e) === 'MALFORMED');
+  });
+});
+
+describe('discovery evidence tool', () => {
+  it('reports a complete field table for good metadata and names the missing fields for incomplete metadata', () => {
+    const good = renderEvidence(parseMetadata(metadataXml()), SIM_ENTITY, 'test', '2026-01-01');
+    assert.equal(good.ok, true);
+    assert.match(good.md, /Every field the adapter reads is present/);
+    const bad = renderEvidence(parseMetadata(metadataXml('Segment')), SIM_ENTITY, 'test', '2026-01-01');
+    assert.equal(bad.ok, false);
+    assert.match(bad.md, /\*\*NO\*\*/);
+    assert.match(bad.md, /Missing fields \(1\): Segment/);
+    const wrong = renderEvidence(parseMetadata(metadataXml()), 'A_Nope', 'test', '2026-01-01');
+    assert.equal(wrong.ok, false);
+    assert.match(wrong.md, /NOT found/);
+  });
+});
+
+describe('S4 configuration', () => {
+  it('has candidate defaults, validates ranges and the amount convention, and rejects path-like injection', () => {
+    const c = loadConfig({});
+    assert.equal(c.s4.serviceRoot, '/sap/opu/odata/sap/API_JOURNALENTRYITEMBASIC_SRV');
+    assert.equal(c.s4.amountConvention, 'INDICATOR');
+    assert.equal(c.s4.ledger, '0L');
+    assert.throws(() => loadConfig({ S4_LEDGER: "0L' or '1'='1" }));
+    assert.throws(() => loadConfig({ S4_AMOUNT_CONVENTION: 'MAYBE' }));
+    assert.throws(() => loadConfig({ S4_REVENUE_ACCOUNTS: 'abc' }));
+    assert.throws(() => loadConfig({ S4_SERVICE_ROOT: 'https://evil.example/x' }));
+    assert.equal(loadConfig({ S4_REVENUE_ACCOUNTS: '400000-499999,800000-809999' }).s4.revenueAccounts, '400000-499999,800000-809999');
   });
 });
 

@@ -33,6 +33,7 @@ export function createS4Adapter(destinationName: string): S4HanaODataAdapter {
     transport: new DestinationTransport(destinationName),
     serviceRoot: cfg.s4.serviceRoot,
     entitySet: cfg.s4.entitySet,
+    ledger: cfg.s4.ledger,
     mapper: { amountConvention: cfg.s4.amountConvention, revenueAccounts: cfg.s4.revenueAccounts, expenseAccounts: cfg.s4.expenseAccounts },
     audit: auditS4Call
   });

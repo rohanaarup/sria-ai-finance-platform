@@ -64,6 +64,23 @@ This worksheet documents the technical contract mapping between the Sria Info Te
 
 ---
 
+### 3b. What the adapter implements (G2-03) — still UNVERIFIED against a real system
+
+Code: `apps/cap/srv/lib/providers/s4hana/`. It reads exactly these fields, each of which must be present in the real system's `$metadata` (checked at runtime and by `apps/cap/scripts/s4-discover.ts`):
+`CompanyCode, FiscalYear, FiscalPeriod, PostingDate, GLAccount, AmountInCompanyCodeCurrency, CompanyCodeCurrency, DebitCreditCode, AccountingDocument, LedgerGLLineItem, Ledger, Segment`.
+
+| Topic | What the adapter does | Status |
+|---|---|---|
+| Debit/credit | `S` → debit, `H` → credit (SAP's own codes); `D`/`C` also accepted; anything else is rejected | candidate |
+| Amount | `S4_AMOUNT_CONVENTION=INDICATOR` (absolute + indicator) or `SIGNED_DEBIT_POSITIVE` (sign carries direction; a sign that contradicts the indicator is rejected) | UNCONFIRMED — decided by reconciliation |
+| Ledger | filters `Ledger eq '<S4_LEDGER>'` (default `0L`) to avoid double counting | UNCONFIRMED |
+| Revenue vs expense | by GL account ranges (`S4_REVENUE_ACCOUNTS`, `S4_EXPENSE_ACCOUNTS`), not by `GLAccountType`; other accounts become "unmapped" and are flagged, never silently summed | UNCONFIRMED |
+| Period | 3-digit `001` → `01`; periods outside 1–16 rejected | candidate |
+| Dates | OData v2 `/Date(ms)/` and ISO accepted | candidate |
+| Record id | `<company>-<year>-<ledger>-<document>-<line item>` | candidate |
+
+This table replaces the earlier `GLAccountType`-based filter sketch in section 3, which assumed a classification the real chart of accounts may not support.
+
 ### 4. Open Questions for Human SAP Administrator & Finance Reviewer
 
 1. **Exact API Release**: Is the target S/4HANA system Cloud (Public/Private) or 2020+ On-Premise?

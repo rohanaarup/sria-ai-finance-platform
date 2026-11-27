@@ -64,3 +64,17 @@ This checklist clearly delineates responsibilities between developer local tasks
 | **Data Privacy Approval** | Prompt logging & data classification | Security Lead | **PENDING** | Confirm permission to send metric query strings to model. |
 | **API Keys / Vault** | Backend environment variable | DevOps / Dev | **PENDING** | Secure key injection; mock LLM adapter used initially. |
 
+---
+
+### 5. G2-03 additions (S/4HANA connectivity) — see `docs/sap/SAP-REQUEST-LIST.md` and `docs/sap/S4-CONNECTIVITY-RUNBOOK.md`
+
+| Requirement | Responsibility | Status | Notes |
+| :--- | :--- | :---: | :--- |
+| Adapter, simulator, discovery and reconciliation tools built and tested against the simulator | Developer | **DONE (unverified against SAP)** | `apps/cap/srv/lib/providers/s4hana/`, `apps/cap/scripts/` |
+| BTP trial/enterprise subaccount with Cloud Foundry | You / BTP admin | **PENDING** | runbook step 1 |
+| Source system decision (D-06) and API decision (D-07) | You / SAP owner | **PENDING** | runbook step 2 |
+| Destination created and bound | You / BTP admin | **PENDING** | runbook step 3 |
+| `$metadata` obtained; `FIELD-EVIDENCE.md` shows every field present | You + developer | **PENDING** | runbook step 4 |
+| Live smoke test passes; replay fixtures re-recorded and sanitised | You + developer | **PENDING** | runbook step 5 |
+| Reference SAP reports; sign-convention memo; reconciliation log signed | Finance | **PENDING** | runbook step 6 |
+| Security owner approval of role design and network path | Security owner | **PENDING** | request list |
