@@ -1,0 +1,1447 @@
+{
+ "_note": "SIMULATED: recorded from the mock test double (not from a real model). Re-record from a real approved model with: node tests/eval/run.ts --mode record (after switching the provider), then review before committing.",
+ "source": "mock",
+ "recordedAt": "2026-11-27",
+ "entries": {
+  "2.0.1:0082f9f1179b66077278bea1977ecc38e7e0a713501e424ad9be807b3d12e606": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1392,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:026bbd849bf44e2d43ba31a6ea49f0312493c00ac0104e2339b0ff5dc00096fc": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]},{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 146
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:02ce56c65506f27a480e98bd7b4f9e73dd3c316d6b72c258e608dcdb3202f679": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]}],\"rationale\":\"I understood a request to answer a question for profit_margin in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1392,
+    "outputTokens": 127
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:02f711b3f47fa77d278437604d70d5c3bcc7cbc65c1965b546cccfe4250730ea": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:03e162777f35ed4a766374a8dcaedda8f58421e557dce7334182b1c54f3483bd": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to answer a question for company 2000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:0652b669de594af272022b7f64b6b7d72a01fbec06af7a0cdeeca1b3dae22599": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\",\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"10\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 4 means periods 10–12.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 2000, 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1406,
+    "outputTokens": 106
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:06b208ac096e5acb385bd2ff36a1004f44c4d662eb59c64536a341f27b4743d2": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1406,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:07c487260f4a63a0382765b60fde2d86ffdaf81008ca3696d2db7efb613e2bbe": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"3000\",\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for net_profit for company 3000, 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1408,
+    "outputTokens": 96
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:08f7f1aa766a0921a24067b05bc5c4ff8c78559ab62e394ae56c9d04f36907ae": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]}],\"rationale\":\"I understood a request to build a dashboard for net_profit in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 125
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:09d49c0346864b25b0531fc9d9ff72f472b60100ea2cf76e1354a891e1dd1564": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to change the open dashboard for profit_margin.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1389,
+    "outputTokens": 91
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:103224690d9903b8708aec54377e9333a83b054c9646e4ff56f3b54515a40400": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1410,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:109d2b4bb46b485858143b3d9b2512cb4e96c6970991b4761048b93f8ff0fec9": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for net_profit for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:15c168b9747fe0781385f005d55fd7f9d3a203ef75f0d4a846f5e42a4acccc08": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"explain_metric\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a metric for profit_margin.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 88
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:15c2d3ccdfe166b409d5bfd1543bc42aa7cf0840c4e3cf77b51778c238eeec35": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"12\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"december means period 12 (calendar-year fiscal variant).\"],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for total_revenue for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 111
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:16c1dd70a1af050b899c7b8cc0b0d7ceb7624acadb30e6150f1ada48cfec2081": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 3000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:173fb7796bca8e1647ccb56d8e7146df129826c678f28765c3e04501759768d5": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"march means period 03 (calendar-year fiscal variant).\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 110
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:17539417c9f3a304734d6d1eab498a18bae42dd58193b39d35e15028c28eec01": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:1760e2c6796c86e9ab2cdd3228a95475cac6f29a6f1c139ff6fff06b673ff5ae": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to change the open dashboard in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1391,
+    "outputTokens": 85
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:177873f6e1ca175b39aa5783d46910fc6504abb930f583ce32aaf7f09aea35d2": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"Forecasts, budgets and changing or exporting accounting data are not available. I can show revenue, expenses, net profit and profit margin for past periods.\"}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 115
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:178b8b042f58148aa7bdcc90e3f8d89d00cf1293ceea2599edeb2dd082cfcdb9": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"10\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 4 means periods 10–12.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1404,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:17fb91a32e23c5b478dfee4cf3607b888f4623e22ecb93a45266c304bf5e4b88": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:1e740d92129444d1285df9a85d9aa96ab5f3bb6d250b7c2e6204ea7d936ed44c": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 127
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:1eaf4f168d90c21bcf4830c9503aad411e3a54958246650bbfe7ed35de8ad0b4": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 2000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:218247a830c5cbc08b3ddaa1af8759dcad83147d09efa6276182e9e0b6a36016": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 1000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1401,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:241514133a415fa2f21ea22430d24a7cf8f8ba3f1ddf393cc953a256a61e1a6c": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\",\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue, total_expenses for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:2427ec5ad7cc0344de617169cbdedac1e0c9b777ee797481f65f4dfe185de769": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to change the open dashboard for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 90
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:25f8bdf10053057d4a4eb16192ee0ca58c188349684f8260bee19131d25184e0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"2000\",\"3000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to compare figures for total_expenses for company 2000, 3000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 124
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:26101029b7fdad4566123b4ce8cf8336d15549e7774b068cb507b3854ae83bff": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"01\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 1 means periods 01–03.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1405,
+    "outputTokens": 103
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:2b884dc82297acf1148f1c7e75c44adf1196e25c21dba4a68597f5f4d121836c": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:2c4606f411dc839f9c58e72de5089f7f58f91f7cbba311026f5269548a91fe01": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 123
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:2cb09e090e3d8623e686a7268b34c0b53e03395439ec9e62010de8db9317b138": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"2000\",\"3000\",\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 1000, 2000, 3000, 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1401,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:2cdcc1e16b15f457e3bb5703ccd732d3101b3f3e21d88cdc3bbb4e48e312843c": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[\"month\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1403,
+    "outputTokens": 99
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:2e0d487869e2cea4cb812cca7b0a7518ea2ee2491f62b5e34c9e7eeea19ab9b4": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"01\",\"periodTo\":\"01\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"january means period 01 (calendar-year fiscal variant).\"],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for total_expenses for company 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 111
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:2e7a0eb9b8d9aaa74bd6a225172b07967cbf88956b09f172e7fb434ab63d8385": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"01\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\",\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 1 means periods 01–03.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue, profit_margin for company 1000, 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 116
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:2ff6065bbcc51c684fc45a9e1a74104bb30ca7a6fd08e8ffe65d044dfcbfc23f": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[\"month\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000, 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 102
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:31986e7c3a7adf8343830b88faf5e8aad4e8605f6bd2c574349460e3e2a2a138": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000, 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1403,
+    "outputTokens": 100
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:357f41f502633abdf62398315fad4e28dd12d26a04544fa094d47df04ddb4ebc": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"1000\",\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a change for net_profit for company 1000, 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 98
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:3745ea3d05e085b069b3cd5c573f9c1d39d7928075696423ad2814bc5f744234": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to explain a change for net_profit for company 1000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 135
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:3ae695631260475572ed9b7879110af2e5dcf9a7655f3f43dd9789884d1e7b99": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 4000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 124
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:3d351de884690bba9b0eaaddc0949cb771e8885a40f46a8bc21844ff08d7e5cd": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1389,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:3e0bf57e958adfe295b32eb8ce1816c2774071ed5c0e9d6301a061b6867675fa": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"march means period 03 (calendar-year fiscal variant).\"],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 3000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 137
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:3e249100a97d43e722684143ca34222d75f8d1f74aeec96db8e4076475354f72": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for net_profit for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1392,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:405e09e49ed284c18f1bd66d0c94ccab19913a2bd3c040722e9c3d1afc174b9b": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 2000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1403,
+    "outputTokens": 124
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:42e71152cc47532bb80b98c5a14f309646218099a205cc32687e1a2c560d433b": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:43f9e03cca4b16badad306ceb0112ef624d70095f97a519c74cb7cfe485af62a": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:4751ae0e2753a16db1430c6e722b20e66013e1b13790a39517126f64b04ab6f6": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to answer a question for total_revenue for company 1000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 123
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:477f3fdeedb1de8a6f9c5df42f0b3ccbb3abceda0a326b06cf6ee857920f8c28": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"explain_metric\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a metric for total_expenses.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 89
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:492baacb82426156cd0952397db9c1d2d040d8a2a94590fa9862cce11749a140": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a change for profit_margin for company 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 109
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:499983ed1252f847a129d5b2bf7c33701fd23f6e90593c804e0b028f6352d71f": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 1000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:4b618eecd3dcf8996feea11d958a6c3e748e8f16e9e6f429a25aa48191333515": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"2000\",\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[\"company_code\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000, 2000, 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1401,
+    "outputTokens": 107
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:4f0b9451f20b8fa4941f84c664eae9cbc4556e2232d9f4b004661623fa07cc0c": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\",\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for profit_margin for company 1000, 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1403,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:50d99600c43007b37cf19d69abeea223b54bc811f11188ac33c51d2a9571ec84": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"07\",\"periodTo\":\"09\"},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 3 means periods 07–09.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:534655a10e0ad5974cedcc81f14497eeb25bca43ce6587c56c940407f7585408": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"12\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for net_profit for company 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:5482695b2081773d08335fb9a96ba8e0179c55be5fcf48829460225fe6c8e989": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1389,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:5528a57af870a391d117043d83cba216394bd98c42cd64b513ba55e59c6d7b49": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to answer a question for company 3000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:559f187f73124010566321e15d9b26df7f8177089933503e9834d0fc9dc7e1bb": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"04\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 2 means periods 04–06.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for profit_margin for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:56b7ff01be8178e122c33b387e97c2f05f856b4e97f25abdd505f62c815ab7b8": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[\"business_unit\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1404,
+    "outputTokens": 100
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:59acc165a3b02b36404a74eb444767341fefd6cbd938a6f0f6d96b92462f79c0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\",\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue, net_profit for company 3000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 130
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:5dd97c771fe66663c0d0c7687e2a16e9c4f0e089325b34a1a3fe6f26f75ef6ba": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:5fa9aa060d22e09155f23a4e667442b1472e148a4023c7fc891f6996d6e3be64": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for net_profit for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:60a16f2ca4b68ad6851a71097d9d0306ebef78ca827a86fcc8649981a3157284": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"2000\",\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 1000, 2000, 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1401,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:615290d6830dcca8db424e892f6ce7e34661aeb70d6ce9f5c7fc45f2769f3086": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]},{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]},{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to explain a change for total_expenses. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1391,
+    "outputTokens": 179
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:615b77e88b9f645aa2377595ab9559645865c5de41cc48edfde9b61caa1e80d0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"march means period 03 (calendar-year fiscal variant).\"],\"missingInformation\":[{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to explain a change for total_revenue for company 4000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 151
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:644386f7694632fa8443f7661d8445742805d0a5b81f039ca5df2378fe49ba0e": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\",\"total_expenses\"],\"dimensions\":[\"month\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue, total_expenses for company 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1412,
+    "outputTokens": 107
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:64bf3a58e9167ef945f57d704aad4ebc0f834adb2478d3865aa7469ed6256d25": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[\"month\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:66c0b378724535a158265f7e3fe04897358b552affb995a13aea9a8dce5da917": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:67741a54dd36aecdb2393ac4e18b4978aef7db6d7f8d5284eeb55540829354c6": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"01\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Half 1 means periods 01–06.\"],\"missingInformation\":[{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to compare figures for net_profit for company 4000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 140
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:67eef0cf891220ed977db563ea604feb4c363007916a8223c64f00558cdba0bd": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1405,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:68cc22d74a59d458452ceaf26cdc7eddbee5b0dbfeb4e06c61cc0fcae6ef1080": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:69a8e5697fa258f1ad444b14c1852cc89ecc8ebd9987fd0b0a63a693d6e5c6b1": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:6c63bad8c6fd1a5c005c9f9e61710e503803388ffb8d684b305bbce059dc9c96": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\",\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"06\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for total_revenue for company 1000, 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1410,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:6cfb8752a7bcebfd50e8700cefa07fdd6a8dc3fa4c28fbe7742faef2023bce04": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"Forecasts, budgets and changing or exporting accounting data are not available. I can show revenue, expenses, net profit and profit margin for past periods.\"}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 115
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:711ba59dc1e5971e7b5b9e1672ac658654e982d9792bbf00d4295bf7bef65604": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"01\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 1 means periods 01–03.\"],\"missingInformation\":[{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to compare figures for total_expenses for company 2000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 143
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:712fc63b385bc55408e468290253e4ae16a8d7c2ce22c3e4508f08f085072378": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:746eb2bd8b5a5eee9b133920f3d309e3684b2907bae1187fef3d6cb1ba159bfa": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"05\",\"periodTo\":\"05\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to explain a change for total_expenses for company 3000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1401,
+    "outputTokens": 137
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:74e8ceb7d5e6cabe1883ef75d961939bf7dc66d33dcd697e336d0c1b6845ce24": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to change the open dashboard for company 2000.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1390,
+    "outputTokens": 88
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:753ce754f8c223b878689e6a9a56d94facc5798e3393aff27f1a96c5668c2ea9": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\",\"2000\",\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for net_profit for company 1000, 2000, 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 99
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:763f7109ed3f063e2877cea741ff3f7bce0ce519e471a49f36543bfb407996f4": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for total_revenue for company 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 96
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:7665304624499721720a0fb04d6f54b61c8312d044b701b44c1df83f032be171": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"01\",\"periodTo\":\"01\"},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1403,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:7a7d579daa10fbf831432af44c353731c3c043efae55115209ec44205d641924": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"explain_metric\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a metric for total_revenue.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1390,
+    "outputTokens": 88
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:7e7d8eaefd2ffd48d6ab7373ab6ac38f4dd74d67ab9bf8173372efae20f0517c": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:805c94e0d25932914f581b6b761093a61d02fbe8cc5fbd997bb163095150802f": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"Forecasts, budgets and changing or exporting accounting data are not available. I can show revenue, expenses, net profit and profit margin for past periods.\"}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 115
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:80c32d5ebc0db662e614855504d7251e9cf3e5ce9ba052acdf4cd266803b96b5": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 1000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:80d58c86d09aea124865bd8077d8e2c1f22be5d250014f468e7c270e62d88350": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"01\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Half 1 means periods 01–06.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:82cd1230a9b6be0e9bb2ef25ca670b590f083ac2e26857c2267d3cf7521146bc": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1391,
+    "outputTokens": 127
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:84a1fa60664e15bfe86f581062b23668a3e10cde542cd17b958edc446ffcac57": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]},{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_expenses. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1392,
+    "outputTokens": 147
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:85e1ac9f4f374d7857e2de9af95643ff2c98a93ac79f3173ca3146f0f26e15d1": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"07\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Half 2 means periods 07–12.\"],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 1000, 4000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 152
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:85e5886e5307d57fd28b09e5a0854c6d4a0c0e51c1392e6662b992a53a47d1cc": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\",\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for total_revenue for company 1000, 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1391,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:86f77addb201f60268ef8be196afb854f9ed128b64016e4919d4f770e2882c92": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"2000\",\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"07\",\"periodTo\":\"09\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 3 means periods 07–09.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for total_expenses for company 2000, 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 106
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:88567f9addc19ba00b62dd01c53d9bfa9a4d9f88fafc9579c393d48c8862be81": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\",\"3000\",\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"04\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 2 means periods 04–06.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 2000, 3000, 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 111
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:8929e5d2f96bf377a734b1dc6390d7a2715e0640eac04f8449b7f4f1bd94a846": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a change for profit_margin for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 109
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:899124510855187e664cb96f7ff1a155a458482004ff82f11fa5f53a13b248f5": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]},{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to compare figures for total_revenue for company 2000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 154
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:89cd62bce9c69bb5bc64487f09e2785baf49e35b7881feddb1ab62ccc08a4852": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:8bbbc82305aacd3db96c2ad8bd3b4c0ab650cb00e87126851770f9e0ef26a523": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]},{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for company 1000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1390,
+    "outputTokens": 161
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:8eb71dc71449f30a6780e9a304d7a42ddad80412b973e80ccfaa9f6d2696c9ae": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to compare figures for total_revenue for company 1000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 134
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9008a435748a3deee0c488b308ab11cf2f4bea465f2a59ef7ee80a45a5eabeec": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:903851f4a8e253060df0a8414b5dd6ecd1287398f04126fa73fd1222b8bba601": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"04\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 2 means periods 04–06.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:90ffe5536de1c488a2e93528999ef96fc41a511a88a2182dfc3c9fed55a37deb": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 1000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:91d17fdb0d978476145cf3c52fe2e3b5553e55e4eedac6191fb21f484a504e5f": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:92b23002cacfa27355636f262989c055dfb03a9babec3a2d301f5347a8a63a54": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]},{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for profit_margin. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1392,
+    "outputTokens": 146
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:955aa1f800ca4a389095af8d375c594c5356510e37583f4390ee0ab0b2a0ee90": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1403,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9561ad7b702b66f99a43697b32b44b42ca0223e479c306c254da1d6cf66c6582": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 2000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 123
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:96a4574007c12dfac94572b181cdf646613dfe643ba19a8295138487ddac08e1": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This request asks for something the assistant cannot do.\"}",
+   "usage": {
+    "inputTokens": 1406,
+    "outputTokens": 90
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:970566422c69a933ea252e2ed190efb9f485f55aed786173e309cbad0a4e26d5": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1408,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:98d19d2ad6614f1bef6e36b2771733d41a7c18b58c4564337faff501908d71c7": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1392,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:995a3ce9e4f62e8195f9e72a0164ce8d4267d5914e6f1ec3766a264f28cf55d5": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a change for net_profit for company 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 107
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9b40eec32671e0eed83ac5418e9b225d08ff49f3e2386d66660616fe7ed0ed1a": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\",\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue, total_expenses for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9b4cf9af449b3727b690865fb0d6b0315dd2c9af42576305d158d78619b767f5": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"01\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 1 means periods 01–03.\"],\"missingInformation\":[{\"parameter\":\"comparisonTarget\",\"question\":\"What should I compare against: another company code or another period?\",\"options\":null}],\"rationale\":\"I understood a request to explain a change for total_expenses for company 2000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 145
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9bf82d593c0bcb7e703d6606ba459fd192212b7209dc4697b39dfab8e37b653b": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\",\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[\"company_code\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 2000, 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1404,
+    "outputTokens": 103
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9de8d538697436d2d331103d8e86fa9c226651aab3cf6a592bedc5422275b9da": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\",\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"march means period 03 (calendar-year fiscal variant).\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses, net_profit for company 1000, 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1407,
+    "outputTokens": 120
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9e22c3dbaaf8122d6deea4f88fe9817c1515e1b701ce1f1c6cbd7df673168ebf": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 1000, 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 98
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9ea43a3737f8299961a3256e694638b7805595866727545f454ed640dac11eb7": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[\"business_unit\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 131
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9f60866c9e58e14df7545da862cec6eb46ff04c999fcc1ed665cd3d0b8d8a68f": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"dashboardContext\",\"question\":\"Which dashboard should I change? Open it first, or tell me what to build instead.\",\"options\":null}],\"rationale\":\"I understood a request to change the open dashboard for profit_margin. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 130
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:9fea904dbd0be3df861fa72537edfa29d8f5a08aeabac42ab6e2070bfdfd7e64": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"01\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Half 1 means periods 01–06.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:a4bcc03756ef18fdf01054a1e1c95cc5340de7decb4463fced71e621f748025e": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"07\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Half 2 means periods 07–12.\"],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 4000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1401,
+    "outputTokens": 149
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:a52a0ff55bce85ec4a07747acb3f47bb5a90daebc751fbebae3f6b02db664d7c": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:a897a9036d72cff08e023ea3b420a4bcbf8a75c77ae5936dca165d12e345f387": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"Forecasts, budgets and changing or exporting accounting data are not available. I can show revenue, expenses, net profit and profit margin for past periods.\"}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 115
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:a8a153d8827e3b5d6ba115f5fb8212586689c69829c3507c9e693207b039cc73": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for net_profit for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:a8fd63362b337dd437f57258513cb9ade28cc9049654ab5f96d94e6810c0616b": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]},{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]},{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1390,
+    "outputTokens": 184
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:a979af0f69eca05cb314da63174b415317ec511194a76d535593935237a6afb0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\",\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"01\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\",\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Half 1 means periods 01–06.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue, total_expenses for company 2000, 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1404,
+    "outputTokens": 115
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:aa7514640609b704effdafdfa91721e5f08427d22b8c4e7f43f11c9c6399a333": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1411,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:ab8b930c38e5cc4e331fcaf5b573e4b88d045a19a3f472827942d79906f57eb0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:adc014be19e8955c0d4f4f0ca2cdd7e77602ee06d87414ac51e833ee3b3fdfe1": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"explain_metric\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a metric for net_profit.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1390,
+    "outputTokens": 87
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:add628e664ca3e2852f28c21b79bf6e71431a6529e2dee109e5ee60d4a6b1eaf": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 2000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 123
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:ae960ae5540602ef9f460a8afc7c013965d42e081aa6c15c86c62cf670a132b4": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]},{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_expenses. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1388,
+    "outputTokens": 147
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:b02b29db38e7edc98e9a163e042137bd71c987e7804ad1c9b623b48daa523a8e": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"3000\",\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 1000, 3000, 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1403,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:b1d02a5f61a481144879f214053adccbb1efbe06436cfdf22cb87601be604a72": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[\"business_unit\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 100
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:b21a02f91e0f58ba9f50af3bfbda9ac3f1453051ea1c3531fe98d41cb5e1b8bc": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a change for total_expenses for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1404,
+    "outputTokens": 109
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:b60f105e8bfa77df1f64ce7a37ea55d8f19f411a35f45553b15107ab6f875a81": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"march means period 03 (calendar-year fiscal variant).\"],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1401,
+    "outputTokens": 110
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:b6d64ccac990e2f9d13645f0d4ef3482530c3f4bd5f909ed202bf516ae2ec6e0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"05\",\"periodTo\":\"05\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:b9785fe7fec4b00969f0366c0603c2251f85d8f727f4d8b7712c3dc4fb9778ac": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"07\",\"periodTo\":\"09\"},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 3 means periods 07–09.\"],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 4000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 150
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:bb5e1f05f69f50f8d58d0d4f86c36b242176dbfc1952752ec513cd12010d21be": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1406,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:bc9a5d25014075a9f8e56ab16bf2203685a80dbb62a2acae7f3050708cbeff93": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":{\"fiscalYear\":2026,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"march means period 03 (calendar-year fiscal variant).\"],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for total_revenue for company 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 120
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:be0eb6b5259572986fdbe0d02cf1d4e8ca609d48f4d84a572824963d1006389a": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"3000\",\"4000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a change for total_revenue for company 3000, 4000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 100
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:be68f647b838b0f3ac0c4eac8c8f2dd15dee67256c5fb9b3c8f067beba9140aa": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\",\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"10\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 4 means periods 10–12.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for profit_margin for company 1000, 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1403,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c19f2d36f530fe1297a2ddc80d10c2db9374902cd18f0e214bdffaa4f8bc91e9": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 1000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 124
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c1b18afc567225263bdea3d6415f7f62a49e520f7ea6f59bed44b55635365aa5": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"2000\",\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[\"month\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for profit_margin for company 2000, 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 99
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c217028dd85956d23506dee13bb38936b09cf4a6bb7c9bf7672a788a7ad85656": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 2000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1399,
+    "outputTokens": 122
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c2b03ba141a5c93f349b6b6ed0c346b214ed3fd9d904c2cf17fbd5726b287f93": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c2f6cf66fb65dbeb71ac2b9fbd8078ec64d444945041ce77191220e803926ce2": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"01\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\",\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses, net_profit for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1411,
+    "outputTokens": 103
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c4e42d51b48d84f4f0ccf6c5a146638cef6c07d78e171ddc41bb21d806f25202": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[\"fiscal_period\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 100
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c537ae427b65b1e4ba86513ede7d82c62d617ef923c984f68b60dcf1d2b70d34": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 127
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c5c460cb5a794f91b931ce2397ce4cd6db17735c9474b11919b9a5918a94e565": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 3000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 122
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c5d137ea03278d2f0bf8170df3dec62ed9a0692e1fbc0f7cdce8e869c6e09cfd": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for profit_margin for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c83a024ff89e6211ceefa4b68fbd4b4958fd6c1937772f190dd229c2bf0375fa": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c84494404264be3b8e2fa568edf806534ab4a4c4767a90a695e99491dc4ddde0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"12\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1404,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:c9e7bcfe5b6f96d78f408c735a5af84c7b22aa91dddd9a5d6e902992e23e45f4": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1391,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:d035919740370600814eef862ca1e89967f4aa270ed0e1ed843bdfbfe0d45a56": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 1000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:d0ab406516d55144671b231901c3c10b4ed7a939e31fc5fdabb4b578dac8ae1d": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1392,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:d35fad8f0fd99883594f396fb5fd7f3511b15669d2df0600f2d76c776b5c1527": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"01\",\"periodTo\":\"06\"},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Half 1 means periods 01–06.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for total_revenue for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:d46c49bcb11009642f98ecab27192281c82c96cdbb999b07b276209e6096099d": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1412,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:d478188d6fa49fb6a6b49f4e5b28aae9ca8cd04e10943ea75b6d9472dee6e3a3": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"dashboardContext\",\"question\":\"Which dashboard should I change? Open it first, or tell me what to build instead.\",\"options\":null}],\"rationale\":\"I understood a request to change the open dashboard for total_expenses. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 131
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:d62f578dcaf4ef33d8157f56057b8d4eb3cef73f6660b3e5f8c29e5c5f1fbbcc": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:d65bbadf3ceca5a7275facc2add3d5ed488ea1205cebc9dacff2a80c6fa57f21": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\",\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for total_revenue for company 1000, 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:d7b4a88f6e0db5006f70ab2c9fd620384a2f454acf78d2f80baa94cfbcd0c6ae": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to change the open dashboard for total_expenses.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1388,
+    "outputTokens": 91
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:decf94301d94a96ccb755a02a3e64a9510f80a12cdef97be45727bcfb54d491e": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"analyze_variance\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a change for net_profit for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 107
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:df89eec4b49cee30870e718d647d1e33742ffc8849ccb68aff4eab65b5109e74": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_expenses for company 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:e06799c3c7bff90e78f3439de431f84de748671d0cb138c968a02d48f74b0ba9": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 4000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1401,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:e0ede29382782c7786a7649e7faa416e56ee61f571d84f502902cb82a3f4e24d": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to answer a question for company 3000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:e1cf37b2cad0118c4a674a6e540c26aa58f28e7e3bec2d0945bb3f907017c6d4": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[\"month\"],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:e34ea10614479185ddd4720ab418c5813f925373f5585150744cdd867a11f6e4": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"08\",\"periodTo\":\"08\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"august means period 08 (calendar-year fiscal variant).\"],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for total_expenses for company 4000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 111
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:e54697dc5a1f478cce3cbe45cd777e74223406ff2947e1daf17301616f25380d": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"07\",\"periodTo\":\"09\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 3 means periods 07–09.\"],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for total_expenses for company 3000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 105
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:e801308d8c4e8d285bf53cb8c629ddf67679e85da259dedf23fe82ad8f9d0751": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:e8052d938c37ccadbcc3bf2b05a797cf40cd59d50ec4a75569462f6724c4cdfd": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to change the open dashboard for total_expenses.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 91
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:e90248dbfa23caff236d8243f943f4c8a72e12222a1ed81980ae3ea72e0219f5": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"unsupported\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I cannot help with this request.\",\"unsupportedReason\":\"This does not look like a finance reporting request. I can show revenue, expenses, net profit and profit margin.\"}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 104
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:ea66c02f75ec73d9e067db32040850c5661f0e16722298a2a079a241a7f95e3a": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"dashboardContext\",\"question\":\"Which dashboard should I change? Open it first, or tell me what to build instead.\",\"options\":null}],\"rationale\":\"I understood a request to change the open dashboard for company 2000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1393,
+    "outputTokens": 130
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:eba481be48d6cf156bed6b698a845f4b4f5bb5bbed19eb88ce34cf086806125a": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\",\"3000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for net_profit for company 1000, 3000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1392,
+    "outputTokens": 96
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:ef92a999208d6267a4bc685a6a129c53026026554a556ce5d4e607d5f6987c54": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"explain_metric\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to explain a metric for profit_margin.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1396,
+    "outputTokens": 88
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:efb7cd2d69a9fb34efe3c90fe324a860696e068b7b8a32bca9419fc461f7b5f0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for total_expenses for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 107
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:efcf68ac24c7b2fd8bb6a1a422e44bd4db1b62088917cd9eb12e55db7be187e0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\",\"total_expenses\",\"profit_margin\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue, total_expenses, profit_margin for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1413,
+    "outputTokens": 113
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:f065e239bb896dd606aa28908f1651d7955e3efd4f19366baaee7f8cc080ceb0": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\",\"2000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 1000, 2000. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 125
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:f13dbf2d9d7a95f125d42836e3ff7f53e66d45814e5330d88ea3b8130ddadc0a": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"07\",\"periodTo\":\"07\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for total_expenses for company 2000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1395,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:f1d7d931d27fbedc7c42d04ca5e09f086cf1f62a71533721a4e6292b176e9f98": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"modify_dashboard\",\"entities\":[\"4000\"],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to change the open dashboard for company 4000.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1391,
+    "outputTokens": 88
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:f2a6b105f2a275566cd069251926f8179fbe6f18d947433096358d9be2ca1517": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"answer_question\",\"entities\":[\"2000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"03\",\"periodTo\":\"03\"},\"comparisonPeriod\":null,\"metrics\":[\"total_expenses\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"march means period 03 (calendar-year fiscal variant).\"],\"missingInformation\":[],\"rationale\":\"I understood a request to answer a question for total_expenses for company 2000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 111
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:f3163aef6f332c725767780e133ddbe7bb8dea28c1b2853475d1d081d298c551": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for total_revenue for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 97
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:f9b8ae3e9c978391b23115881cc2307e580a096eac5d8d35aed9606be553b4e8": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"compare\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to compare figures for total_revenue for company 1000 in 2025.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1397,
+    "outputTokens": 106
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:f9ff911a2cb16617a242a094894dd2bbe62beae0fc1f1d1ec7fa332cc2b379d9": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[],\"period\":{\"fiscalYear\":null,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"total_revenue\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"companyCode\",\"question\":\"Which company code should I use?\",\"options\":[\"1000\",\"2000\",\"3000\",\"4000\"]},{\"parameter\":\"fiscalYear\",\"question\":\"Which fiscal year?\",\"options\":[\"2025\",\"2026\"]}],\"rationale\":\"I understood a request to build a dashboard for total_revenue. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1394,
+    "outputTokens": 146
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:fb828b945ab28825e9a4a4a68b04cca41818f9eb464b230ed1916f51d3f83002": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"3000\"],\"period\":{\"fiscalYear\":2025,\"periodFrom\":\"04\",\"periodTo\":\"09\"},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 3000 in 2025. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1405,
+    "outputTokens": 142
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:fbee209f815552427323864316c946c9468a6c044f30032884e63c24e145b7bd": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":\"10\",\"periodTo\":\"12\"},\"comparisonPeriod\":null,\"metrics\":[],\"dimensions\":[],\"constraints\":[],\"assumptions\":[\"Quarter 4 means periods 10–12.\"],\"missingInformation\":[{\"parameter\":\"metric\",\"question\":\"Which metric do you want: revenue, expenses, net profit or profit margin?\",\"options\":[\"Total revenue\",\"Total expenses\",\"Net profit\",\"Profit margin\"]}],\"rationale\":\"I understood a request to build a dashboard for company 1000 in 2026. I need a bit more information.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1402,
+    "outputTokens": 150
+   },
+   "modelId": "mock-goal-model-v2"
+  },
+  "2.0.1:ff86b0153f44656792b2875b0a9dcd6ae369c50bf9f6b359aa9711259efa5e78": {
+   "text": "{\"goalVersion\":\"1\",\"taskType\":\"create_dashboard\",\"entities\":[\"1000\"],\"period\":{\"fiscalYear\":2026,\"periodFrom\":null,\"periodTo\":null},\"comparisonPeriod\":null,\"metrics\":[\"net_profit\"],\"dimensions\":[],\"constraints\":[],\"assumptions\":[],\"missingInformation\":[],\"rationale\":\"I understood a request to build a dashboard for net_profit for company 1000 in 2026.\",\"unsupportedReason\":null}",
+   "usage": {
+    "inputTokens": 1398,
+    "outputTokens": 95
+   },
+   "modelId": "mock-goal-model-v2"
+  }
+ }
+}

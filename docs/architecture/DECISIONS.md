@@ -116,3 +116,16 @@
 - **Decision:** An adapter implementing the v2 adapter contract reads journal-entry lines with OData GET requests only. The connection is a BTP Destination resolved by name through the SAP Cloud SDK (credentials, token exchange and the Cloud Connector path stay in the platform). Before the first data call the service `$metadata` is read and every selected field must exist in it. Failures are typed (AUTH, NOT_FOUND, BAD_QUERY, THROTTLED, TIMEOUT, UNAVAILABLE, SOURCE_ERROR, MALFORMED); only transient ones are retried (exponential backoff with jitter, honouring Retry-After) behind a circuit breaker. Rows are validated with Zod before mapping, and a mismatch fails the whole page rather than dropping money. Revenue/expense classification, ledger and amount convention are configuration (`S4_*`), because they depend on the customer's system and are confirmed by reconciliation. Every call is audited without values. An outage is an error, never a fall back to synthetic data.
 - **Consequences:** Reaching a real system needs people (BTP admin, SAP owner, Finance, security) and cannot be completed by a coding agent. The simulator proves the adapter's behaviour, not SAP's.
 - **Revisit when:** the real `$metadata` differs from the candidate (D-07), or principal propagation (D-05) replaces the technical user.
+
+### ADR-015: One LLM gateway; the model only proposes (G2-04)
+- **Status:** Accepted (2026-11-27) for the gateway design; the live provider choice (D-08) is still open.
+- **Context:** Model calls were made directly from feature code with no budget, redaction, retry policy, versioned prompts or usage record.
+- **Decision:** Every model call goes through `LLMGateway`: route, redact, budget check, hard timeout, retry only on 429/5xx, circuit breaker, strict schema validation with at most two repairs, and a metadata-only usage record. Providers are adapters (mock, replay, OpenAI-compatible, Anthropic). Live providers refuse to start without a recorded approval.
+- **Consequences:** The model returns an `AgentGoal` and nothing else; ordinary code validates it. No tools or data rows are given to the model in this step.
+- **Revisit when:** a provider is approved (D-08/D-09) or streaming/multi-turn use is needed.
+
+### ADR-018: Evaluation before trust (G2-04)
+- **Status:** Accepted (2026-11-27) as a method. Datasets are AI-drafted and **pending Finance review**.
+- **Decision:** 212 intent cases and 52 injection cases, kept independent of the mock model, scored by a harness (accuracy, slot F1, clarification accuracy, refusal recall, adversarial safety). A recorded baseline is a regression gate in replay mode; injection tests also run against a deliberately compromised model.
+- **Consequences:** Baseline numbers are measured on the mock (SIMULATED), not a real model. Real-model numbers need an approved provider and the opt-in live run.
+- **Revisit when:** Finance reviews the datasets or a live model is evaluated.

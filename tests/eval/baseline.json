@@ -1,0 +1,22 @@
+{
+  "_note": "Regression baseline for dataset intent-v2 measured on the MOCK test double. A change that lowers these numbers fails tests/eval/regression.test.ts.",
+  "dataset": "intent-v2",
+  "mode": "mock",
+  "promptVersion": "2.0.1",
+  "recordedAt": "2026-11-27",
+  "metrics": {
+    "cases": 212,
+    "taskTypeAccuracy": 0.8962,
+    "slotF1": 0.9754,
+    "slotPrecision": 0.9953,
+    "slotRecall": 0.9562,
+    "clarificationAccuracy": 0.8757,
+    "falseAskRate": 0.0682,
+    "missedAskRate": 0.0541,
+    "refusalRecall": 0.9535,
+    "falseRefusalRate": 0.0592,
+    "adversarialSafety": 1,
+    "exactMatch": 0.8255,
+    "modelFailures": 0
+  }
+}

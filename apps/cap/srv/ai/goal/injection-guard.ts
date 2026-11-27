@@ -23,7 +23,18 @@ const PATTERNS: Array<{ id: string; re: RegExp }> = [
   { id: 'code_or_sql', re: /\b(drop|truncate|alter)\s+table\b|\bdelete\s+from\b|\bselect\s+\*\s+from\b|\bunion\s+select\b|'\s*or\s*'?1'?\s*=\s*'?1|;\s*--|<script\b|\brm\s+-rf\b|\bsudo\b|\bexec(ute)?\s*\(|\beval\s*\(/i },
   { id: 'exfiltration', re: /\b(send|post|upload|forward|email|exfiltrat\w*)\b[^.\n]{0,50}\b(to|at)\b[^.\n]{0,30}(https?:\/\/|webhook|@[a-z0-9.-]+\.[a-z]{2,})|\bwebhook\.site\b/i },
   { id: 'tenant_crossing', re: /\b(other|another|different|all)\s+(tenants?|organi[sz]ations?|customers?|companies of other)\b|\btenant[_ -]?id\b|\bx-tenant\b/i },
-  { id: 'encoding', re: /\b(base64|rot13|hex(adecimal)? encoded|decode (this|the following))\b/i }
+  { id: 'encoding', re: /\b(base64|rot13|hex(adecimal)? encoded|decode (this|the following))\b/i },
+  // a long unbroken run of letters/digits is not how finance staff write; it is how encoded payloads look
+  { id: 'encoded_payload', re: /(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{20,}={0,2}(?![A-Za-z0-9+/])/ },
+  { id: 'prompt_repeat', re: /\b(repeat|print|show|output|copy|recite)\b[^.\n]{0,25}\b(everything|all|text|words?)\b[^.\n]{0,25}\b(above|before|prior|earlier)\b|\bword for word\b|\bwhat (were|are) your (exact |original |initial )?(instructions|rules|prompt)\b|\bexact instructions\b/i },
+  { id: 'env_and_credentials', re: /\b(environment variables?|env vars?|connection strings?|config(uration)? files?|database (password|credentials?)|service keys?)\b/i },
+  { id: 'disable_controls', re: /\b(disable|turn off|switch off|deactivate|remove|lift|skip)\b[^.\n]{0,30}\b(permissions?|authori[sz]ation|access|security|safety|guardrails?|restrictions?|filters?|checks?|policy|policies|validation)\b|\bmaintenance mode\b/i },
+  { id: 'rules_cancelled', re: /\b(rules?|instructions?|guidelines?|restrictions?|polic(y|ies))\b[^.\n]{0,35}\b(cancel+ed|void|revoked|removed|lifted|suspended|no longer apply|do(es)? not apply|are off)\b|\bset (the )?task ?type to\b/i },
+  { id: 'unfiltered_persona', re: /\b(unfiltered|uncensored|no rules|without (any )?(rules|limits|restrictions)|no restrictions)\b|\byou are (an? |the )?[a-z -]{0,30}\b(bot|ai|assistant|persona)\b[^.\n]{0,40}\b(named|called)\b|\bplay a game\b[^.\n]{0,40}\byou are\b/i },
+  { id: 'run_code', re: /\b(write|run|execute|launch|start)\b[^.\n]{0,25}\b(shell|bash|python|powershell|terminal|command|script)\b|\b(shell|bash) script\b|\braw html\b|\bscript tag\b/i },
+  { id: 'named_tenant', re: /\b(for|of|in|from)\s+tenant\b|\btenant[-_ ][A-Za-z0-9-]{3,}/i },
+  { id: 'write_back', re: /\b(write|push|send|post|save)\b[^.\n]{0,40}\bback\b[^.\n]{0,20}\b(to|into)\b[^.\n]{0,15}\b(sap|the system|erp|ledger)\b|\bpost\b[^.\n]{0,15}\b(a |an )?(journal )?(entry|entries|posting)\b|\bexport\b[^.\n]{0,40}\b(to|into)\b[^.\n]{0,20}\b(external|web address|url|website|server)\b/i },
+  { id: 'format_hijack', re: /\b(answer|reply|respond|output|return)\s+(only|just|exactly)\s+(with|as|in)\b/i }
 ];
 
 export interface GuardResult { blocked: boolean; matched: string[] }

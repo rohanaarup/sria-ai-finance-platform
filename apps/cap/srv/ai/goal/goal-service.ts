@@ -28,7 +28,15 @@ import { loadPrompt, renderPrompt, asData } from '../prompts/registry.ts';
 import { checkInjection, neutralizeUserText, leaksSecretsOrPrompt } from './injection-guard.ts';
 import { TASK_DESCRIPTIONS } from './task-taxonomy.ts';
 
-export interface GoalContext { tenant: string; userId: string; runId?: string; hasDashboard?: boolean }
+export interface GoalContext {
+  tenant: string; userId: string; runId?: string; hasDashboard?: boolean;
+  /**
+   * Retrieved text the model may read as DATA (tool output, glossary snippets, document excerpts).
+   * Each item is shown inside its own <data> block, neutralised so it cannot close the block, and the
+   * system prompt tells the model that nothing inside <data> is an instruction.
+   */
+  extraData?: Array<{ label: string; text: string }>;
+}
 
 export type GoalSource = 'input_check' | 'injection_guard' | 'glossary' | 'model' | 'model_failure';
 
@@ -109,7 +117,8 @@ export class GoalService {
       dimensions_json: asData(dimensionIds),
       context_json: asData({ hasDashboard: !!ctx.hasDashboard })
     });
-    const userMessage = `<user_request>\n${neutralizeUserText(text)}\n</user_request>`;
+    const dataBlocks = (ctx.extraData ?? []).slice(0, 5).map((d) => `\n<data label="${d.label.replace(/[^a-z0-9_]/gi, '_').slice(0, 24)}">${neutralizeUserText(d.text).slice(0, 1000)}</data>`).join('');
+    const userMessage = `<user_request>\n${neutralizeUserText(text)}\n</user_request>${dataBlocks}`;
 
     // 5. the one model step
     let outcome;

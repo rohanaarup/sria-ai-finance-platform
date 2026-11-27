@@ -75,10 +75,13 @@ export const roughTokens = (text: string) => Math.ceil(text.length / 4);
 export async function persistModelCall(r: UsageRecord): Promise<void> {
   const cds = (await import('@sap/cds')).default as any;
   if (!cds.db) return;
-  await cds.db.tx({ user: new cds.User.Privileged() }, (tx: any) => tx.run(INSERT.into('sria.finance.ModelCalls').entries({
+  const row = {
     tenantId: r.tenant, userId: r.userId, runId: r.runId ?? null, task: r.task, promptId: r.promptId, promptVersion: r.promptVersion,
     promptHash: r.promptHash, provider: r.provider, mode: r.mode, model: r.model, inputTokens: r.inputTokens, outputTokens: r.outputTokens,
     latencyMs: r.latencyMs, costEstimateUsd: r.costEstimateUsd, attempts: r.attempts, repairs: r.repairs,
     redactionCounts: JSON.stringify(r.redactionCounts), outcome: r.outcome
-  })));
+  };
+  // Inside a request, join its transaction (one connection); outside one (scripts), use a privileged transaction of our own.
+  if (cds.context) await cds.db.run(INSERT.into('sria.finance.ModelCalls').entries(row));
+  else await cds.db.tx({ user: new cds.User.Privileged() }, (tx: any) => tx.run(INSERT.into('sria.finance.ModelCalls').entries(row)));
 }

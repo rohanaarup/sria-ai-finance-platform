@@ -41,7 +41,7 @@ const rules: Rule[] = [
   // Personal data
   { kind: 'EMAIL', re: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g },
   { kind: 'IBAN', re: /\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?\b/g },
-  { kind: 'CARD', re: /\b(?:\d[ -]?){13,19}\b/g, keep: (m) => m.replace(/\D/g, '').length < 13 },
+  { kind: 'CARD', re: /\b\d(?:[ -]?\d){12,18}\b/g },
   { kind: 'PHONE', re: /(?<![\w.])\+?\d{1,3}[ .-]?\(?\d{2,4}\)?[ .-]\d{3,4}[ .-]\d{3,4}(?![\w.])/g },
   // Money: a symbol/code next to a number, or a number with a magnitude word
   { kind: 'AMOUNT', re: /(?:[$€£¥]\s?\d[\d,.]*(?:\s?(?:k|m|mn|bn|million|billion|thousand))?)/gi },
@@ -49,9 +49,9 @@ const rules: Rule[] = [
   { kind: 'AMOUNT', re: /\b\d+(?:[.,]\d+)?\s?(?:k|m|mn|bn|million|billion|thousand)\b/gi },
   { kind: 'AMOUNT', re: /\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b/g },
   { kind: 'AMOUNT', re: /\b\d+\.\d{2}\b/g },
-  // Identifiers: long digit strings (accounts, documents, invoices) unless allowed
-  { kind: 'ID', re: /\b\d{4,}\b/g, keep: (m, o) => isYear(m) || (o.allowedIdentifiers ?? []).includes(m) },
-  { kind: 'ID', re: /\b(?:INV|PO|SO|DOC|ACC|GL)[-_ ]?\d{3,}\b/gi }
+  // Identifiers: prefixed document ids first, then long digit strings (accounts, documents, invoices) unless allowed
+  { kind: 'ID', re: /\b(?:INV|PO|SO|DOC|ACC|GL)[-_ ]?\d{3,}\b/gi },
+  { kind: 'ID', re: /\b\d{4,}\b/g, keep: (m, o) => isYear(m) || (o.allowedIdentifiers ?? []).includes(m) }
 ];
 
 const isYear = (s: string) => /^\d{4}$/.test(s) && Number(s) >= 2000 && Number(s) <= 2100;

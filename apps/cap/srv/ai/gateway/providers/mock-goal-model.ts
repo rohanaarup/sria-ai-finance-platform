@@ -28,7 +28,9 @@ function jsonBetween<T>(text: string, open: string, close: string, fallback: T):
 export function mockGoalModel(system: string, userText: string): AgentGoal {
   const raw = userText;
   const t = userText.toLowerCase();
-  const ctx = jsonBetween<{ hasDashboard?: boolean }>(system, '<context>', '</context>', {});
+  // the real context block is the LAST <context>…</context> (the rules text mentions the tag earlier)
+  const ctxStart = system.lastIndexOf('<context>');
+  const ctx = ctxStart >= 0 ? jsonBetween<{ hasDashboard?: boolean }>(system.slice(ctxStart), '<context>', '</context>', {}) : {};
   const entitiesKnown = jsonBetween<string[]>(system, 'Company codes that exist: <data>', '</data>', []);
   const unsupportedTerms = jsonBetween<string[]>(system, 'does NOT support (a request using any of them is "unsupported"):\n<data>', '</data>', []);
 
