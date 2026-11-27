@@ -21,12 +21,9 @@ export default class AiServiceHandler extends cds.ApplicationService {
   }
 
   private async handleUnderstandRequest(req: Request) {
-    // 1. Authenticate context (requires FinanceAnalyst scope or local fallback)
-    const user = AuthGuard.resolveUser(req);
-    const userCtx = {
-      organizationId: user?.tenant || (req.user as unknown as Record<string, string>)?.['tenant'] || 'local-org',
-      userId: user?.id || req.user?.id || 'USER_DEFAULT'
-    };
+    // 1. Verified identity from the token (fail closed: no defaults)
+    const verified = AuthGuard.tenantContext(req, 'FinanceAnalyst');
+    const userCtx = { organizationId: verified.organizationId, userId: verified.userId };
 
     const { prompt } = req.data as { prompt: string };
 

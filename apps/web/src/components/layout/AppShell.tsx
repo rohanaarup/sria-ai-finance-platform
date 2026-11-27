@@ -24,7 +24,9 @@ import { clsx } from 'clsx';
 import { SriaLogo } from '../brand/SriaLogo';
 import { Badge } from '../ui/Badge';
 import { Popover } from '../ui/Popover';
+import { ApiClient } from '../../services/api-client';
 import type { SystemHealthStatus } from '../../services/api-client';
+import { DemoModeBanner } from './DemoModeBanner';
 import type { ThemeMode } from '../../hooks/useTheme';
 
 export type AppNavView = 'studio' | 'canvas' | 'dashboards';
@@ -79,6 +81,10 @@ export const AppShell: React.FC<AppShellProps> = ({
 
   const isMock = (dataSourceSummary?.isSynthetic ?? systemStatus?.isSynthetic) ?? true;
   const backendUp = systemStatus?.backendReachable ?? false;
+  const demoMode = ApiClient.isDemoMode();
+  const tier = systemStatus?.environmentTier ?? 'unknown';
+  const tierTone =
+    tier === 'production' ? 'positive' : tier === 'pilot' ? 'info' : tier === 'unknown' ? 'neutral' : 'warning';
 
   const handleNav = (view: AppNavView) => {
     onNavigate(view);
@@ -323,7 +329,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             <div className="sidebar__status-row">
               <span className={clsx('status-dot', backendUp ? 'status-dot--up' : 'status-dot--warn')} />
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {backendUp ? 'CAP Runtime Connected' : 'Local Deterministic Mode'}
+                {backendUp ? 'CAP Runtime Connected' : demoMode ? 'Demo Mode (local)' : 'Backend Unreachable'}
               </span>
             </div>
           )}
@@ -332,6 +338,7 @@ export const AppShell: React.FC<AppShellProps> = ({
 
       {/* Main Content Shell */}
       <div className={clsx('app-main', collapsed && 'app-main--collapsed')}>
+        {demoMode && <DemoModeBanner />}
         <header className="topbar">
           <div className="topbar__left">
             <button
@@ -360,6 +367,11 @@ export const AppShell: React.FC<AppShellProps> = ({
           </div>
 
           <div className="topbar__right">
+            <span role="status" aria-label={`Environment tier: ${tier}`} data-testid="env-tier-badge">
+              <Badge tone={tierTone} dot>
+                Env: {tier}
+              </Badge>
+            </span>
             {onOpenCommandPalette && (
               <button
                 type="button"
@@ -440,7 +452,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                       I_JournalEntryItemBasic
                     </span>
                     <span style={{ color: 'var(--text-tertiary)' }}>CAP Backend</span>
-                    <span>{backendUp ? 'Connected (port 4004)' : 'Offline local fallback'}</span>
+                    <span>{backendUp ? 'Connected (port 4004)' : demoMode ? 'Not connected (demo mode)' : 'Unreachable'}</span>
                     <span style={{ color: 'var(--text-tertiary)' }}>Engine</span>
                     <span>Deterministic TS v1.0.0</span>
                   </div>

@@ -15,13 +15,16 @@ import { describe, it } from 'node:test';
 
 process.env.NODE_ENV = 'test';
 
-import { ApiClient } from '../src/services/api-client.ts';
+import { ApiClient, ApiAuthError, ApiUnavailableError } from '../src/services/api-client.ts';
 import {
   detectDashboardLayout,
   buildExecutiveNarrative,
   buildAnalyticalInsights,
 } from '../src/services/dashboard-intelligence.ts';
 import type { DashboardSpec } from '@sria/contracts';
+
+// Existing tests exercise the local synthetic engine, which is only available in demo mode.
+ApiClient.setDemoMode(true);
 
 describe('Frontend Services, Intelligence & Component Logic', () => {
   it('1. ApiClient triggers clarification when prompt lacks company code', async () => {
@@ -168,5 +171,121 @@ describe('Frontend Services, Intelligence & Component Logic', () => {
     assert.ok(narrative && narrative.includes('$350,000.00'));
     const insights = buildAnalyticalInsights(baseSpec, [], []);
     assert.ok(insights.length > 0);
+  });
+});
+
+describe('Demo-mode gating of local fallback', () => {
+  const realFetch = globalThis.fetch;
+  const realEnv = process.env.NODE_ENV;
+  const request = {
+    version: '1.0' as const,
+    rawPrompt: 'Show revenue for company 1000',
+    metricIds: ['total_revenue'] as 'total_revenue'[],
+    dimensions: ['fiscal_period'] as 'fiscal_period'[],
+    filters: { companyCode: '1000', fiscalYear: 2026 },
+    organizationId: 'ORG_TEST',
+    userId: 'test_user',
+  };
+
+  // Leave NODE_ENV=development so the client really exercises fetch (not the test short-circuit).
+  const useRealNetworkPath = () => {
+    process.env.NODE_ENV = 'development';
+  };
+  const restore = () => {
+    globalThis.fetch = realFetch;
+    process.env.NODE_ENV = realEnv;
+    ApiClient.setDemoMode(true);
+  };
+
+  it('A. demo OFF + network failure throws ApiUnavailableError, no synthetic data', async () => {
+    useRealNetworkPath();
+    ApiClient.setDemoMode(false);
+    globalThis.fetch = (async () => {
+      throw new TypeError('fetch failed');
+    }) as typeof fetch;
+    try {
+      await assert.rejects(() => ApiClient.executeRequest(request), ApiUnavailableError);
+      await assert.rejects(() => ApiClient.understandPrompt('revenue for company 1000'), ApiUnavailableError);
+      await assert.rejects(() => ApiClient.listDashboards(), ApiUnavailableError);
+    } finally {
+      restore();
+    }
+  });
+
+  it('A2. demo OFF + HTTP 401/403 throws ApiAuthError with status', async () => {
+    useRealNetworkPath();
+    ApiClient.setDemoMode(false);
+    try {
+      for (const status of [401, 403]) {
+        globalThis.fetch = (async () => new Response('', { status })) as typeof fetch;
+        await assert.rejects(
+          () => ApiClient.executeRequest(request),
+          (e: any) => e instanceof ApiAuthError && e.status === status
+        );
+      }
+    } finally {
+      restore();
+    }
+  });
+
+  it('A3. demo ON + HTTP 401 still throws ApiAuthError (never falls back)', async () => {
+    useRealNetworkPath();
+    ApiClient.setDemoMode(true);
+    globalThis.fetch = (async () => new Response('', { status: 401 })) as typeof fetch;
+    try {
+      await assert.rejects(() => ApiClient.executeRequest(request), ApiAuthError);
+      await assert.rejects(() => ApiClient.getApprovedMetrics(), ApiAuthError);
+    } finally {
+      restore();
+    }
+  });
+
+  it('B. demo ON + network failure returns local synthetic result', async () => {
+    useRealNetworkPath();
+    ApiClient.setDemoMode(true);
+    assert.equal(ApiClient.isDemoMode(), true);
+    globalThis.fetch = (async () => {
+      throw new TypeError('fetch failed');
+    }) as typeof fetch;
+    try {
+      const out = await ApiClient.executeRequest(request);
+      assert.equal(out.isSynthetic, true);
+      assert.equal(out.results.length, 1);
+    } finally {
+      restore();
+    }
+  });
+
+  it('C. health status reports environmentTier unknown when unreachable', async () => {
+    useRealNetworkPath();
+    globalThis.fetch = (async () => {
+      throw new TypeError('fetch failed');
+    }) as typeof fetch;
+    try {
+      for (const demo of [true, false]) {
+        ApiClient.setDemoMode(demo);
+        const status = await ApiClient.getSystemStatus();
+        assert.equal(status.backendReachable, false);
+        assert.equal(status.environmentTier, 'unknown');
+      }
+    } finally {
+      restore();
+    }
+  });
+
+  it('D. health status passes through environmentTier from /health', async () => {
+    useRealNetworkPath();
+    ApiClient.setDemoMode(false);
+    globalThis.fetch = (async (url: any) =>
+      String(url).includes('/health')
+        ? new Response(JSON.stringify({ environmentTier: 'pilot' }), { status: 200 })
+        : new Response('', { status: 401 })) as typeof fetch;
+    try {
+      const status = await ApiClient.getSystemStatus();
+      assert.equal(status.backendReachable, true);
+      assert.equal(status.environmentTier, 'pilot');
+    } finally {
+      restore();
+    }
   });
 });

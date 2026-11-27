@@ -1,7 +1,12 @@
 /**
  * Frontend API Client
- * Connects the React UI to authenticated SAP CAP endpoints with deterministic
- * offline fallback for local development and unit testing.
+ * Connects the React UI to authenticated SAP CAP endpoints.
+ *
+ * Local synthetic fallback (bundled fixtures, in-browser calculation, localStorage
+ * dashboards) is available ONLY in explicit demo mode:
+ *   import.meta.env.VITE_DEMO_MODE === 'true' && !import.meta.env.PROD
+ * (or ApiClient.setDemoMode(true), used by unit tests). Otherwise backend failures
+ * surface as typed errors (ApiUnavailableError / ApiAuthError) - never fake data.
  */
 
 import {
@@ -17,6 +22,28 @@ import type {
   FinanceRecord,
   ProvenanceMetadata,
 } from '@sria/contracts';
+
+export type EnvironmentTier = 'mock' | 'local' | 'pilot' | 'production' | 'unknown';
+
+/** Backend rejected the credentials / permissions (HTTP 401 or 403). Never triggers fallback. */
+export class ApiAuthError extends Error {
+  readonly status: number;
+  constructor(status: number, message?: string) {
+    super(message || (status === 401 ? 'Authentication required (HTTP 401).' : 'Access denied (HTTP 403).'));
+    this.name = 'ApiAuthError';
+    this.status = status;
+  }
+}
+
+/** Backend unreachable or returned a non-auth failure while demo mode is off. */
+export class ApiUnavailableError extends Error {
+  readonly status?: number;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'ApiUnavailableError';
+    this.status = status;
+  }
+}
 
 export interface UnderstandResponse {
   status: 'RESOLVED' | 'CLARIFICATION_REQUIRED' | 'REJECTED';
@@ -42,6 +69,7 @@ export interface SystemHealthStatus {
   statusMessage: string;
   aiProvider: string;
   databaseDialect: string;
+  environmentTier: EnvironmentTier;
 }
 
 export interface ApprovedMetricSummary {
@@ -82,6 +110,43 @@ export interface CompanyComparisonPoint {
 
 const getBaseUrl = () => (typeof window !== 'undefined' ? '' : 'http://127.0.0.1:4004');
 const isNodeTest = () => typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+
+// Demo mode: explicit opt-in, never in production builds. `import.meta.env` only exists under
+// Vite, so access is guarded for plain `node --test`.
+let demoOverride: boolean | null = null;
+const viteEnv = (): Record<string, unknown> => (import.meta as any).env ?? {};
+const isDemoMode = (): boolean => {
+  if (demoOverride !== null) return demoOverride;
+  const env = viteEnv();
+  return env.VITE_DEMO_MODE === 'true' && !env.PROD;
+};
+/** In unit tests with demo mode on, skip the network entirely (deterministic, fast). */
+const localOnly = () => isDemoMode() && isNodeTest();
+
+/**
+ * Decide what to do with a failed backend call. 401/403 and non-demo failures throw;
+ * returning normally means "fall back to local demo data".
+ */
+function failOrFallback(err: unknown, what: string): void {
+  if (err instanceof ApiAuthError) throw err;
+  if (!isDemoMode()) {
+    if (err instanceof ApiUnavailableError) throw err;
+    throw new ApiUnavailableError(
+      `${what}: backend unreachable (${err instanceof Error ? err.message : String(err)}).`
+    );
+  }
+  console.warn(`[ApiClient] ${what} failed, demo-mode local fallback in use:`, err);
+}
+
+/** Throws ApiAuthError for 401/403 and ApiUnavailableError for any other non-OK status. */
+function assertOk(res: Response, what: string): void {
+  if (res.status === 401 || res.status === 403) throw new ApiAuthError(res.status);
+  if (!res.ok) throw new ApiUnavailableError(`${what} failed with HTTP ${res.status}.`, res.status);
+}
+
+function normalizeTier(v: unknown): EnvironmentTier {
+  return v === 'mock' || v === 'local' || v === 'pilot' || v === 'production' ? v : 'unknown';
+}
 
 const BUSINESS_UNIT_LABELS: Record<string, string> = {
   BU_COMMERCIAL: 'Commercial',
@@ -157,6 +222,15 @@ function computeFromRecords(
 }
 
 export class ApiClient {
+  /** Enable/disable demo mode (null = revert to the VITE_DEMO_MODE build flag). */
+  static setDemoMode(value: boolean | null): void {
+    demoOverride = value;
+  }
+
+  static isDemoMode(): boolean {
+    return isDemoMode();
+  }
+
   /**
    * Health-check
    */
@@ -173,15 +247,16 @@ export class ApiClient {
    * Rich system health and data provider status
    */
   static async getSystemStatus(): Promise<SystemHealthStatus> {
-    if (isNodeTest()) {
+    if (localOnly()) {
       return {
         backendReachable: false,
         service: 'offline-test',
         providerMode: 'mock',
         isSynthetic: true,
-        statusMessage: 'Test runtime — synthetic fixtures active.',
+        statusMessage: 'Test runtime - synthetic fixtures active.',
         aiProvider: 'mock',
         databaseDialect: 'sqlite',
+        environmentTier: 'unknown',
       };
     }
 
@@ -211,19 +286,25 @@ export class ApiClient {
           providerData?.statusMessage ||
           (healthOk
             ? 'Connected to SAP CAP runtime.'
-            : 'CAP backend offline — using local deterministic fallback.'),
+            : isDemoMode()
+            ? 'CAP backend offline - demo mode, local synthetic data.'
+            : 'CAP backend unreachable.'),
         aiProvider: healthData?.components?.aiEngine?.provider || 'mock',
         databaseDialect: healthData?.components?.database?.dialect || 'sqlite',
+        environmentTier: normalizeTier(healthData?.environmentTier),
       };
     } catch {
       return {
         backendReachable: false,
-        service: 'offline-fallback',
+        service: isDemoMode() ? 'offline-fallback' : 'unreachable',
         providerMode: 'mock',
         isSynthetic: true,
-        statusMessage: 'CAP backend unreachable — local synthetic mode.',
+        statusMessage: isDemoMode()
+          ? 'CAP backend unreachable - demo mode, local synthetic data.'
+          : 'CAP backend unreachable.',
         aiProvider: 'mock',
-        databaseDialect: 'localStorage',
+        databaseDialect: isDemoMode() ? 'localStorage' : 'unknown',
+        environmentTier: 'unknown',
       };
     }
   }
@@ -232,18 +313,18 @@ export class ApiClient {
    * Approved Metric Catalog from CAP MetricCatalogService
    */
   static async getApprovedMetrics(): Promise<ApprovedMetricSummary[]> {
-    if (!isNodeTest()) {
+    if (!localOnly()) {
       try {
         const res = await fetch(`${getBaseUrl()}/api/v1/metrics/getApprovedMetrics()`, {
-          signal: AbortSignal.timeout(1500),
+          signal: AbortSignal.timeout(3000),
         });
-        if (res.ok) {
-          const data = await res.json();
-          const list = data.value || data;
-          if (Array.isArray(list) && list.length > 0) return list;
-        }
-      } catch {
-        // Fallback to shared contracts catalog
+        assertOk(res, 'Approved metric catalog');
+        const data = await res.json();
+        const list = data.value || data;
+        if (Array.isArray(list) && list.length > 0) return list;
+        throw new ApiUnavailableError('Approved metric catalog returned no entries.');
+      } catch (err) {
+        failOrFallback(err, 'Approved metric catalog');
       }
     }
 
@@ -262,7 +343,7 @@ export class ApiClient {
    * Natural Language Intent Understanding
    */
   static async understandPrompt(prompt: string): Promise<UnderstandResponse> {
-    if (isNodeTest()) {
+    if (localOnly()) {
       return this._localMockUnderstand(prompt);
     }
     try {
@@ -273,9 +354,7 @@ export class ApiClient {
         signal: AbortSignal.timeout(2000),
       });
 
-      if (!res.ok) {
-        throw new Error(`UnderstandRequest failed with HTTP ${res.status}`);
-      }
+      assertOk(res, 'UnderstandRequest');
 
       const data = await res.json();
       if (data.status === 'RESOLVED' && data.resolvedRequest) {
@@ -296,7 +375,7 @@ export class ApiClient {
         supportedMetrics: data.supportedMetrics || [],
       };
     } catch (err) {
-      console.warn('[ApiClient] Server understand failed, evaluating with local fallback:', err);
+      failOrFallback(err, 'UnderstandRequest');
       return this._localMockUnderstand(prompt);
     }
   }
@@ -309,7 +388,7 @@ export class ApiClient {
     sourceType: 'mock' | 's4hana';
     isSynthetic: boolean;
   }> {
-    if (isNodeTest()) {
+    if (localOnly()) {
       return this._localMockExecution(request);
     }
     try {
@@ -320,9 +399,13 @@ export class ApiClient {
         signal: AbortSignal.timeout(2500),
       });
 
-      if (res.ok) {
+      assertOk(res, 'ExecutePlan');
+      {
         const data = await res.json();
-        if (data.status === 'SUCCESS' && data.resultsJson) {
+        if (data.status !== 'SUCCESS' || !data.resultsJson) {
+          throw new ApiUnavailableError(data.error || 'ExecutePlan did not return results.');
+        }
+        {
           const rawResults = JSON.parse(data.resultsJson);
           const firstBatch = rawResults[0];
           const sourceType: 'mock' | 's4hana' = firstBatch?.sourceType || 'mock';
@@ -354,7 +437,7 @@ export class ApiClient {
         }
       }
     } catch (err) {
-      console.warn('[ApiClient] Server execution failed, using local synthetic dataset:', err);
+      failOrFallback(err, 'ExecutePlan');
     }
 
     return this._localMockExecution(request);
@@ -476,7 +559,7 @@ export class ApiClient {
     isZeroDenominator: boolean;
     currency: string;
   } | null> {
-    if (!isNodeTest()) {
+    if (!localOnly()) {
       try {
         const res = await fetch(`${getBaseUrl()}/api/finance/GetFinanceMetrics`, {
           method: 'POST',
@@ -484,7 +567,8 @@ export class ApiClient {
           body: JSON.stringify(params),
           signal: AbortSignal.timeout(2000),
         });
-        if (res.ok) {
+        assertOk(res, 'GetFinanceMetrics');
+        {
           const data = await res.json();
           const metrics: any[] = data.metrics || [];
           const find = (id: string) => metrics.find((m) => m.metricId === id);
@@ -501,8 +585,8 @@ export class ApiClient {
             currency: rev?.currency || exp?.currency || 'USD',
           };
         }
-      } catch {
-        // Fallback below
+      } catch (err) {
+        failOrFallback(err, 'GetFinanceMetrics');
       }
     }
 
@@ -561,12 +645,11 @@ export class ApiClient {
           specJson: JSON.stringify(spec),
         }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        return { dashboardId: data.dashboardId, status: data.status };
-      }
+      assertOk(res, 'SaveDashboard');
+      const data = await res.json();
+      return { dashboardId: data.dashboardId, status: data.status };
     } catch (err) {
-      console.warn('[ApiClient] Server save failed, saving to local cache:', err);
+      failOrFallback(err, 'SaveDashboard');
     }
 
     const localId = `local-${Date.now()}`;
@@ -599,22 +682,20 @@ export class ApiClient {
   > {
     try {
       const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/ListDashboards()`);
-      if (res.ok) {
-        const data = await res.json();
-        const items = data.value || data;
-        if (Array.isArray(items)) {
-          return items.map((item: any) => ({
-            id: item.ID || item.id,
-            title: item.title,
-            description: item.description,
-            createdAt: item.createdAt || new Date().toISOString(),
-            version: '1.0',
-            isStale: item.isStale ?? true,
-          }));
-        }
-      }
+      assertOk(res, 'ListDashboards');
+      const data = await res.json();
+      const items = data.value || data;
+      if (!Array.isArray(items)) throw new ApiUnavailableError('ListDashboards returned an unexpected payload.');
+      return items.map((item: any) => ({
+        id: item.ID || item.id,
+        title: item.title,
+        description: item.description,
+        createdAt: item.createdAt || new Date().toISOString(),
+        version: '1.0',
+        isStale: item.isStale ?? true,
+      }));
     } catch (err) {
-      console.warn('[ApiClient] Server list failed, checking local storage:', err);
+      failOrFallback(err, 'ListDashboards');
     }
 
     const localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
@@ -640,15 +721,14 @@ export class ApiClient {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dashboardId }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        return {
-          spec: JSON.parse(data.specJson),
-          isStale: data.isStale ?? true,
-        };
-      }
+      assertOk(res, 'ReopenDashboard');
+      const data = await res.json();
+      return {
+        spec: JSON.parse(data.specJson),
+        isStale: data.isStale ?? true,
+      };
     } catch (err) {
-      console.warn('[ApiClient] Server reopen failed, reading local storage:', err);
+      failOrFallback(err, 'ReopenDashboard');
     }
 
     const localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
@@ -669,9 +749,10 @@ export class ApiClient {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dashboardId, newTitle }),
       });
-      if (res.ok) return true;
+      assertOk(res, 'RenameDashboard');
+      return true;
     } catch (err) {
-      console.warn('[ApiClient] Server rename failed:', err);
+      failOrFallback(err, 'RenameDashboard');
     }
 
     const localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
@@ -698,9 +779,7 @@ export class ApiClient {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ dashboardId, sharedWithUserId, permission }),
     });
-    if (!res.ok) {
-      throw new Error('Sharing requires an active CAP backend session and a saved dashboard.');
-    }
+    assertOk(res, 'ShareDashboard');
     const data = await res.json();
     return {
       status: data.status || 'SHARED',
@@ -719,9 +798,10 @@ export class ApiClient {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dashboardId }),
       });
-      if (res.ok) return true;
+      assertOk(res, 'DeleteDashboard');
+      return true;
     } catch (err) {
-      console.warn('[ApiClient] Server delete failed:', err);
+      failOrFallback(err, 'DeleteDashboard');
     }
 
     let localStore = JSON.parse(localStorage.getItem('sria_saved_dashboards') || '[]');
@@ -742,17 +822,18 @@ export class ApiClient {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dashboardId }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        return {
-          spec: JSON.parse(data.refreshedSpecJson),
-          refreshedAt: data.refreshedAt,
-        };
-      }
+      assertOk(res, 'RefreshDashboard');
+      const data = await res.json();
+      return {
+        spec: JSON.parse(data.refreshedSpecJson),
+        refreshedAt: data.refreshedAt,
+      };
     } catch (err) {
-      console.warn('[ApiClient] Server refresh failed:', err);
+      if (err instanceof ApiAuthError || err instanceof ApiUnavailableError) throw err;
+      throw new ApiUnavailableError(
+        `RefreshDashboard: backend unreachable (${err instanceof Error ? err.message : String(err)}).`
+      );
     }
-    throw new Error('On-demand refresh requires active backend connection.');
   }
 
   /**

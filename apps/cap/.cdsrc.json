@@ -5,14 +5,59 @@
       "credentials": {
         "url": "sqlite.db"
       }
-    }
-  },
-  "[development]": {
-    "requires": {
-      "db": {
-        "kind": "sqlite",
-        "credentials": {
-          "url": "sqlite.db"
+    },
+    "auth": {
+      "kind": "mocked",
+      "users": {
+        "analyst": {
+          "password": "dev",
+          "roles": [
+            "FinanceAnalyst"
+          ],
+          "attr": {
+            "tenantid": "TENANT_A"
+          }
+        },
+        "manager": {
+          "password": "dev",
+          "roles": [
+            "FinanceManager",
+            "FinanceAnalyst"
+          ],
+          "attr": {
+            "tenantid": "TENANT_A"
+          }
+        },
+        "admin": {
+          "password": "dev",
+          "roles": [
+            "TenantAdmin"
+          ],
+          "attr": {
+            "tenantid": "TENANT_A"
+          }
+        },
+        "analyst_b": {
+          "password": "dev",
+          "roles": [
+            "FinanceAnalyst"
+          ],
+          "attr": {
+            "tenantid": "TENANT_B"
+          }
+        },
+        "norole": {
+          "password": "dev",
+          "roles": [],
+          "attr": {
+            "tenantid": "TENANT_A"
+          }
+        },
+        "notenant": {
+          "password": "dev",
+          "roles": [
+            "FinanceAnalyst"
+          ]
         }
       }
     }

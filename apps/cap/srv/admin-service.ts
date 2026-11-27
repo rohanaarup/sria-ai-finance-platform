@@ -1,9 +1,24 @@
 import cds from '@sap/cds';
+import { AuthGuard } from './lib/auth/auth-guard.ts';
 
+/**
+ * AdminService — tenant & workspace administration (read-only in G2-00).
+ * Every read is restricted to the caller's own tenant, taken from the verified token.
+ */
 export default class AdminService extends cds.ApplicationService {
   init() {
-    // Admin service boundary for tenant & workspace management
+    const filters: Record<string, (tenant: string) => Record<string, string>> = {
+      Organizations: (t) => ({ ID: t }),
+      Workspaces: (t) => ({ organization_ID: t }),
+      AuditEvents: (t) => ({ organizationId: t })
+    };
+    for (const [entity, where] of Object.entries(filters)) {
+      this.on('READ', entity, async (req: any, next: any) => {
+        const ctx = AuthGuard.tenantContext(req, 'TenantAdmin');
+        req.query.where(where(ctx.organizationId));
+        return next();
+      });
+    }
     return super.init();
   }
 }
-

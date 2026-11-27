@@ -5,18 +5,13 @@ import { AuthGuard } from './lib/auth/auth-guard.ts';
 
 export default class DashboardService extends cds.ApplicationService {
   init() {
-    const getContext = (req: any): TenantContext => {
-      const authUser = AuthGuard.resolveUser(req);
-      const organizationId = authUser?.tenant || req.headers['x-tenant-id'] || 'ORG_ACME_DEFAULT';
-      const userId = authUser?.id || req.headers['x-user-id'] || 'USER_DEFAULT';
-      const roles = authUser?.roles || ['FinanceAnalyst'];
-      return { organizationId, userId, roles };
-    };
+    // Tenant, user and roles come only from the verified token (x-tenant-id / x-user-id headers are ignored).
+    const getContext = (req: any, scope: 'FinanceAnalyst' | 'FinanceManager' = 'FinanceAnalyst'): TenantContext =>
+      AuthGuard.tenantContext(req, scope);
 
     // Action: createDashboard (Requires FinanceManager scope)
     this.on('createDashboard', async (req: any) => {
-      AuthGuard.assertScope(req, 'FinanceManager');
-      const ctx = getContext(req);
+      const ctx = getContext(req, 'FinanceManager');
       const { workspaceId, title, description, specJson, metricIds, dimensions, sourceType } = req.data;
 
       if (!title || !specJson) {
@@ -31,8 +26,7 @@ export default class DashboardService extends cds.ApplicationService {
 
     // Action: updateDashboard (Requires FinanceManager scope)
     this.on('updateDashboard', async (req: any) => {
-      AuthGuard.assertScope(req, 'FinanceManager');
-      const ctx = getContext(req);
+      const ctx = getContext(req, 'FinanceManager');
       const { dashboardId, title, description, specJson } = req.data;
 
       try {
@@ -48,8 +42,7 @@ export default class DashboardService extends cds.ApplicationService {
 
     // Action: archiveDashboard (Requires FinanceManager scope)
     this.on('archiveDashboard', async (req: any) => {
-      AuthGuard.assertScope(req, 'FinanceManager');
-      const ctx = getContext(req);
+      const ctx = getContext(req, 'FinanceManager');
       const { dashboardId } = req.data;
 
       try {
@@ -59,10 +52,16 @@ export default class DashboardService extends cds.ApplicationService {
       }
     });
 
+    // Workspaces are tenant-scoped too
+    this.on('READ', 'Workspaces', async (req: any, next: any) => {
+      const ctx = getContext(req, 'FinanceAnalyst');
+      req.query.where({ organization_ID: ctx.organizationId });
+      return next();
+    });
+
     // Custom filtering for Dashboards entity read (Requires FinanceAnalyst scope)
     this.on('READ', 'Dashboards', async (req: any, next: any) => {
-      AuthGuard.assertScope(req, 'FinanceAnalyst');
-      const ctx = getContext(req);
+      const ctx = getContext(req, 'FinanceAnalyst');
       // Automatically inject tenant isolation into query
       req.query.where({ organization_ID: ctx.organizationId, isArchived: 0 });
       return next();

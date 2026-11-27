@@ -1,4 +1,5 @@
 import cds from '@sap/cds';
+import { getConfig } from './lib/config/app-config.ts';
 
 export default class HealthService extends cds.ApplicationService {
   init() {
@@ -8,9 +9,10 @@ export default class HealthService extends cds.ApplicationService {
         service: 'sria-cap-backend',
         version: '0.1.0',
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development',
+        environment: getConfig().nodeEnv,
         database: 'sqlite',
-        provider: process.env.FINANCE_DATA_PROVIDER || 'mock'
+        provider: getConfig().financeProvider,
+        environmentTier: getConfig().tier
       };
     });
 

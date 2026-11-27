@@ -1,0 +1,125 @@
+/**
+ * AppConfig — the single, validated source of runtime configuration (G2-00).
+ *
+ * Every environment variable the backend reads is defined here once. Invalid or
+ * missing values fail at startup (ConfigError) instead of silently falling back.
+ * /health, the provider factory, the planner and the CORS middleware all read this
+ * module, so what /health reports is what the code actually uses (finding F-06).
+ *
+ * Environment tiers:
+ *   mock        synthetic data, mock AI. CI, demos, offline development.
+ *   local       developer machine; synthetic data allowed.
+ *   pilot       live pilot on BTP. Must be set explicitly.
+ *   production  production. Synthetic providers are rejected.
+ */
+import { z } from 'zod';
+
+export const ENVIRONMENT_TIERS = ['mock', 'local', 'pilot', 'production'] as const;
+export type EnvironmentTier = (typeof ENVIRONMENT_TIERS)[number];
+
+export class ConfigError extends Error {
+  readonly problems: string[];
+  constructor(problems: string[]) {
+    super(`Invalid configuration:\n - ${problems.join('\n - ')}`);
+    this.name = 'ConfigError';
+    this.problems = problems;
+  }
+}
+
+const EnvSchema = z.object({
+  NODE_ENV: z.string().optional(),
+  APP_ENV_TIER: z.enum(ENVIRONMENT_TIERS).optional(),
+  FINANCE_DATA_PROVIDER: z.enum(['mock', 's4hana']).default('mock'),
+  FINANCE_S4HANA_DESTINATION_NAME: z.string().min(1).optional(),
+  AI_RUNTIME_PROVIDER: z.enum(['mock', 'openai', 'azure-openai', 'gemini-api']).default('mock'),
+  AI_RUNTIME_API_KEY: z.string().min(1).optional(),
+  AI_RUNTIME_ENDPOINT: z.string().url().optional(),
+  AI_RUNTIME_MODEL: z.string().min(1).optional(),
+  CORS_ALLOWED_ORIGINS: z.string().optional()
+});
+
+export interface AppConfig {
+  nodeEnv: string;
+  tier: EnvironmentTier;
+  financeProvider: 'mock' | 's4hana';
+  s4DestinationName?: string;
+  aiProvider: 'mock' | 'openai' | 'azure-openai' | 'gemini-api';
+  aiApiKey?: string;
+  aiEndpoint?: string;
+  aiModel?: string;
+  corsAllowedOrigins: string[];
+  /** true when answers are built from synthetic data or the mock model */
+  isSynthetic: boolean;
+}
+
+const LOCAL_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
+export function loadConfig(env: Record<string, string | undefined> = process.env): AppConfig {
+  const problems: string[] = [];
+  // Treat empty strings as unset so a blank .env line cannot silently change behaviour.
+  const cleaned: Record<string, string | undefined> = {};
+  for (const k of Object.keys(EnvSchema.shape)) cleaned[k] = env[k] === '' ? undefined : env[k];
+
+  const parsed = EnvSchema.safeParse(cleaned);
+  if (!parsed.success) {
+    for (const issue of parsed.error.issues) problems.push(`${issue.path.join('.')}: ${issue.message}`);
+    throw new ConfigError(problems);
+  }
+  const e = parsed.data;
+  const nodeEnv = e.NODE_ENV ?? 'development';
+
+  if (nodeEnv === 'production' && !e.APP_ENV_TIER) {
+    problems.push('APP_ENV_TIER must be set explicitly (pilot or production) when NODE_ENV=production');
+  }
+  const tier: EnvironmentTier = e.APP_ENV_TIER ?? 'local';
+
+  if (nodeEnv === 'production' && (tier === 'mock' || tier === 'local')) {
+    problems.push(`APP_ENV_TIER=${tier} is not allowed when NODE_ENV=production`);
+  }
+  if (tier === 'production' && (e.FINANCE_DATA_PROVIDER === 'mock' || e.AI_RUNTIME_PROVIDER === 'mock')) {
+    problems.push('APP_ENV_TIER=production cannot use the mock finance provider or the mock AI provider');
+  }
+  if (e.FINANCE_DATA_PROVIDER === 's4hana' && !e.FINANCE_S4HANA_DESTINATION_NAME) {
+    problems.push('FINANCE_S4HANA_DESTINATION_NAME is required when FINANCE_DATA_PROVIDER=s4hana');
+  }
+  if (e.AI_RUNTIME_PROVIDER !== 'mock' && (!e.AI_RUNTIME_API_KEY || !e.AI_RUNTIME_ENDPOINT)) {
+    problems.push(`AI_RUNTIME_API_KEY and AI_RUNTIME_ENDPOINT are required when AI_RUNTIME_PROVIDER=${e.AI_RUNTIME_PROVIDER}`);
+  }
+  if (problems.length) throw new ConfigError(problems);
+
+  let corsAllowedOrigins: string[];
+  if (e.CORS_ALLOWED_ORIGINS !== undefined) {
+    corsAllowedOrigins = e.CORS_ALLOWED_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean);
+    if (corsAllowedOrigins.includes('*')) {
+      throw new ConfigError(['CORS_ALLOWED_ORIGINS must list explicit origins; "*" is not allowed']);
+    }
+  } else {
+    corsAllowedOrigins = tier === 'mock' || tier === 'local' ? LOCAL_ORIGINS : [];
+  }
+
+  return {
+    nodeEnv,
+    tier,
+    financeProvider: e.FINANCE_DATA_PROVIDER,
+    s4DestinationName: e.FINANCE_S4HANA_DESTINATION_NAME,
+    aiProvider: e.AI_RUNTIME_PROVIDER,
+    aiApiKey: e.AI_RUNTIME_API_KEY,
+    aiEndpoint: e.AI_RUNTIME_ENDPOINT,
+    aiModel: e.AI_RUNTIME_MODEL,
+    corsAllowedOrigins,
+    isSynthetic: e.FINANCE_DATA_PROVIDER === 'mock' || e.AI_RUNTIME_PROVIDER === 'mock'
+  };
+}
+
+let cached: AppConfig | null = null;
+
+/** Validated configuration, loaded once per process. */
+export function getConfig(): AppConfig {
+  if (!cached) cached = loadConfig();
+  return cached;
+}
+
+/** @internal tests only */
+export function resetConfig(): void {
+  cached = null;
+}

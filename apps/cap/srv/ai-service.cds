@@ -8,7 +8,7 @@
 
 using { sria.finance } from '../db/schema';
 
-service AiService @(path: '/api/ai') {
+service AiService @(path: '/api/ai', requires: ['FinanceAnalyst','FinanceManager','TenantAdmin']) {
 
   /**
    * UnderstandRequest — interprets natural language prompt into structured intent

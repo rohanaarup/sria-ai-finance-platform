@@ -13,11 +13,11 @@ interface WorkflowProgressIndicatorProps {
 }
 
 const STEPS: { id: ProgressStep; label: string; desc: string }[] = [
-  { id: 'INTERPRETING', label: 'Intent', desc: 'Extracting approved metrics & filters' },
-  { id: 'PLANNING', label: 'Plan', desc: 'Validating query against registry' },
-  { id: 'RETRIEVING_DATA', label: 'SAP Fetch', desc: 'Retrieving authorized finance records' },
-  { id: 'CALCULATING', label: 'Engine', desc: 'Running deterministic arithmetic' },
-  { id: 'COMPILING', label: 'Render', desc: 'Assembling layout & provenance' },
+  { id: 'INTERPRETING', label: 'Understand', desc: 'Matching keywords in your request to metrics and filters' },
+  { id: 'PLANNING', label: 'Plan', desc: 'Building a query plan for the matched metrics' },
+  { id: 'RETRIEVING_DATA', label: 'Fetch', desc: 'Fetching finance records from the backend data provider' },
+  { id: 'CALCULATING', label: 'Calculate', desc: 'Calculating metric values with fixed formulas' },
+  { id: 'COMPILING', label: 'Compile', desc: 'Compiling the dashboard layout and rendering it' },
 ];
 
 export const WorkflowProgressIndicator: React.FC<WorkflowProgressIndicatorProps> = ({

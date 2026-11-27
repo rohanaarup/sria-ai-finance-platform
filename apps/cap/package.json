@@ -19,9 +19,9 @@
     "express": "^4.21.2"
   },
   "devDependencies": {
+    "@cap-js/cds-test": "^1.0.2",
     "@sap/cds-dk": "^10.2.1",
     "@types/node": "^22.10.5",
     "typescript": "^5.7.3"
   }
 }
-

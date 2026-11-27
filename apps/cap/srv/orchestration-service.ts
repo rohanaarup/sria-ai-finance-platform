@@ -28,14 +28,14 @@ export default class OrchestrationServiceHandler extends cds.ApplicationService 
   }
 
   private async handlePlanRequest(req: Request) {
-    const user = AuthGuard.resolveUser(req);
+    const ctx = AuthGuard.tenantContext(req, 'FinanceAnalyst');
     const { requestJson } = req.data as { requestJson: string };
 
     try {
       const parsed = JSON.parse(requestJson);
-      // Ensure organizationId and userId are bound to authenticated user
-      parsed.organizationId = user?.tenant || (req.user as unknown as Record<string, string>)?.['tenant'] || 'local-org';
-      parsed.userId = user?.id || req.user?.id || 'USER_DEFAULT';
+      // organizationId and userId are bound to the verified token, never to the request body
+      parsed.organizationId = ctx.organizationId;
+      parsed.userId = ctx.userId;
 
       const validReq = DashboardRequestSchema.parse(parsed);
       const plan = this._planner.createPlan(validReq);
@@ -55,13 +55,13 @@ export default class OrchestrationServiceHandler extends cds.ApplicationService 
   }
 
   private async handleExecutePlan(req: Request) {
-    const user = AuthGuard.resolveUser(req);
+    const verified = AuthGuard.tenantContext(req, 'FinanceAnalyst');
     const { requestJson } = req.data as { requestJson: string };
 
     const ctx: ExecutionContext = {
-      organizationId: user?.tenant || (req.user as unknown as Record<string, string>)?.['tenant'] || 'local-org',
-      userId: user?.id || req.user?.id || 'USER_DEFAULT',
-      userRoles: user?.roles || ['FinanceAnalyst']
+      organizationId: verified.organizationId,
+      userId: verified.userId,
+      userRoles: verified.roles
     };
 
     try {

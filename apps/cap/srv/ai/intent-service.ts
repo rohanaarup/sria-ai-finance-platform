@@ -23,6 +23,7 @@ import { RawIntentOutputSchema } from './schemas/intent-schemas.ts';
 import type { RawIntentOutput, IntentProcessingResult } from './schemas/intent-schemas.ts';
 import { MockLLMProvider } from './mock-llm-provider.ts';
 import { ApprovedLLMProvider } from './approved-provider.ts';
+import { loadConfig } from '../lib/config/app-config.ts';
 
 export interface UserContext {
   organizationId: string;
@@ -34,7 +35,7 @@ export class IntentService {
   private readonly _maxRetries: number;
 
   constructor(provider?: LLMProvider, maxRetries = 2) {
-    this._llmProvider = provider ?? (process.env['RUNTIME_LLM_PROVIDER'] === 'mock' || !process.env['RUNTIME_LLM_PROVIDER']
+    this._llmProvider = provider ?? (loadConfig().aiProvider === 'mock'
       ? new MockLLMProvider()
       : new ApprovedLLMProvider());
     this._maxRetries = maxRetries;

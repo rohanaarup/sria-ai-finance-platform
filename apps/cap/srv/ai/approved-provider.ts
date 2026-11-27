@@ -6,7 +6,7 @@
  *
  * GOVERNANCE GATE (ADR-004):
  *  - This adapter remains GATED pending corporate data-privacy and provider approval.
- *  - If RUNTIME_LLM_PROVIDER is not set or set to 'mock', it automatically delegates
+ *  - If AI_RUNTIME_PROVIDER is not set or set to 'mock', it automatically delegates
  *    to MockLLMProvider.
  *  - Do NOT store or hardcode API keys, tokens, or endpoints here.
  *  - Never log prompts containing customer financial figures.
@@ -14,12 +14,13 @@
 
 import type { LLMProvider, LLMMessage, LLMCompletionOptions, LLMCompletionResponse } from './llm-provider.ts';
 import { MockLLMProvider } from './mock-llm-provider.ts';
+import { loadConfig } from '../lib/config/app-config.ts';
 
 export class RuntimeLLMNotApprovedError extends Error {
   constructor(providerName: string) {
     super(
       `[RuntimeLLMNotApprovedError] Runtime LLM provider "${providerName}" has not been approved ` +
-      `by corporate governance. Set RUNTIME_LLM_PROVIDER=mock for local/test execution.`
+      `by corporate governance. Set AI_RUNTIME_PROVIDER=mock for local/test execution.`
     );
     this.name = 'RuntimeLLMNotApprovedError';
   }
@@ -32,9 +33,10 @@ export class ApprovedLLMProvider implements LLMProvider {
   private readonly _fallbackMock: MockLLMProvider;
 
   constructor() {
-    this._providerName = process.env['RUNTIME_LLM_PROVIDER'] || 'mock';
-    this._apiKey = process.env['RUNTIME_LLM_API_KEY'];
-    this._endpoint = process.env['RUNTIME_LLM_ENDPOINT'];
+    const cfg = loadConfig();
+    this._providerName = cfg.aiProvider;
+    this._apiKey = cfg.aiApiKey;
+    this._endpoint = cfg.aiEndpoint;
     this._fallbackMock = new MockLLMProvider();
 
     if (this._providerName === 'mock') {

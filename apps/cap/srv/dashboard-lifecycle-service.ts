@@ -34,6 +34,11 @@ export default class DashboardLifecycleServiceHandler extends cds.ApplicationSer
     this.on('ReopenDashboard', this.handleReopenDashboard.bind(this));
     this.on('RefreshDashboard', this.handleRefreshDashboard.bind(this));
     this.on('ListDashboards', this.handleListDashboards.bind(this));
+    this.on('READ', 'Dashboards', async (req: any, next: any) => {
+      const ctx = AuthGuard.tenantContext(req, 'FinanceAnalyst');
+      req.query.where({ organization_ID: ctx.organizationId, isArchived: 0 });
+      return next();
+    });
 
     return super.init();
   }
@@ -41,12 +46,7 @@ export default class DashboardLifecycleServiceHandler extends cds.ApplicationSer
   // ─── ListDashboards ─────────────────────────────────────────────────────────
 
   private async handleListDashboards(req: Request) {
-    const user = AuthGuard.resolveUser(req);
-    const ctx = {
-      organizationId: user?.tenant || 'local-org',
-      userId: user?.id || 'USER_DEFAULT',
-      roles: user?.roles || ['FinanceAnalyst']
-    };
+    const ctx = AuthGuard.tenantContext(req, 'FinanceAnalyst');
 
     const list = await this._repo.listDashboards(ctx);
     return (list || []).map((d: any) => ({
@@ -61,12 +61,7 @@ export default class DashboardLifecycleServiceHandler extends cds.ApplicationSer
   // ─── SaveDashboard ──────────────────────────────────────────────────────────
 
   private async handleSaveDashboard(req: Request) {
-    const user = AuthGuard.resolveUser(req);
-    const ctx = {
-      organizationId: user?.tenant || 'local-org',
-      userId: user?.id || 'USER_DEFAULT',
-      roles: user?.roles || ['FinanceAnalyst']
-    };
+    const ctx = AuthGuard.tenantContext(req, 'FinanceManager');
 
     const { workspaceId, title, description, specJson } = req.data as {
       workspaceId?: string;
@@ -100,12 +95,7 @@ export default class DashboardLifecycleServiceHandler extends cds.ApplicationSer
   // ─── RenameDashboard ────────────────────────────────────────────────────────
 
   private async handleRenameDashboard(req: Request) {
-    const user = AuthGuard.resolveUser(req);
-    const ctx = {
-      organizationId: user?.tenant || 'local-org',
-      userId: user?.id || 'USER_DEFAULT',
-      roles: user?.roles || ['FinanceAnalyst']
-    };
+    const ctx = AuthGuard.tenantContext(req, 'FinanceManager');
 
     const { dashboardId, newTitle } = req.data as {
       dashboardId: string;
@@ -132,12 +122,7 @@ export default class DashboardLifecycleServiceHandler extends cds.ApplicationSer
   // ─── DeleteDashboard ────────────────────────────────────────────────────────
 
   private async handleDeleteDashboard(req: Request) {
-    const user = AuthGuard.resolveUser(req);
-    const ctx = {
-      organizationId: user?.tenant || 'local-org',
-      userId: user?.id || 'USER_DEFAULT',
-      roles: user?.roles || ['FinanceAnalyst']
-    };
+    const ctx = AuthGuard.tenantContext(req, 'FinanceManager');
 
     const { dashboardId } = req.data as { dashboardId: string };
     if (!dashboardId) {
@@ -156,12 +141,7 @@ export default class DashboardLifecycleServiceHandler extends cds.ApplicationSer
   // ─── ShareDashboard ─────────────────────────────────────────────────────────
 
   private async handleShareDashboard(req: Request) {
-    const user = AuthGuard.resolveUser(req);
-    const ctx = {
-      organizationId: user?.tenant || 'local-org',
-      userId: user?.id || 'USER_DEFAULT',
-      roles: user?.roles || ['FinanceAnalyst']
-    };
+    const ctx = AuthGuard.tenantContext(req, 'FinanceManager');
 
     const { dashboardId, sharedWithUserId, permission } = req.data as {
       dashboardId: string;
@@ -201,12 +181,7 @@ export default class DashboardLifecycleServiceHandler extends cds.ApplicationSer
   // ─── ReopenDashboard ────────────────────────────────────────────────────────
 
   private async handleReopenDashboard(req: Request) {
-    const user = AuthGuard.resolveUser(req);
-    const ctx = {
-      organizationId: user?.tenant || 'local-org',
-      userId: user?.id || 'USER_DEFAULT',
-      roles: user?.roles || ['FinanceAnalyst']
-    };
+    const ctx = AuthGuard.tenantContext(req, 'FinanceAnalyst');
 
     const { dashboardId } = req.data as { dashboardId: string };
     if (!dashboardId) {
@@ -230,12 +205,7 @@ export default class DashboardLifecycleServiceHandler extends cds.ApplicationSer
   // ─── RefreshDashboard ───────────────────────────────────────────────────────
 
   private async handleRefreshDashboard(req: Request) {
-    const user = AuthGuard.resolveUser(req);
-    const ctx = {
-      organizationId: user?.tenant || 'local-org',
-      userId: user?.id || 'USER_DEFAULT',
-      roles: user?.roles || ['FinanceAnalyst']
-    };
+    const ctx = AuthGuard.tenantContext(req, 'FinanceManager');
 
     const { dashboardId } = req.data as { dashboardId: string };
     if (!dashboardId) {

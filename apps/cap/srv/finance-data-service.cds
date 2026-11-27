@@ -12,7 +12,7 @@
 
 using { sria.finance } from '../db/schema';
 
-service FinanceDataService @(path: '/api/finance') {
+service FinanceDataService @(path: '/api/finance', requires: ['FinanceAnalyst','FinanceManager','TenantAdmin']) {
 
   /**
    * GetFinanceMetrics — primary action for the AI tool-calling layer.

@@ -11,6 +11,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { loadConfig } from '../lib/config/app-config.ts';
 import {
   DataPlanSchema,
   BASELINE_METRIC_CATALOG
@@ -35,7 +36,7 @@ export class Planner {
     this._maxSteps = config?.maxSteps ?? 3;
     this._resolvedSource =
       config?.resolvedSource ??
-      (process.env['FINANCE_DATA_PROVIDER'] === 's4hana' ? 's4hana' : 'mock');
+      loadConfig().financeProvider;
   }
 
   /**

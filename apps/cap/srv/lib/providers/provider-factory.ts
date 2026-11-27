@@ -15,6 +15,7 @@
 import type { FinanceDataProvider } from './finance-data-provider.ts';
 import { MockFinanceDataProvider } from './mock-finance-data-provider.ts';
 import { S4HanaODataFinanceDataProvider } from './s4hana-odata-provider.ts';
+import { loadConfig } from '../config/app-config.ts';
 
 export type ProviderType = 'mock' | 's4hana';
 
@@ -32,7 +33,7 @@ export function getFinanceDataProvider(overrideType?: ProviderType): FinanceData
     return _instance;
   }
 
-  const type: string = overrideType ?? (process.env['FINANCE_DATA_PROVIDER'] ?? 'mock');
+  const type: string = overrideType ?? loadConfig().financeProvider;
 
   switch (type) {
     case 's4hana': {

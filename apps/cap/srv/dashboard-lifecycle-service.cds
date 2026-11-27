@@ -9,10 +9,12 @@
 using { sria.finance as my } from '../db/schema';
 
 @path: '/api/v1/lifecycle'
+@requires: ['FinanceAnalyst','FinanceManager','TenantAdmin']
 service DashboardLifecycleService {
+  // Tenant-filtered in dashboard-lifecycle-service.ts. DashboardSpecs is internal (no tenant key) and not exposed.
   @readonly entity Dashboards as projection on my.Dashboards;
-  @readonly entity DashboardSpecs as projection on my.DashboardSpecs;
 
+  @requires: ['FinanceManager','TenantAdmin']
   action SaveDashboard(
     workspaceId : UUID,
     title       : String(150),
@@ -25,6 +27,7 @@ service DashboardLifecycleService {
     status      : String;
   };
 
+  @requires: ['FinanceManager','TenantAdmin']
   action RenameDashboard(
     dashboardId : UUID,
     newTitle    : String(150) not null
@@ -34,6 +37,7 @@ service DashboardLifecycleService {
     status      : String;
   };
 
+  @requires: ['FinanceManager','TenantAdmin']
   action DeleteDashboard(
     dashboardId : UUID
   ) returns {
@@ -42,6 +46,7 @@ service DashboardLifecycleService {
     status      : String;
   };
 
+  @requires: ['FinanceManager','TenantAdmin']
   action ShareDashboard(
     dashboardId     : UUID,
     sharedWithUserId: String(100) not null,
@@ -63,6 +68,7 @@ service DashboardLifecycleService {
     lastSavedAt : String;
   };
 
+  @requires: ['FinanceManager','TenantAdmin']
   action RefreshDashboard(
     dashboardId : UUID
   ) returns {

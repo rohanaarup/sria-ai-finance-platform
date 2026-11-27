@@ -14,6 +14,7 @@
 
 import cds from '@sap/cds';
 import type { Request } from '@sap/cds';
+import { AuthGuard } from './lib/auth/auth-guard.ts';
 import { getFinanceDataProvider } from './lib/providers/provider-factory.ts';
 import { MockFinanceDataProvider } from './lib/providers/mock-finance-data-provider.ts';
 import { S4HanaProviderBlockedError } from './lib/providers/s4hana-odata-provider.ts';
@@ -35,6 +36,7 @@ export default class FinanceDataServiceHandler extends cds.ApplicationService {
   // ─── Action: GetFinanceMetrics ──────────────────────────────────────────────
 
   private async handleGetFinanceMetrics(req: Request) {
+    AuthGuard.tenantContext(req, 'FinanceAnalyst');
     const { companyCode, fiscalYear, fiscalPeriod, businessUnit } = req.data as {
       companyCode: string;
       fiscalYear: number;
@@ -52,11 +54,9 @@ export default class FinanceDataServiceHandler extends cds.ApplicationService {
 
     const provider = getFinanceDataProvider();
 
-    // Build a minimal tenant context from the request (Phase 4 auth guard sets user)
-    const tenantCtx = {
-      organizationId: (req.user as unknown as Record<string, string>)?.['tenant'] ?? 'local',
-      userId: req.user?.id ?? 'anonymous'
-    };
+    // Tenant context comes only from the verified token (fail closed).
+    const verified = AuthGuard.tenantContext(req, 'FinanceAnalyst');
+    const tenantCtx = { organizationId: verified.organizationId, userId: verified.userId };
 
     let records;
     try {
@@ -138,7 +138,8 @@ export default class FinanceDataServiceHandler extends cds.ApplicationService {
 
   // ─── Function: GetProviderStatus ────────────────────────────────────────────
 
-  private async handleGetProviderStatus(_req: Request) {
+  private async handleGetProviderStatus(req: Request) {
+    AuthGuard.tenantContext(req, 'FinanceAnalyst');
     const provider = getFinanceDataProvider();
     const available = await provider.isAvailable();
     const sourceType = provider.getSourceType();

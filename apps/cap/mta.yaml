@@ -27,6 +27,7 @@ modules:
       NODE_ENV: production
       CDS_ENV: production
       FINANCE_DATA_PROVIDER: mock
+      APP_ENV_TIER: pilot
     requires:
       - name: sria-xsuaa
       - name: sria-destination

@@ -8,7 +8,7 @@
 
 using { sria.finance } from '../db/schema';
 
-service OrchestrationService @(path: '/api/orchestration') {
+service OrchestrationService @(path: '/api/orchestration', requires: ['FinanceAnalyst','FinanceManager','TenantAdmin']) {
 
   /**
    * PlanRequest — builds a validated DataPlan from a DashboardRequest
