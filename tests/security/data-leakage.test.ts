@@ -12,8 +12,11 @@
 import { strict as assert } from 'node:assert';
 import test from 'node:test';
 import cds from '@sap/cds';
+import { connectTestDb } from '../../apps/cap/test/helpers/test-db.ts';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { randomUUID } from 'node:crypto';
+import { DashboardRepository, ENTITY_NAMES } from '../../apps/cap/srv/lib/repositories/dashboard-repository.ts';
 import { Orchestrator } from '../../apps/cap/srv/ai/orchestrator.ts';
 import { MockFinanceDataProvider } from '../../apps/cap/srv/lib/providers/mock-finance-data-provider.ts';
 import { CalculationEngine } from '../../apps/cap/srv/lib/finance/calculation-engine.ts';
@@ -21,10 +24,27 @@ import type { DashboardRequest } from '../../packages/contracts/dist/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbPath = path.resolve(__dirname, '../../apps/cap/sqlite.db');
 
 test('Phase 11 — Data Leakage & Zero Arithmetic Verification Suite', async (t) => {
-  const db = await cds.connect.to({ kind: 'sqlite', credentials: { url: dbPath } });
+  const { db } = await connectTestDb();
+
+  // This suite creates its own data (it no longer relies on rows left behind by other suites).
+  const orgId = randomUUID();
+  const workspaceId = randomUUID();
+  await db.run(INSERT.into(ENTITY_NAMES.Organizations).entries({ ID: orgId, code: `ORG_${Date.now()}`, name: 'Leakage audit tenant' }));
+  await db.run(INSERT.into(ENTITY_NAMES.Workspaces).entries({ ID: workspaceId, organization_ID: orgId, code: `WS_${Date.now()}`, name: 'Leakage audit workspace' }));
+  await new DashboardRepository().createDashboard(
+    {
+      workspaceId,
+      title: 'Leakage audit dashboard',
+      description: 'aggregates only',
+      specJson: JSON.stringify({ version: '1.0', title: 'x', widgets: [], results: [], dataProvenance: { sourceType: 'mock', isSynthetic: true } }),
+      metricIds: 'total_revenue',
+      dimensions: 'fiscal_period',
+      sourceType: 'mock'
+    },
+    { organizationId: orgId, userId: 'USER_AUDITOR', roles: ['FinanceManager'] }
+  );
 
   await t.test('1. Database Storage Audit: No raw financial ledger rows persisted in any table', async () => {
     // Check Dashboards table

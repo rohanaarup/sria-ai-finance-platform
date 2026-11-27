@@ -2,12 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import cds from '@sap/cds';
 import { randomUUID } from 'node:crypto';
+import { connectTestDb, reconnectTestDb } from './helpers/test-db.ts';
 import { DashboardRepository, ENTITY_NAMES } from '../srv/lib/repositories/dashboard-repository.ts';
 import type { TenantContext } from '../srv/lib/repositories/dashboard-repository.ts';
 
 test('CAP Persistence & Tenant Isolation Suite', async (t) => {
-  // Connect to local SQLite DB
-  const db = await cds.connect.to({ kind: 'sqlite', credentials: { url: 'sqlite.db' } });
+  // Fresh, freshly deployed SQLite file for this suite
+  const { db, url: testDbUrl } = await connectTestDb();
 
   const repo = new DashboardRepository();
 
@@ -164,8 +165,7 @@ test('CAP Persistence & Tenant Isolation Suite', async (t) => {
 
   await t.test('7. Persistence across simulated connection restart', async () => {
     // Disconnect and reconnect to simulate cold service restart
-    await cds.disconnect();
-    const freshDb = await cds.connect.to({ kind: 'sqlite', credentials: { url: 'sqlite.db' } });
+    const freshDb = await reconnectTestDb(testDbUrl);
 
     const reloaded = await freshDb.run(
       SELECT.one.from(ENTITY_NAMES.Dashboards).where({ ID: createdDashboardId })

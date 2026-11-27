@@ -16,11 +16,12 @@ import { strict as assert } from 'node:assert';
 import test from 'node:test';
 import cds from '@sap/cds';
 import { randomUUID } from 'node:crypto';
+import { connectTestDb } from './helpers/test-db.ts';
 import { DashboardRepository, ENTITY_NAMES } from '../srv/lib/repositories/dashboard-repository.ts';
 import type { TenantContext } from '../srv/lib/repositories/dashboard-repository.ts';
 
 test('Dashboard Lifecycle & Authorization Suite', async (t) => {
-  const db = await cds.connect.to({ kind: 'sqlite', credentials: { url: 'sqlite.db' } });
+  const { db } = await connectTestDb();
   const repo = new DashboardRepository();
 
   const orgId = randomUUID();

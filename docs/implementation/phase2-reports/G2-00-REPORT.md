@@ -48,4 +48,4 @@ Before G2-00 `npm test` ran 104 tests (89 cap + 7 web + 8 contracts); 75 more sa
 - F-07 (follow-up classification duplicated client-side), F-09 (binary floats → G2-01 decimal), F-10 (circular intent evaluation → G2-04/G2-10), F-13 (unused entities) remain open by design.
 - The web proxy's dev Authorization header and the live `/health` field were exercised by tests, not by a manual browser session.
 - `DataSourceReferences` is no longer exposed through AdminService because it has no tenant key; revisit in G2-02/G2-03.
-- The CI run on GitHub is verified after push (see below).
+- CI note: the first GitHub Actions runs failed because the persistence and security suites depended on a gitignored local `sqlite.db` (and on rows left by other suites). They now deploy a fresh temp database per suite (`apps/cap/test/helpers/test-db.ts`) and create their own data. Verified locally with every `sqlite.db` removed: 248/248.

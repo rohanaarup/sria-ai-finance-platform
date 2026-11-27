@@ -12,13 +12,15 @@
  *  - x-tenant-id / x-user-id headers never change the tenant.
  *  - Every CDS service carries an explicit @requires / @restrict annotation.
  */
-import { describe, it, before } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import cds from '@sap/cds';
 
 const here = dirname(fileURLToPath(import.meta.url));
+// In-memory database, deployed by cds.test: never depends on a local sqlite.db file.
+(cds.env.requires as any).db = { kind: 'sqlite', impl: '@cap-js/sqlite', credentials: { url: ':memory:' } };
 const test = cds.test(resolve(here, '..'));
 const axios = test.axios as any;
 axios.defaults.validateStatus = () => true;
@@ -70,8 +72,6 @@ function allowed(who: Who, min: Ep['min']): boolean {
 }
 
 describe('HTTP authorization matrix', () => {
-  before(async () => { await test.data.reset?.(); });
-
   it('public health endpoints answer without credentials and expose the environment tier', async () => {
     const h = await call('anonymous', 'GET', '/health');
     assert.equal(h.status, 200);

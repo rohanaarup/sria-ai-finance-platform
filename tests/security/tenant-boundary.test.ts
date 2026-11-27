@@ -15,6 +15,7 @@
 import { strict as assert } from 'node:assert';
 import test from 'node:test';
 import cds from '@sap/cds';
+import { connectTestDb } from '../../apps/cap/test/helpers/test-db.ts';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
@@ -24,10 +25,9 @@ import type { TenantContext } from '../../apps/cap/srv/lib/repositories/dashboar
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbPath = path.resolve(__dirname, '../../apps/cap/sqlite.db');
 
 test('Phase 11 — Tenant Boundary & RBAC Authorization Security Suite', async (t) => {
-  const db = await cds.connect.to({ kind: 'sqlite', credentials: { url: dbPath } });
+  const { db } = await connectTestDb();
   const repo = new DashboardRepository();
 
   const tenantAlphaId = randomUUID();
