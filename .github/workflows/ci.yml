@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [22.x, 24.x]
 
     steps:
       - name: Checkout repository
@@ -34,7 +34,7 @@ jobs:
       - name: Typecheck all workspaces
         run: npm run typecheck
 
-      - name: Run test suites
+      - name: Run every test suite (workspaces + root tests/)
         run: npm run test
 
       - name: Production builds

@@ -11,8 +11,8 @@ export interface AuthenticatedUser {
  */
 /** Reject with a proper HTTP status (req.reject throws in CAP; the fallback keeps plain-object tests working). */
 function deny(req: any, code: number, message: string): never {
-  if (typeof req.reject === 'function') return req.reject(code, message);
-  req.error(code, message);
+  if (typeof req.reject === 'function') req.reject(code, message);
+  else req.error(code, message);
   throw new Error(message);
 }
 

@@ -20,6 +20,8 @@
  */
 
 import type { FinanceRecord } from '@sria/contracts';
+import { normalizeAndInspectRecords, evaluateDataState } from '../../finance/normalization.ts';
+import type { DataAvailabilityState } from '../../finance/normalization.ts';
 
 // ─── Result Types ─────────────────────────────────────────────────────────────
 
@@ -207,7 +209,66 @@ export function calculateAllMetrics(
   return { totalRevenue, totalExpenses, netProfit, profitMargin };
 }
 
+// ─── The single production pipeline: inspect → calculate ─────────────────────
+
+export class DataQualityError extends Error {
+  readonly code: 'MIXED_CURRENCIES';
+  constructor(code: 'MIXED_CURRENCIES', message: string) {
+    super(message);
+    this.name = 'DataQualityError';
+    this.code = code;
+  }
+}
+
+export interface DataQualityReport {
+  currency: string;
+  recordCount: number;
+  hasDuplicates: boolean;
+  duplicateIds: string[];
+  revenueState: DataAvailabilityState;
+  expensesState: DataAvailabilityState;
+}
+
+/**
+ * inspectAndCalculate — THE runtime calculation pipeline (G2-00, finding F-04).
+ *
+ * 1. Normalization checks on the records in scope: currencies must not be mixed
+ *    (there is no confirmed conversion table, so mixing is refused, never silently summed);
+ *    duplicate recordIds are reported.
+ * 2. Deterministic formulas (same functions as above).
+ * 3. Zero-vs-missing is made explicit per metric, so "no data" is never shown as 0.00.
+ *
+ * Every production caller (FinanceDataService, get_finance_metrics tool) uses this function.
+ */
+export function inspectAndCalculate(
+  records: FinanceRecord[],
+  companyCode?: string,
+  fiscalPeriod?: string
+): { metrics: AllMetricsResult; quality: DataQualityReport } {
+  const inScope = applyFilters(records, companyCode, fiscalPeriod);
+  const summary = normalizeAndInspectRecords(inScope);
+  if (summary.hasMixedCurrencies) {
+    throw new DataQualityError(
+      'MIXED_CURRENCIES',
+      `Records contain more than one currency (${summary.currenciesFound.join(', ')}); no conversion table is configured, so the figures are not calculated.`
+    );
+  }
+  const metrics = calculateAllMetrics(records, companyCode, fiscalPeriod);
+  return {
+    metrics,
+    quality: {
+      currency: summary.primaryCurrency,
+      recordCount: summary.recordCount,
+      hasDuplicates: summary.hasDuplicates,
+      duplicateIds: summary.duplicateIds,
+      revenueState: evaluateDataState(metrics.totalRevenue.recordCount, metrics.totalRevenue.value),
+      expensesState: evaluateDataState(metrics.totalExpenses.recordCount, metrics.totalExpenses.value)
+    }
+  };
+}
+
 export const CalculationEngine = {
+  inspectAndCalculate,
   calculateTotalRevenue,
   calculateTotalExpenses,
   calculateNetProfit,

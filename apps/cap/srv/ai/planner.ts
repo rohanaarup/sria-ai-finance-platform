@@ -12,6 +12,9 @@
 
 import { randomUUID } from 'node:crypto';
 import { loadConfig } from '../lib/config/app-config.ts';
+import type { EnvironmentTier } from '../lib/config/app-config.ts';
+import { defaultMetricRegistry } from '../finance-metric-registry.ts';
+import type { FinanceMetricRegistry } from '../finance-metric-registry.ts';
 import {
   DataPlanSchema,
   BASELINE_METRIC_CATALOG
@@ -26,14 +29,20 @@ import type {
 export interface PlannerConfig {
   maxSteps?: number;
   resolvedSource?: 'mock' | 's4hana';
+  tier?: EnvironmentTier;
+  registry?: FinanceMetricRegistry;
 }
 
 export class Planner {
   private readonly _maxSteps: number;
   private readonly _resolvedSource: 'mock' | 's4hana';
+  private readonly _tier: EnvironmentTier;
+  private readonly _registry: FinanceMetricRegistry;
 
   constructor(config?: PlannerConfig) {
     this._maxSteps = config?.maxSteps ?? 3;
+    this._tier = config?.tier ?? loadConfig().tier;
+    this._registry = config?.registry ?? defaultMetricRegistry;
     this._resolvedSource =
       config?.resolvedSource ??
       loadConfig().financeProvider;
@@ -49,6 +58,9 @@ export class Planner {
         throw new Error(`[Planner] Cannot plan for unknown metric: "${metric}"`);
       }
     }
+
+    // 1b. Approval gate: the metric must be executable in the active environment tier
+    this._registry.assertExecutable(request.metricIds, this._tier);
 
     // 2. Validate filters
     if (!request.filters?.companyCode) {

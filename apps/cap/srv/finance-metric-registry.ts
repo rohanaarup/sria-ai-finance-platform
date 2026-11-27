@@ -3,11 +3,23 @@ import {
   MetricIdEnum,
   SupportedDimensionEnum
 } from '@sria/contracts';
+import type { EnvironmentTier } from './lib/config/app-config.ts';
 import type {
   MetricId,
   MetricDefinition,
   SupportedDimension
 } from '@sria/contracts';
+
+export class MetricNotExecutableError extends Error {
+  readonly metrics: string[];
+  readonly tier: EnvironmentTier;
+  constructor(metrics: string[], tier: EnvironmentTier) {
+    super(`Metric(s) not approved and enabled for the '${tier}' environment: ${metrics.join(', ')}`);
+    this.name = 'MetricNotExecutableError';
+    this.metrics = metrics;
+    this.tier = tier;
+  }
+}
 
 /**
  * Validation Result Interface
@@ -62,6 +74,28 @@ export class FinanceMetricRegistry {
   public isMetricExecutable(id: MetricId): boolean {
     const metric = this.catalog.get(id);
     return Boolean(metric && metric.enabled && metric.approvalStatus === 'APPROVED');
+  }
+
+  /**
+   * Tier-aware execution gate (decision D-02, G2-00).
+   *  - pilot / production: only metrics that Finance has APPROVED and ENABLED.
+   *  - mock / local (synthetic data only): metrics awaiting review may run so development
+   *    and demos work, but REJECTED or unknown metrics never run. Results in these tiers are
+   *    labelled synthetic by the data provider.
+   */
+  public isExecutableInTier(id: MetricId, tier: EnvironmentTier): boolean {
+    const metric = this.catalog.get(id);
+    if (!metric) return false;
+    if (tier === 'pilot' || tier === 'production') {
+      return metric.enabled && metric.approvalStatus === 'APPROVED';
+    }
+    return metric.approvalStatus !== 'REJECTED';
+  }
+
+  /** Throws MetricNotExecutableError listing every metric that may not run in the tier. */
+  public assertExecutable(ids: readonly string[], tier: EnvironmentTier): void {
+    const blocked = ids.filter((id) => !this.isExecutableInTier(id as MetricId, tier));
+    if (blocked.length) throw new MetricNotExecutableError(blocked, tier);
   }
 
   /**

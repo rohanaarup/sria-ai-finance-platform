@@ -15,7 +15,12 @@ import { MetricIdEnum } from '@sria/contracts';
 import type { ToolDefinition, ExecutionContext } from '../tool-registry.ts';
 import type { FinanceDataProvider } from '../../lib/providers/finance-data-provider.ts';
 import { getFinanceDataProvider } from '../../lib/providers/provider-factory.ts';
-import { calculateAllMetrics } from '../../lib/finance/calculation-engine.ts';
+import { inspectAndCalculate } from '../../lib/finance/calculation-engine.ts';
+import type { DataQualityReport } from '../../lib/finance/calculation-engine.ts';
+import { loadConfig } from '../../lib/config/app-config.ts';
+import type { EnvironmentTier } from '../../lib/config/app-config.ts';
+import { defaultMetricRegistry } from '../../finance-metric-registry.ts';
+import type { FinanceMetricRegistry } from '../../finance-metric-registry.ts';
 
 // ─── Input Schema ─────────────────────────────────────────────────────────────
 
@@ -37,6 +42,8 @@ export interface ComputedMetricValue {
   formattedValue: string;
   currency: string;
   isZeroDenominator?: boolean;
+  /** AVAILABLE | ZERO_VALUE | MISSING_DATA — "no data" is never presented as 0.00 */
+  dataState?: string;
 }
 
 export interface GetFinanceMetricsResult {
@@ -48,18 +55,23 @@ export interface GetFinanceMetricsResult {
   recordCount: number;
   calculatedAt: string;
   metrics: ComputedMetricValue[];
+  dataQuality: DataQualityReport;
 }
 
 // ─── Tool Factory ─────────────────────────────────────────────────────────────
 
 export function createGetFinanceMetricsTool(
-  customProvider?: FinanceDataProvider
+  customProvider?: FinanceDataProvider,
+  gate?: { tier?: EnvironmentTier; registry?: FinanceMetricRegistry }
 ): ToolDefinition<GetFinanceMetricsParams, GetFinanceMetricsResult> {
   return {
     name: 'get_finance_metrics',
     description: 'Retrieves authorized financial records and calculates approved metrics deterministically.',
     paramSchema: GetFinanceMetricsParamsSchema,
     async execute(params: GetFinanceMetricsParams, ctx: ExecutionContext): Promise<GetFinanceMetricsResult> {
+      // Approval gate (defence in depth: the planner checks too, the tool never trusts its caller)
+      (gate?.registry ?? defaultMetricRegistry).assertExecutable(params.metrics, gate?.tier ?? loadConfig().tier);
+
       const provider = customProvider ?? getFinanceDataProvider();
 
       // Enforce server-side tenant context (never rely on client parameters for tenant)
@@ -80,7 +92,7 @@ export function createGetFinanceMetricsTool(
       );
 
       // 2. Deterministic calculations
-      const calcs = calculateAllMetrics(records, params.companyCode, params.fiscalPeriod);
+      const { metrics: calcs, quality } = inspectAndCalculate(records, params.companyCode, params.fiscalPeriod);
 
       const currency = records.length > 0 ? records[0]!.currency : 'USD';
       const fmt = (v: number) =>
@@ -96,7 +108,8 @@ export function createGetFinanceMetricsTool(
               label: 'Total Revenue',
               value: calcs.totalRevenue.value,
               formattedValue: fmt(calcs.totalRevenue.value),
-              currency
+              currency,
+              dataState: quality.revenueState
             });
             break;
           case 'total_expenses':
@@ -105,7 +118,8 @@ export function createGetFinanceMetricsTool(
               label: 'Total Expenses',
               value: calcs.totalExpenses.value,
               formattedValue: fmt(calcs.totalExpenses.value),
-              currency
+              currency,
+              dataState: quality.expensesState
             });
             break;
           case 'net_profit':
@@ -138,7 +152,8 @@ export function createGetFinanceMetricsTool(
         isSynthetic: provider.getSourceType() === 'mock',
         recordCount: records.length,
         calculatedAt: new Date().toISOString(),
-        metrics: metricList
+        metrics: metricList,
+        dataQuality: quality
       };
     }
   };

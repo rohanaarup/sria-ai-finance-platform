@@ -19,7 +19,8 @@ import { getFinanceDataProvider } from './lib/providers/provider-factory.ts';
 import { MockFinanceDataProvider } from './lib/providers/mock-finance-data-provider.ts';
 import { S4HanaProviderBlockedError } from './lib/providers/s4hana-odata-provider.ts';
 import {
-  calculateAllMetrics
+  inspectAndCalculate,
+  DataQualityError
 } from './lib/finance/calculation-engine.ts';
 
 // ─── Service Registration ──────────────────────────────────────────────────────
@@ -77,7 +78,13 @@ export default class FinanceDataServiceHandler extends cds.ApplicationService {
     }
 
     // --- Deterministic calculation (LLM never involved) ---
-    const metrics = calculateAllMetrics(records);
+    let metrics;
+    try {
+      metrics = inspectAndCalculate(records).metrics;
+    } catch (err) {
+      if (err instanceof DataQualityError) return req.error(422, err.message);
+      throw err;
+    }
 
     // --- Build provenance ---
     const isSynthetic = provider.getSourceType() === 'mock';

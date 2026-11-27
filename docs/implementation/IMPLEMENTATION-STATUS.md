@@ -1,4 +1,7 @@
 # Implementation Progress & Status Tracker
+
+> **Correction (2026-11-27, G2-00):** the per-phase test counts in the table below (for example "176/176") were claims in earlier reports. Measured on 2026-11-27 before G2-00, `npm test` ran 104 tests; 75 further tests lived in `tests/` outside any script and CI. After G2-00 the root `npm test` runs **248 tests, 248 passing** (contracts 8, cap 153, web 13, root tests 74). Authoritative, measured status for Phase 2 is in `docs/implementation/phase2-reports/`.
+
 ## Sria Info Tech AI Finance Dashboard Generator
 
 ### Overall Delivery Progress: 100% / 100%
