@@ -1,15 +1,21 @@
 /**
  * Frontend API Client
- * Phase 9 — React Dashboard Creation & Rendering Experience
- *
- * Connects the React UI to authenticated CAP endpoints.
+ * Connects the React UI to authenticated SAP CAP endpoints with deterministic
+ * offline fallback for local development and unit testing.
  */
 
+import {
+  BASELINE_METRIC_CATALOG,
+  SYNTHETIC_FINANCE_RECORDS,
+} from '@sria/contracts';
 import type {
   DashboardRequest,
   ClarificationQuestion,
   MetricResult,
-  DashboardSpec
+  DashboardSpec,
+  MetricId,
+  FinanceRecord,
+  ProvenanceMetadata,
 } from '@sria/contracts';
 
 export interface UnderstandResponse {
@@ -28,7 +34,127 @@ export interface ExecutionResponse {
   error?: string;
 }
 
+export interface SystemHealthStatus {
+  backendReachable: boolean;
+  service: string;
+  providerMode: 'mock' | 's4hana';
+  isSynthetic: boolean;
+  statusMessage: string;
+  aiProvider: string;
+  databaseDialect: string;
+}
+
+export interface ApprovedMetricSummary {
+  metricId: string;
+  label: string;
+  category: string;
+  formulaOrAggregation: string;
+  supportedDimensions: string;
+  enabled: boolean;
+  approvalStatus: string;
+}
+
+export interface PeriodSeriesPoint {
+  period: string;
+  label: string;
+  total_revenue: number;
+  total_expenses: number;
+  net_profit: number;
+  profit_margin: number;
+  isZeroDenominator: boolean;
+  currency: string;
+}
+
+export interface BusinessUnitSlice {
+  businessUnit: string;
+  label: string;
+  total_revenue: number;
+  total_expenses: number;
+  net_profit: number;
+  currency: string;
+}
+
+export interface CompanyComparisonPoint {
+  companyCode: string;
+  label: string;
+  results: MetricResult[];
+}
+
 const getBaseUrl = () => (typeof window !== 'undefined' ? '' : 'http://127.0.0.1:4004');
+const isNodeTest = () => typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+
+const BUSINESS_UNIT_LABELS: Record<string, string> = {
+  BU_COMMERCIAL: 'Commercial',
+  BU_OPERATIONS: 'Operations',
+  BU_ADMIN: 'Administration',
+  BU_MARKETING: 'Marketing',
+  BU_SHARED_SERVICES: 'Shared Services',
+};
+
+function computeFromRecords(
+  records: FinanceRecord[],
+  metricIds: MetricId[],
+  provenance: ProvenanceMetadata
+): MetricResult[] {
+  let revenue = 0;
+  let expenses = 0;
+  const currency = records[0]?.currency || 'USD';
+
+  for (const r of records) {
+    if (r.accountType === 'REVENUE') {
+      revenue += r.debitCredit === 'C' ? r.amount : -r.amount;
+    } else if (r.accountType === 'EXPENSE') {
+      expenses += r.debitCredit === 'D' ? r.amount : -r.amount;
+    }
+  }
+
+  revenue = Math.round(revenue * 100) / 100;
+  expenses = Math.round(expenses * 100) / 100;
+  const netProfit = Math.round((revenue - expenses) * 100) / 100;
+  const isZeroDenom = revenue === 0;
+  const margin = isZeroDenom ? 0 : Math.round(((netProfit / revenue) * 100) * 100) / 100;
+
+  const fmt = (val: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(val);
+
+  const all: MetricResult[] = [
+    {
+      metricId: 'total_revenue',
+      label: 'Total Revenue',
+      value: revenue,
+      formattedValue: fmt(revenue),
+      currency,
+      provenance,
+    },
+    {
+      metricId: 'total_expenses',
+      label: 'Total Expenses',
+      value: expenses,
+      formattedValue: fmt(expenses),
+      currency,
+      provenance,
+    },
+    {
+      metricId: 'net_profit',
+      label: 'Net Profit',
+      value: netProfit,
+      formattedValue: fmt(netProfit),
+      currency,
+      provenance,
+    },
+    {
+      metricId: 'profit_margin',
+      label: 'Profit Margin',
+      value: margin,
+      formattedValue: `${margin.toFixed(2)}%`,
+      currency: 'PCT',
+      isZeroDenominator: isZeroDenom,
+      provenance,
+    },
+  ];
+
+  return all.filter((m) => metricIds.includes(m.metricId));
+}
 
 export class ApiClient {
   /**
@@ -44,10 +170,99 @@ export class ApiClient {
   }
 
   /**
+   * Rich system health and data provider status
+   */
+  static async getSystemStatus(): Promise<SystemHealthStatus> {
+    if (isNodeTest()) {
+      return {
+        backendReachable: false,
+        service: 'offline-test',
+        providerMode: 'mock',
+        isSynthetic: true,
+        statusMessage: 'Test runtime — synthetic fixtures active.',
+        aiProvider: 'mock',
+        databaseDialect: 'sqlite',
+      };
+    }
+
+    try {
+      const [healthRes, providerRes] = await Promise.allSettled([
+        fetch(`${getBaseUrl()}/health`, { signal: AbortSignal.timeout(1500) }),
+        fetch(`${getBaseUrl()}/api/finance/GetProviderStatus()`, {
+          signal: AbortSignal.timeout(1500),
+        }),
+      ]);
+
+      const healthOk = healthRes.status === 'fulfilled' && healthRes.value.ok;
+      const healthData = healthOk ? await healthRes.value.json() : null;
+      const providerOk = providerRes.status === 'fulfilled' && providerRes.value.ok;
+      const providerData = providerOk ? await providerRes.value.json() : null;
+
+      return {
+        backendReachable: healthOk,
+        service: healthData?.service || 'sria-cap-backend',
+        providerMode:
+          providerData?.providerType === 's4hana' ||
+          healthData?.components?.dataProvider?.mode === 's4hana'
+            ? 's4hana'
+            : 'mock',
+        isSynthetic: providerData?.isSynthetic ?? true,
+        statusMessage:
+          providerData?.statusMessage ||
+          (healthOk
+            ? 'Connected to SAP CAP runtime.'
+            : 'CAP backend offline — using local deterministic fallback.'),
+        aiProvider: healthData?.components?.aiEngine?.provider || 'mock',
+        databaseDialect: healthData?.components?.database?.dialect || 'sqlite',
+      };
+    } catch {
+      return {
+        backendReachable: false,
+        service: 'offline-fallback',
+        providerMode: 'mock',
+        isSynthetic: true,
+        statusMessage: 'CAP backend unreachable — local synthetic mode.',
+        aiProvider: 'mock',
+        databaseDialect: 'localStorage',
+      };
+    }
+  }
+
+  /**
+   * Approved Metric Catalog from CAP MetricCatalogService
+   */
+  static async getApprovedMetrics(): Promise<ApprovedMetricSummary[]> {
+    if (!isNodeTest()) {
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/v1/metrics/getApprovedMetrics()`, {
+          signal: AbortSignal.timeout(1500),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.value || data;
+          if (Array.isArray(list) && list.length > 0) return list;
+        }
+      } catch {
+        // Fallback to shared contracts catalog
+      }
+    }
+
+    return Object.values(BASELINE_METRIC_CATALOG).map((m) => ({
+      metricId: m.id,
+      label: m.label,
+      category: m.category,
+      formulaOrAggregation: m.formulaOrAggregation,
+      supportedDimensions: m.supportedDimensions.join(', '),
+      enabled: m.enabled,
+      approvalStatus: m.approvalStatus,
+    }));
+  }
+
+  /**
    * Natural Language Intent Understanding
    */
   static async understandPrompt(prompt: string): Promise<UnderstandResponse> {
-    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test') {
+    if (isNodeTest()) {
       return this._localMockUnderstand(prompt);
     }
     try {
@@ -55,7 +270,7 @@ export class ApiClient {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
-        signal: AbortSignal.timeout(1500)
+        signal: AbortSignal.timeout(2000),
       });
 
       if (!res.ok) {
@@ -66,19 +281,19 @@ export class ApiClient {
       if (data.status === 'RESOLVED' && data.resolvedRequest) {
         return {
           status: 'RESOLVED',
-          resolvedRequest: JSON.parse(data.resolvedRequest)
+          resolvedRequest: JSON.parse(data.resolvedRequest),
         };
       }
       if (data.status === 'CLARIFICATION_REQUIRED' && data.clarificationJson) {
         return {
           status: 'CLARIFICATION_REQUIRED',
-          clarifications: JSON.parse(data.clarificationJson)
+          clarifications: JSON.parse(data.clarificationJson),
         };
       }
       return {
         status: 'REJECTED',
         rejectionReason: data.rejectionReason || 'Request could not be understood.',
-        supportedMetrics: data.supportedMetrics || []
+        supportedMetrics: data.supportedMetrics || [],
       };
     } catch (err) {
       console.warn('[ApiClient] Server understand failed, evaluating with local fallback:', err);
@@ -94,7 +309,7 @@ export class ApiClient {
     sourceType: 'mock' | 's4hana';
     isSynthetic: boolean;
   }> {
-    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test') {
+    if (isNodeTest()) {
       return this._localMockExecution(request);
     }
     try {
@@ -102,7 +317,7 @@ export class ApiClient {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestJson: JSON.stringify(request) }),
-        signal: AbortSignal.timeout(1500)
+        signal: AbortSignal.timeout(2500),
       });
 
       if (res.ok) {
@@ -110,10 +325,31 @@ export class ApiClient {
         if (data.status === 'SUCCESS' && data.resultsJson) {
           const rawResults = JSON.parse(data.resultsJson);
           const firstBatch = rawResults[0];
+          const sourceType: 'mock' | 's4hana' = firstBatch?.sourceType || 'mock';
+          const isSynthetic: boolean = firstBatch?.isSynthetic ?? true;
+          const provenance: ProvenanceMetadata = {
+            sourceType,
+            sourceSystem: isSynthetic ? 'SAP_SYNTHETIC_OFFLINE_FIXTURE' : 'SAP_S4HANA_LIVE',
+            retrievedAt: firstBatch?.calculatedAt || new Date().toISOString(),
+            calculationVersion: '1.0.0',
+            isSynthetic,
+            appliedFilters: request.filters as Record<string, unknown>,
+          };
+
+          const metrics: MetricResult[] = (firstBatch?.metrics || []).map((m: any) => ({
+            metricId: m.metricId as MetricId,
+            label: m.label,
+            value: Number(m.value),
+            formattedValue: m.formattedValue,
+            currency: m.currency,
+            isZeroDenominator: m.isZeroDenominator,
+            provenance: m.provenance || provenance,
+          }));
+
           return {
-            results: firstBatch?.metrics || [],
-            sourceType: firstBatch?.sourceType || 'mock',
-            isSynthetic: firstBatch?.isSynthetic ?? true
+            results: metrics,
+            sourceType,
+            isSynthetic,
           };
         }
       }
@@ -122,6 +358,187 @@ export class ApiClient {
     }
 
     return this._localMockExecution(request);
+  }
+
+  /**
+   * Fetch genuine period-by-period figures from CAP FinanceDataService (or synthetic records offline)
+   * Avoids fabricated trend splits.
+   */
+  static async fetchPeriodBreakdown(
+    companyCode: string,
+    fiscalYear: number
+  ): Promise<PeriodSeriesPoint[]> {
+    const periods = ['01', '02'];
+    const points: PeriodSeriesPoint[] = [];
+
+    for (const period of periods) {
+      const data = await this._fetchFinanceSlice({ companyCode, fiscalYear, fiscalPeriod: period });
+      if (data && (data.total_revenue !== 0 || data.total_expenses !== 0)) {
+        points.push({
+          period,
+          label: `FY${fiscalYear} P${period}`,
+          ...data,
+        });
+      }
+    }
+
+    return points;
+  }
+
+  /**
+   * Fetch genuine Business Unit breakdown using FinanceDataService.GetFinanceMetrics
+   */
+  static async fetchBusinessUnitBreakdown(
+    companyCode: string,
+    fiscalYear: number,
+    fiscalPeriod?: string
+  ): Promise<BusinessUnitSlice[]> {
+    const units = Object.keys(BUSINESS_UNIT_LABELS);
+    const slices: BusinessUnitSlice[] = [];
+
+    const responses = await Promise.all(
+      units.map(async (bu) => ({
+        bu,
+        data: await this._fetchFinanceSlice({
+          companyCode,
+          fiscalYear,
+          fiscalPeriod,
+          businessUnit: bu,
+        }),
+      }))
+    );
+
+    for (const { bu, data } of responses) {
+      if (data && (data.total_revenue !== 0 || data.total_expenses !== 0)) {
+        slices.push({
+          businessUnit: bu,
+          label: BUSINESS_UNIT_LABELS[bu] || bu,
+          total_revenue: data.total_revenue,
+          total_expenses: data.total_expenses,
+          net_profit: data.net_profit,
+          currency: data.currency,
+        });
+      }
+    }
+
+    return slices;
+  }
+
+  /**
+   * Fetch comparison metrics across Company 1000 and Company 2000
+   */
+  static async fetchCompanyComparison(
+    fiscalYear: number,
+    metricIds: MetricId[],
+    fiscalPeriod?: string
+  ): Promise<CompanyComparisonPoint[]> {
+    const companies = [
+      { code: '1000', label: 'Company 1000 (HQ)' },
+      { code: '2000', label: 'Company 2000 (Subsidiary)' },
+    ];
+
+    const out = await Promise.all(
+      companies.map(async (co) => {
+        const exec = await this.executeRequest({
+          version: '1.0',
+          rawPrompt: `Comparison for company ${co.code} FY ${fiscalYear}`,
+          metricIds,
+          dimensions: ['company_code'],
+          filters: {
+            companyCode: co.code,
+            fiscalYear,
+            ...(fiscalPeriod ? { periodFrom: fiscalPeriod, periodTo: fiscalPeriod } : {}),
+          },
+          organizationId: 'ORG_ACME_PILOT',
+          userId: 'finance_analyst',
+        });
+        return {
+          companyCode: co.code,
+          label: co.label,
+          results: exec.results,
+        };
+      })
+    );
+
+    return out;
+  }
+
+  private static async _fetchFinanceSlice(params: {
+    companyCode: string;
+    fiscalYear: number;
+    fiscalPeriod?: string;
+    businessUnit?: string;
+  }): Promise<{
+    total_revenue: number;
+    total_expenses: number;
+    net_profit: number;
+    profit_margin: number;
+    isZeroDenominator: boolean;
+    currency: string;
+  } | null> {
+    if (!isNodeTest()) {
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/finance/GetFinanceMetrics`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(params),
+          signal: AbortSignal.timeout(2000),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const metrics: any[] = data.metrics || [];
+          const find = (id: string) => metrics.find((m) => m.metricId === id);
+          const rev = find('total_revenue');
+          const exp = find('total_expenses');
+          const prof = find('net_profit');
+          const marg = find('profit_margin');
+          return {
+            total_revenue: Number(rev?.value ?? 0),
+            total_expenses: Number(exp?.value ?? 0),
+            net_profit: Number(prof?.value ?? 0),
+            profit_margin: Number(marg?.value ?? 0),
+            isZeroDenominator: Boolean(marg?.isZeroDenominator),
+            currency: rev?.currency || exp?.currency || 'USD',
+          };
+        }
+      } catch {
+        // Fallback below
+      }
+    }
+
+    const matched = SYNTHETIC_FINANCE_RECORDS.filter((r) => {
+      if (r.companyCode !== params.companyCode) return false;
+      if (r.fiscalYear !== params.fiscalYear) return false;
+      if (params.fiscalPeriod && r.fiscalPeriod !== params.fiscalPeriod) return false;
+      if (params.businessUnit && r.businessUnit !== params.businessUnit) return false;
+      return true;
+    });
+
+    if (matched.length === 0) return null;
+
+    const provenance: ProvenanceMetadata = {
+      sourceType: 'mock',
+      sourceSystem: 'SAP_SYNTHETIC_OFFLINE_FIXTURE',
+      retrievedAt: new Date().toISOString(),
+      calculationVersion: '1.0.0',
+      isSynthetic: true,
+    };
+
+    const computed = computeFromRecords(
+      matched,
+      ['total_revenue', 'total_expenses', 'net_profit', 'profit_margin'],
+      provenance
+    );
+    const get = (id: MetricId) => computed.find((m) => m.metricId === id);
+
+    return {
+      total_revenue: get('total_revenue')?.value ?? 0,
+      total_expenses: get('total_expenses')?.value ?? 0,
+      net_profit: get('net_profit')?.value ?? 0,
+      profit_margin: get('profit_margin')?.value ?? 0,
+      isZeroDenominator: Boolean(get('profit_margin')?.isZeroDenominator),
+      currency: get('total_revenue')?.currency || 'USD',
+    };
   }
 
   // ─── Lifecycle & Follow-up API Methods ──────────────────────────────────────
@@ -141,8 +558,8 @@ export class ApiClient {
         body: JSON.stringify({
           title,
           description: description || spec.description,
-          specJson: JSON.stringify(spec)
-        })
+          specJson: JSON.stringify(spec),
+        }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -161,7 +578,7 @@ export class ApiClient {
       createdAt: new Date().toISOString(),
       version: '1.0',
       isStale: true,
-      spec
+      spec,
     });
     localStorage.setItem('sria_saved_dashboards', JSON.stringify(localStore));
     return { dashboardId: localId, status: 'SAVED' };
@@ -170,27 +587,29 @@ export class ApiClient {
   /**
    * List saved dashboards from database
    */
-  static async listDashboards(): Promise<Array<{
-    id: string;
-    title: string;
-    description?: string;
-    createdAt: string;
-    version: string;
-    isStale: boolean;
-  }>> {
+  static async listDashboards(): Promise<
+    Array<{
+      id: string;
+      title: string;
+      description?: string;
+      createdAt: string;
+      version: string;
+      isStale: boolean;
+    }>
+  > {
     try {
       const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/ListDashboards()`);
       if (res.ok) {
         const data = await res.json();
         const items = data.value || data;
-        if (Array.isArray(items) && items.length > 0) {
+        if (Array.isArray(items)) {
           return items.map((item: any) => ({
             id: item.ID || item.id,
             title: item.title,
             description: item.description,
             createdAt: item.createdAt || new Date().toISOString(),
             version: '1.0',
-            isStale: true
+            isStale: item.isStale ?? true,
           }));
         }
       }
@@ -205,7 +624,7 @@ export class ApiClient {
       description: d.description,
       createdAt: d.createdAt,
       version: d.version,
-      isStale: true
+      isStale: true,
     }));
   }
 
@@ -219,13 +638,13 @@ export class ApiClient {
       const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/ReopenDashboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dashboardId })
+        body: JSON.stringify({ dashboardId }),
       });
       if (res.ok) {
         const data = await res.json();
         return {
           spec: JSON.parse(data.specJson),
-          isStale: data.isStale ?? true
+          isStale: data.isStale ?? true,
         };
       }
     } catch (err) {
@@ -248,7 +667,7 @@ export class ApiClient {
       const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/RenameDashboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dashboardId, newTitle })
+        body: JSON.stringify({ dashboardId, newTitle }),
       });
       if (res.ok) return true;
     } catch (err) {
@@ -267,6 +686,30 @@ export class ApiClient {
   }
 
   /**
+   * Share a saved dashboard with another user via CAP ShareDashboard
+   */
+  static async shareDashboard(
+    dashboardId: string,
+    sharedWithUserId: string,
+    permission: 'READ' | 'EDIT'
+  ): Promise<{ status: string; sharedWithUserId: string; permission: string }> {
+    const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/ShareDashboard`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dashboardId, sharedWithUserId, permission }),
+    });
+    if (!res.ok) {
+      throw new Error('Sharing requires an active CAP backend session and a saved dashboard.');
+    }
+    const data = await res.json();
+    return {
+      status: data.status || 'SHARED',
+      sharedWithUserId: data.sharedWithUserId || sharedWithUserId,
+      permission: data.permission || permission,
+    };
+  }
+
+  /**
    * Delete a dashboard
    */
   static async deleteDashboard(dashboardId: string): Promise<boolean> {
@@ -274,7 +717,7 @@ export class ApiClient {
       const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/DeleteDashboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dashboardId })
+        body: JSON.stringify({ dashboardId }),
       });
       if (res.ok) return true;
     } catch (err) {
@@ -297,13 +740,13 @@ export class ApiClient {
       const res = await fetch(`${getBaseUrl()}/api/v1/lifecycle/RefreshDashboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dashboardId })
+        body: JSON.stringify({ dashboardId }),
       });
       if (res.ok) {
         const data = await res.json();
         return {
           spec: JSON.parse(data.refreshedSpecJson),
-          refreshedAt: data.refreshedAt
+          refreshedAt: data.refreshedAt,
         };
       }
     } catch (err) {
@@ -323,6 +766,8 @@ export class ApiClient {
     reusedExistingData: boolean;
     message: string;
     type: 'PRESENTATION_ONLY' | 'DATA_CHANGING' | 'REFRESH' | 'UNSUPPORTED';
+    preferredChartMode?: 'bar' | 'line' | 'area' | 'donut';
+    explainRequested?: boolean;
   }> {
     const lower = prompt.toLowerCase().trim();
 
@@ -333,29 +778,68 @@ export class ApiClient {
       lower.includes('stock price') ||
       lower.includes('ebitda') ||
       lower.includes('drop') ||
-      lower.includes('delete from')
+      lower.includes('delete from') ||
+      lower.includes('cash flow') ||
+      lower.includes('arr') ||
+      lower.includes('cogs')
     ) {
       return {
         type: 'UNSUPPORTED',
         reusedExistingData: true,
-        message: 'Unsupported follow-up: Predictive analysis and direct DB commands are blocked.'
+        message:
+          'Unsupported follow-up: Predictive forecasting, unapproved metrics, and direct DB commands are blocked.',
       };
     }
 
-    // 2. Presentation Only
+    // 2. Explanation request (deterministic summary of validated figures)
+    if (lower.includes('explain') || lower.includes('summarize') || lower.includes('why')) {
+      return {
+        type: 'PRESENTATION_ONLY',
+        reusedExistingData: true,
+        explainRequested: true,
+        message: 'Generated deterministic explanation from existing validated figures.',
+      };
+    }
+
+    // 3. Presentation Only (chart switches or rename)
     if (
       lower.includes('bar') ||
       lower.includes('line') ||
+      lower.includes('area') ||
+      lower.includes('donut') ||
       lower.includes('table') ||
       lower.includes('rename') ||
       lower.includes('title')
     ) {
       let targetType: 'bar_chart' | 'line_chart' | 'table' | undefined;
-      if (lower.includes('bar')) targetType = 'bar_chart';
-      else if (lower.includes('line')) targetType = 'line_chart';
-      else if (lower.includes('table')) targetType = 'table';
+      let preferredChartMode: 'bar' | 'line' | 'area' | 'donut' | undefined;
+      if (lower.includes('area')) {
+        targetType = 'line_chart';
+        preferredChartMode = 'area';
+      } else if (lower.includes('donut') || lower.includes('pie')) {
+        preferredChartMode = 'donut';
+      } else if (lower.includes('bar')) {
+        targetType = 'bar_chart';
+        preferredChartMode = 'bar';
+      } else if (lower.includes('line')) {
+        targetType = 'line_chart';
+        preferredChartMode = 'line';
+      } else if (lower.includes('table')) {
+        targetType = 'table';
+      }
 
-      const updatedWidgets = currentSpec.widgets.map((w: any) => {
+      let updatedTitle = currentSpec.title;
+      const quoted = prompt.match(/["']([^"']+)["']/);
+      if (quoted?.[1]) {
+        updatedTitle = quoted[1].trim();
+      } else {
+        const titleMatch = prompt.match(/(?:rename(?:\s+dashboard)?|title)\s*(?:to|as|=)?\s*[:=]?\s*(.+)$/i);
+        if (titleMatch?.[1] && titleMatch[1].trim().length > 0 && !titleMatch[1].toLowerCase().includes('this dashboard')) {
+          updatedTitle = titleMatch[1].trim();
+        }
+      }
+
+      const updatedWidgets = currentSpec.widgets.map((w) => {
         if (targetType && (w.type === 'bar_chart' || w.type === 'line_chart')) {
           return { ...w, type: targetType };
         }
@@ -364,30 +848,106 @@ export class ApiClient {
 
       const updatedSpec: DashboardSpec = {
         ...currentSpec,
-        widgets: updatedWidgets
+        title: updatedTitle,
+        widgets: updatedWidgets,
       };
 
       return {
         type: 'PRESENTATION_ONLY',
         spec: updatedSpec,
+        preferredChartMode,
         reusedExistingData: true,
-        message: 'Presentation updated. Validated calculation figures reused without re-querying SAP.'
+        message: 'Presentation updated. Validated calculation figures reused without re-querying SAP.',
       };
     }
 
-    // 3. Data-Changing or Refresh -> Route through understand/execute flow
+    // 4. Data-Changing or Refresh -> Route through understand/execute flow
     return {
       type: 'DATA_CHANGING',
       reusedExistingData: false,
-      message: 'Data modification detected. Triggering fresh authorized retrieval.'
+      message: 'Data scope change detected. Triggering fresh authorized retrieval.',
     };
   }
 
   // ─── Local Fallback for Seamless Offline Demo ───────────────────────────────
 
   private static _localMockUnderstand(prompt: string): UnderstandResponse {
-    const lower = prompt.toLowerCase();
-    if (!lower.includes('1000') && !lower.includes('2000') && !lower.includes('company')) {
+    const lower = prompt.toLowerCase().trim();
+
+    if (
+      lower.includes('ignore previous') ||
+      lower.includes('system prompt') ||
+      lower.includes('drop table') ||
+      lower.includes('delete from') ||
+      lower.includes('<script') ||
+      lower.includes('union select')
+    ) {
+      return {
+        status: 'REJECTED',
+        rejectionReason:
+          'The request contains disallowed commands or instructions that violate security policy.',
+        supportedMetrics: ['total_revenue', 'total_expenses', 'net_profit', 'profit_margin'],
+      };
+    }
+
+    const unsupportedList = [
+      'ebitda',
+      'arr',
+      'mrr',
+      'churn',
+      'headcount',
+      'stock price',
+      'cogs',
+      'cash flow',
+    ];
+    for (const badMetric of unsupportedList) {
+      if (lower.includes(badMetric)) {
+        return {
+          status: 'REJECTED',
+          rejectionReason: `Metric "${badMetric.toUpperCase()}" is not supported in the approved SAP S/4HANA metric catalog. Approved metrics: Total Revenue, Total Expenses, Net Profit, Profit Margin.`,
+          supportedMetrics: ['total_revenue', 'total_expenses', 'net_profit', 'profit_margin'],
+        };
+      }
+    }
+
+    const metricIds: MetricId[] = [];
+    if (lower.includes('revenue') || lower.includes('sales')) metricIds.push('total_revenue');
+    if (lower.includes('expense') || lower.includes('cost') || lower.includes('spend')) {
+      metricIds.push('total_expenses');
+    }
+    if (lower.includes('profit margin') || lower.includes('margin')) {
+      if (!metricIds.includes('profit_margin')) metricIds.push('profit_margin');
+    }
+    if (
+      (lower.includes('profit') || lower.includes('income') || lower.includes('net profit')) &&
+      !lower.includes('profit margin')
+    ) {
+      if (!metricIds.includes('net_profit')) metricIds.push('net_profit');
+    }
+
+    const isOverviewIntent =
+      lower.includes('overview') ||
+      lower.includes('performance') ||
+      lower.includes('financial') ||
+      lower.includes('all metrics') ||
+      lower.includes('complete') ||
+      lower.includes('compare') ||
+      lower.includes('comparison');
+
+    if (metricIds.length === 0 && isOverviewIntent) {
+      metricIds.push('total_revenue', 'total_expenses', 'net_profit', 'profit_margin');
+    }
+
+    if (metricIds.length === 0) {
+      return {
+        status: 'REJECTED',
+        rejectionReason: `"${prompt}" is not recognized as a financial reporting request. Supported metrics: Total Revenue, Total Expenses, Net Profit, and Profit Margin (e.g. "Show total revenue for company 1000 in FY 2026").`,
+        supportedMetrics: ['total_revenue', 'total_expenses', 'net_profit', 'profit_margin'],
+      };
+    }
+
+    const hasCompany = lower.includes('1000') || lower.includes('2000') || lower.includes('company');
+    if (!hasCompany) {
       return {
         status: 'CLARIFICATION_REQUIRED',
         clarifications: [
@@ -397,22 +957,18 @@ export class ApiClient {
             prompt: 'Which SAP company code would you like to view?',
             reason: 'Company code is required to identify the legal reporting entity.',
             options: ['1000', '2000'],
-            suggestedDefault: '1000'
-          }
-        ]
+            suggestedDefault: '1000',
+          },
+        ],
       };
     }
 
-    const companyCode = lower.includes('2000') ? '2000' : '1000';
-    const metricIds: ('total_revenue' | 'total_expenses' | 'net_profit' | 'profit_margin')[] = [];
+    const companyCode = lower.includes('2000') && !lower.includes('1000') ? '2000' : '1000';
+    const yearMatch = prompt.match(/\b(202[0-9])\b/);
+    const fiscalYear = yearMatch?.[1] ? parseInt(yearMatch[1], 10) : 2026;
 
-    if (lower.includes('revenue') || lower.includes('sales')) metricIds.push('total_revenue');
-    if (lower.includes('expense') || lower.includes('cost')) metricIds.push('total_expenses');
-    if (lower.includes('profit') || lower.includes('income')) metricIds.push('net_profit');
-    if (lower.includes('margin')) metricIds.push('profit_margin');
-    if (metricIds.length === 0) {
-      metricIds.push('total_revenue', 'total_expenses', 'net_profit', 'profit_margin');
-    }
+    const periodMatch = prompt.match(/\bperiod\s*(\d{1,2})\b/i);
+    const periodFrom = periodMatch?.[1] ? periodMatch[1].padStart(2, '0') : undefined;
 
     return {
       status: 'RESOLVED',
@@ -421,69 +977,44 @@ export class ApiClient {
         rawPrompt: prompt,
         metricIds,
         dimensions: ['fiscal_period'],
-        filters: { companyCode, fiscalYear: 2026 },
-        organizationId: 'ORG_ACME',
-        userId: 'finance_analyst'
-      }
+        filters: {
+          companyCode,
+          fiscalYear,
+          ...(periodFrom ? { periodFrom, periodTo: periodFrom } : {}),
+        },
+        organizationId: 'ORG_ACME_PILOT',
+        userId: 'finance_analyst',
+      },
     };
   }
 
   private static _localMockExecution(request: DashboardRequest) {
-    const isCompany2000 = request.filters?.companyCode === '2000';
-    const revenue = isCompany2000 ? 50000 : 350000;
-    const expenses = isCompany2000 ? 75000 : 230000;
-    const netProfit = revenue - expenses;
-    const margin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
+    const companyCode = request.filters?.companyCode || '1000';
+    const fiscalYear = request.filters?.fiscalYear || 2026;
+    const periodFrom = request.filters?.periodFrom;
 
-    const provenance = {
-      sourceType: 'mock' as const,
+    const matched = SYNTHETIC_FINANCE_RECORDS.filter((r) => {
+      if (r.companyCode !== companyCode) return false;
+      if (r.fiscalYear !== fiscalYear) return false;
+      if (periodFrom && r.fiscalPeriod !== periodFrom) return false;
+      return true;
+    });
+
+    const provenance: ProvenanceMetadata = {
+      sourceType: 'mock',
       sourceSystem: 'SAP_SYNTHETIC_OFFLINE_FIXTURE',
       retrievedAt: new Date().toISOString(),
       calculationVersion: '1.0.0',
       isSynthetic: true,
-      appliedFilters: request.filters
+      appliedFilters: request.filters as Record<string, unknown>,
     };
 
-    const results: MetricResult[] = [
-      {
-        metricId: 'total_revenue',
-        label: 'Total Revenue',
-        value: revenue,
-        formattedValue: `$${revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-        currency: 'USD',
-        provenance
-      },
-      {
-        metricId: 'total_expenses',
-        label: 'Total Expenses',
-        value: expenses,
-        formattedValue: `$${expenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-        currency: 'USD',
-        provenance
-      },
-      {
-        metricId: 'net_profit',
-        label: 'Net Profit',
-        value: netProfit,
-        formattedValue: `$${netProfit.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-        currency: 'USD',
-        provenance
-      },
-      {
-        metricId: 'profit_margin',
-        label: 'Profit Margin',
-        value: Math.round(margin * 100) / 100,
-        formattedValue: `${margin.toFixed(2)}%`,
-        currency: 'PCT',
-        isZeroDenominator: false,
-        provenance
-      }
-    ];
+    const results = computeFromRecords(matched, request.metricIds, provenance);
 
     return {
-      results: results.filter(r => request.metricIds.includes(r.metricId)),
+      results,
       sourceType: 'mock' as const,
-      isSynthetic: true
+      isSynthetic: true,
     };
   }
 }

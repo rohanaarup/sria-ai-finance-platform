@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sria Analytics — Data Storage, Access &amp; Database Deep Dive</title>
+  <style>
+    :root {
+      --bg: #F6F5F2;
+      --surface: #FFFFFF;
+      --subtle: #FAFAF8;
+      --text: #181615;
+      --text-2: #57534E;
+      --text-3: #8C8680;
+      --border: #E7E4DE;
+      --border-strong: #D4CFC7;
+      --brand: #C2531A;
+      --brand-bg: #FDF1EA;
+      --sap: #0369A1;
+      --sap-bg: #F0F9FF;
+      --db: #15803D;
+      --db-bg: #ECFDF5;
+      --warn: #B45309;
+      --warn-bg: #FFFBEB;
+      --neg: #B91C1C;
+      --neg-bg: #FEF2F2;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+    code, .mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+      background: #F1EFEA;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #161412;
+      color: #F5F5F4;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-pill {
+      color: #D6D3D1;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+    .nav-pill:hover { background: rgba(255,255,255,0.09); color: #fff; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 32px; padding: 0 12px; border-radius: 7px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08); color: #fff; font-family: inherit;
+    }
+    .btn:hover { background: rgba(255,255,255,0.16); }
+    .btn-primary { background: var(--brand); border-color: var(--brand); }
+    .btn-primary:hover { background: #A84412; }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 26px 24px 72px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 26px;
+      box-shadow: 0 1px 3px rgba(24,22,21,0.05);
+    }
+    .eyebrow {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--brand); margin-bottom: 4px;
+    }
+    h1 { margin: 0; font-size: 25px; font-weight: 800; letter-spacing: -0.025em; }
+    h2 { margin: 0; font-size: 19px; font-weight: 750; letter-spacing: -0.02em; }
+    h3 { margin: 0 0 8px 0; font-size: 15px; font-weight: 700; }
+    .lead { margin: 6px 0 0 0; font-size: 13.5px; color: var(--text-2); max-width: 82ch; }
+    .head-row {
+      margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      border: 1px solid transparent; white-space: nowrap;
+    }
+    .b-sap { background: var(--sap-bg); color: var(--sap); border-color: #BAE6FD; }
+    .b-db { background: var(--db-bg); color: var(--db); border-color: #BBF7D0; }
+    .b-warn { background: var(--warn-bg); color: var(--warn); border-color: #FDE68A; }
+    .b-neg { background: var(--neg-bg); color: var(--neg); border-color: #FECACA; }
+    .b-brand { background: var(--brand-bg); color: var(--brand); border-color: rgba(194,83,26,0.25); }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+    .box {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px 18px; background: var(--subtle);
+    }
+    .path-dark {
+      margin-top: 10px; padding: 9px 12px; border-radius: 8px;
+      background: #181615; color: #F5F5F4;
+      font-family: ui-monospace, monospace; font-size: 11.5px; word-break: break-all;
+    }
+
+    /* Zoomable Viewport */
+    .zoom-frame {
+      border: 1px solid var(--border-strong); border-radius: 12px;
+      background: #FCFBF9; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .zoom-toolbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 8px 14px; background: var(--subtle); border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .zoom-controls { display: flex; align-items: center; gap: 6px; }
+    .zoom-btn {
+      height: 28px; padding: 0 10px; border-radius: 6px;
+      border: 1px solid var(--border-strong); background: var(--surface);
+      color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .zoom-btn:hover { background: var(--bg); }
+    .zoom-level { font-family: ui-monospace, monospace; font-size: 11.5px; color: var(--text-2); min-width: 44px; text-align: center; }
+    .zoom-viewport { overflow: auto; cursor: grab; padding: 16px; max-height: 700px; }
+    .zoom-viewport:active { cursor: grabbing; }
+    .zoom-canvas { transform-origin: top left; transition: transform 0.12s ease; display: inline-block; min-width: 100%; }
+
+    table.data-table {
+      width: 100%; border-collapse: collapse; font-size: 12.5px;
+    }
+    table.data-table th {
+      text-align: left; padding: 10px 12px; background: var(--subtle);
+      border-bottom: 1px solid var(--border-strong);
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2);
+    }
+    table.data-table td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;
+    }
+    table.data-table tr:hover td { background: #FAFAF7; }
+
+    /* Lightbox */
+    .lightbox {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(22,20,18,0.88); backdrop-filter: blur(4px); flex-direction: column;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; background: #161412; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .lightbox-stage { flex: 1; overflow: auto; padding: 24px; display: flex; justify-content: center; align-items: flex-start; }
+    .lightbox-content { transform-origin: top center; transition: transform 0.12s ease; }
+
+    @media print {
+      .topbar, .zoom-toolbar { display: none !important; }
+      body { background: #fff; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .zoom-viewport { overflow: visible !important; max-height: none !important; }
+      .zoom-canvas { transform: scale(0.75) !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg width="28" height="28" viewBox="0 0 332 332" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="14" y="18" width="96" height="292" rx="48" fill="#FBB900"/>
+      <rect x="122" y="96" width="92" height="214" rx="46" fill="#F96302"/>
+      <circle cx="268" cy="260" r="50" fill="#F54E00"/>
+    </svg>
+    <div>
+      <div style="font-size:14px; font-weight:700; color:#fff;">Sria Analytics — Data Storage, Access &amp; Database Guide</div>
+      <div style="font-size:11px; color:#A8A29E;">Deep Dive into Transient Finance Data, Local SQLite DB, Browser Cache &amp; SAP S/4HANA</div>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a class="nav-pill" href="#two-worlds">1. Two Worlds of Data</a>
+    <a class="nav-pill" href="#access-flow">2. How Data is Accessed</a>
+    <a class="nav-pill" href="#sqlite-erd">3. Local SQLite Database</a>
+    <a class="nav-pill" href="#device-locations">4. On Your Device</a>
+    <a class="nav-pill" href="#lifecycle-dynamics">5. Save / Stale / Refresh</a>
+    <a class="nav-pill" href="#cheat-sheet">6. File Cheat-Sheet</a>
+  </nav>
+
+  <div style="display:flex; gap:8px;">
+    <button class="btn" type="button" onclick="downloadHtml()">Download HTML</button>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Print / Save PDF</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Intro -->
+  <section class="card">
+    <div class="eyebrow">Focused Data Guide</div>
+    <h1>Understanding Every Single Data &amp; Database Dynamic</h1>
+    <p class="lead">
+      The #1 thing that confuses newcomers in this codebase is: <strong>"Where do the financial numbers ($350,000 revenue, expenses, profit) actually come from, and why aren't they stored in the SQLite database?"</strong> This guide explains every layer clearly—using real table counts inspected directly from your <code>apps/cap/sqlite.db</code> file.
+    </p>
+  </section>
+
+  <!-- SECTION 1: Two Worlds of Data -->
+  <section class="card" id="two-worlds">
+    <div class="head-row">
+      <div class="eyebrow">Chapter 01 · Core Mental Model</div>
+      <h2>The Two Separate Worlds of Data</h2>
+      <p class="lead">Never confuse <strong>Accounting Figures</strong> (transient, never stored in our DB) with <strong>Application Metadata</strong> (saved dashboards, layouts, shares, and audit logs persisted in SQLite).</p>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:18px;">
+      <div class="box" style="border-left:4px solid var(--sap); background:#F7FBFE;">
+        <h3>World A: Financial Accounting Data (ERP Ledger)</h3>
+        <p style="font-size:13px; color:var(--text-2); margin:0 0 10px 0;">
+          Journal entries, GL accounts, debit/credit amounts, company codes.
+        </p>
+        <ul style="margin:0; padding-left:18px; font-size:12.5px; color:var(--text-2);">
+          <li><strong>Local Dev Source:</strong> Hardcoded TypeScript fixture array <code>SYNTHETIC_FINANCE_RECORDS</code> (10 sample rows).</li>
+          <li><strong>Production Source:</strong> Live <strong>SAP S/4HANA</strong> via OData (<code>I_JournalEntryItemBasic</code>) — currently a blocked stub.</li>
+          <li><strong>Stored in SQLite/HANA?</strong> <span class="badge b-neg">NO — NEVER</span></li>
+          <li><strong>Lifetime:</strong> Lives in Node.js RAM for a few milliseconds during math calculation, then discarded.</li>
+        </ul>
+      </div>
+
+      <div class="box" style="border-left:4px solid var(--db); background:#F6FCF8;">
+        <h3>World B: Application Database (Dashboard Configs &amp; Governance)</h3>
+        <p style="font-size:13px; color:var(--text-2); margin:0 0 10px 0;">
+          Saved dashboard titles, widget layouts, sharing permissions, tenants, audit trails.
+        </p>
+        <ul style="margin:0; padding-left:18px; font-size:12.5px; color:var(--text-2);">
+          <li><strong>Local Dev Storage:</strong> Real SQLite database at <code>apps/cap/sqlite.db</code> (currently 192.5 KB).</li>
+          <li><strong>Production Storage:</strong> <strong>SAP HANA Cloud</strong> (configured in <code>apps/cap/.cdsrc.json</code>).</li>
+          <li><strong>Offline Browser Fallback:</strong> Browser <code>localStorage["sria_saved_dashboards"]</code> if CAP server is off.</li>
+          <li><strong>Contains Raw SAP Rows?</strong> <span class="badge b-neg">NO</span> — only stores <code>DashboardSpec</code> JSON &amp; metadata.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="zoom-frame" data-zoom-box>
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Diagram 1 · Two Worlds of Data &amp; Storage Boundary</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1100" height="360" viewBox="0 0 1100 360" xmlns="http://www.w3.org/2000/svg" style="background:#fff; border-radius:10px; border:1px solid #E7E4DE;">
+            <defs>
+              <marker id="arr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#57534E"/>
+              </marker>
+            </defs>
+            <!-- Top Zone: World A -->
+            <rect x="20" y="16" width="1060" height="150" rx="10" fill="#F0F9FF" stroke="#BAE6FD"/>
+            <text x="36" y="38" font-size="11.5" font-weight="700" fill="#0369A1">WORLD A · FINANCIAL ACCOUNTING DATA (TRANSIENT IN RAM — NEVER WRITTEN TO SQLITE)</text>
+
+            <rect x="40" y="54" width="250" height="94" rx="8" fill="#FFFFFF" stroke="#0284C7"/>
+            <text x="54" y="76" font-size="12" font-weight="700" fill="#181615">Active Source (Local Mock)</text>
+            <text x="54" y="94" font-size="10.5" fill="#57534E">SYNTHETIC_FINANCE_RECORDS</text>
+            <text x="54" y="110" font-size="10" fill="#57534E">10 journal rows (Co. 1000 &amp; 2000)</text>
+            <text x="54" y="128" font-size="9.5" fill="#8C8680">packages/contracts/.../synthetic-fixtures.ts</text>
+
+            <rect x="40" y="54" width="250" height="94" rx="8" fill="none"/>
+
+            <rect x="340" y="54" width="250" height="94" rx="8" fill="#FFFBEB" stroke="#F59E0B" stroke-dasharray="5,4"/>
+            <text x="354" y="76" font-size="12" font-weight="700" fill="#B45309">Future Source (S/4HANA Prod)</text>
+            <text x="354" y="94" font-size="10.5" fill="#57534E">S4HanaODataFinanceDataProvider</text>
+            <text x="354" y="110" font-size="10" fill="#B45309">STATUS: BLOCKED STUB</text>
+            <text x="354" y="128" font-size="9.5" fill="#8C8680">Needs BTP Destination + OAuth2 + GL Map</text>
+
+            <rect x="650" y="54" width="406" height="94" rx="8" fill="#FFFFFF" stroke="#15803D" stroke-width="1.6"/>
+            <text x="666" y="76" font-size="12" font-weight="700" fill="#15803D">Node.js Backend RAM (CalculationEngine)</text>
+            <text x="666" y="95" font-size="10.5" fill="#181615">1. Filters FinanceRecord[] in memory (companyCode, year, period, BU)</text>
+            <text x="666" y="112" font-size="10.5" fill="#181615">2. Computes totals: Revenue, Expenses, Net Profit, Margin %</text>
+            <text x="666" y="129" font-size="10" fill="#B91C1C" font-weight="700">3. Sends MetricResult[] to Browser &amp; DISCARDS raw FinanceRecord[]</text>
+
+            <line x1="290" y1="101" x2="648" y2="101" stroke="#0284C7" stroke-width="1.8" marker-end="url(#arr1)"/>
+
+            <!-- Bottom Zone: World B -->
+            <rect x="20" y="186" width="1060" height="156" rx="10" fill="#ECFDF5" stroke="#BBF7D0"/>
+            <text x="36" y="208" font-size="11.5" font-weight="700" fill="#15803D">WORLD B · APPLICATION STATE DATABASE (PERSISTED ON DISK)</text>
+
+            <rect x="40" y="224" width="330" height="100" rx="8" fill="#FFFFFF" stroke="#15803D" stroke-width="1.5"/>
+            <text x="54" y="246" font-size="12" font-weight="700" fill="#181615">Local SQLite Database</text>
+            <text x="54" y="264" font-size="10.5" fill="#15803D" font-weight="600">apps/cap/sqlite.db (192,512 bytes)</text>
+            <text x="54" y="281" font-size="10" fill="#57534E">Tables: Dashboards, DashboardSpecs, Shares,</text>
+            <text x="54" y="296" font-size="10" fill="#57534E">Organizations, Workspaces, AuditEvents</text>
+
+            <rect x="405" y="224" width="310" height="100" rx="8" fill="#FFFFFF" stroke="#C2531A"/>
+            <text x="420" y="246" font-size="12" font-weight="700" fill="#C2531A">Browser Cache (Offline Fallback)</text>
+            <text x="420" y="264" font-size="10.5" fill="#181615">localStorage["sria_saved_dashboards"]</text>
+            <text x="420" y="281" font-size="10" fill="#57534E">Used only if CAP server (:4004) is unreachable</text>
+            <text x="420" y="296" font-size="10" fill="#57534E">during Save / Rename / Delete / Reopen.</text>
+
+            <rect x="750" y="224" width="306" height="100" rx="8" fill="#FFFBEB" stroke="#F59E0B" stroke-dasharray="5,4"/>
+            <text x="765" y="246" font-size="12" font-weight="700" fill="#B45309">Prod Cloud DB (SAP HANA Cloud)</text>
+            <text x="765" y="264" font-size="10.5" fill="#57534E">Configured in apps/cap/.cdsrc.json [production]</text>
+            <text x="765" y="281" font-size="10" fill="#57534E">Replaces SQLite automatically on BTP deploy.</text>
+            <text x="765" y="296" font-size="10" fill="#57534E">Same CDS tables, zero raw ERP replication.</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: Exact Numbers & Access Code Path -->
+  <section class="card" id="access-flow">
+    <div class="head-row">
+      <div class="eyebrow">Chapter 02 · How Data is Accessed &amp; Computed</div>
+      <h2>Exact Financial Numbers &amp; Every Hop in Code</h2>
+      <p class="lead">Below are the exact 10 synthetic accounting rows currently powering local dashboards, followed by the exact code path from UI button click to calculation.</p>
+    </div>
+
+    <h3 style="margin-bottom:10px;">What is inside <code>SYNTHETIC_FINANCE_RECORDS</code> (<code>packages/contracts/src/fixtures/synthetic-fixtures.ts</code>)</h3>
+    <div style="overflow-x:auto; margin-bottom:20px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>FY / Period</th>
+            <th>G/L Account</th>
+            <th>Account Type</th>
+            <th>Debit / Credit</th>
+            <th>Amount</th>
+            <th>Business Unit</th>
+            <th>Deterministic Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1000</td><td>2026 / P01</td><td><code>410000</code></td><td>REVENUE</td><td>Credit (C)</td><td>$160,000</td><td><code>BU_COMMERCIAL</code></td><td>+ Revenue</td></tr>
+          <tr><td>1000</td><td>2026 / P01</td><td><code>410000</code></td><td>REVENUE</td><td>Debit (D)</td><td>$10,000</td><td><code>BU_COMMERCIAL</code></td><td>− Revenue Return (P01 Net Rev = $150k)</td></tr>
+          <tr><td>1000</td><td>2026 / P01</td><td><code>510000</code></td><td>EXPENSE</td><td>Debit (D)</td><td>$60,000</td><td><code>BU_OPERATIONS</code></td><td>+ Expense</td></tr>
+          <tr><td>1000</td><td>2026 / P01</td><td><code>520000</code></td><td>EXPENSE</td><td>Debit (D)</td><td>$30,000</td><td><code>BU_ADMIN</code></td><td>+ Expense (P01 Exp = $90k)</td></tr>
+          <tr><td>1000</td><td>2026 / P02</td><td><code>410000</code></td><td>REVENUE</td><td>Credit (C)</td><td>$200,000</td><td><code>BU_COMMERCIAL</code></td><td>+ Revenue (Total 1000 Rev = <strong>$350,000</strong>)</td></tr>
+          <tr><td>1000</td><td>2026 / P02</td><td><code>510000</code></td><td>EXPENSE</td><td>Debit (D)</td><td>$80,000</td><td><code>BU_OPERATIONS</code></td><td>+ Expense</td></tr>
+          <tr><td>1000</td><td>2026 / P02</td><td><code>530000</code></td><td>EXPENSE</td><td>Debit (D)</td><td>$60,000</td><td><code>BU_MARKETING</code></td><td>+ Expense (Total 1000 Exp = <strong>$230,000</strong>)</td></tr>
+          <tr><td>2000</td><td>2026 / P01</td><td><code>520000</code></td><td>EXPENSE</td><td>Debit (D)</td><td>$25,000</td><td><code>BU_SHARED_SERVICES</code></td><td>Zero revenue edge case (Margin = 0.00%)</td></tr>
+          <tr><td>2000</td><td>2026 / P02</td><td><code>410000</code></td><td>REVENUE</td><td>Credit (C)</td><td>$50,000</td><td><code>BU_COMMERCIAL</code></td><td>+ Revenue (Total 2000 Rev = $50,000)</td></tr>
+          <tr><td>2000</td><td>2026 / P02</td><td><code>510000</code></td><td>EXPENSE</td><td>Debit (D)</td><td>$75,000</td><td><code>BU_OPERATIONS</code></td><td>Operating loss edge case (Total 2000 Exp = $100k, Net = −$50k)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="zoom-frame" data-zoom-box>
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Diagram 2 · Data Access Pipeline (UI → Vite Proxy → CAP → Provider → CalculationEngine)</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1140" height="310" viewBox="0 0 1140 310" xmlns="http://www.w3.org/2000/svg" style="background:#fff; border-radius:10px; border:1px solid #E7E4DE;">
+            <defs>
+              <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#57534E"/>
+              </marker>
+            </defs>
+
+            <rect x="20" y="34" width="185" height="90" rx="8" fill="#FDF1EA" stroke="#C2531A"/>
+            <text x="32" y="56" font-size="11.5" font-weight="700" fill="#C2531A">1. React UI</text>
+            <text x="32" y="74" font-size="10" fill="#181615">ApiClient.executeRequest()</text>
+            <text x="32" y="90" font-size="10" fill="#57534E">ApiClient.fetchPeriodBreakdown()</text>
+            <text x="32" y="106" font-size="9.5" fill="#8C8680">apps/web/src/services/api-client.ts</text>
+
+            <rect x="235" y="34" width="175" height="90" rx="8" fill="#FAFAF8" stroke="#D4CFC7"/>
+            <text x="247" y="56" font-size="11.5" font-weight="700" fill="#181615">2. Vite Proxy</text>
+            <text x="247" y="74" font-size="10" fill="#57534E">/api/* → :4004</text>
+            <text x="247" y="90" font-size="10" fill="#57534E">/health → :4004</text>
+            <text x="247" y="106" font-size="9.5" fill="#8C8680">apps/web/vite.config.ts</text>
+
+            <rect x="440" y="34" width="210" height="90" rx="8" fill="#F0F9FF" stroke="#0284C7"/>
+            <text x="452" y="56" font-size="11.5" font-weight="700" fill="#0369A1">3. CAP Service + Auth</text>
+            <text x="452" y="74" font-size="10" fill="#181615">POST /api/orchestration/ExecutePlan</text>
+            <text x="452" y="90" font-size="10" fill="#181615">POST /api/finance/GetFinanceMetrics</text>
+            <text x="452" y="106" font-size="9.5" fill="#57534E">AuthGuard resolves tenant &amp; roles</text>
+
+            <rect x="680" y="34" width="205" height="90" rx="8" fill="#ECFDF5" stroke="#15803D"/>
+            <text x="692" y="56" font-size="11.5" font-weight="700" fill="#15803D">4. ProviderFactory</text>
+            <text x="692" y="74" font-size="10" fill="#181615">Reads FINANCE_DATA_PROVIDER</text>
+            <text x="692" y="90" font-size="10" fill="#57534E">'mock' → MockFinanceDataProvider</text>
+            <text x="692" y="106" font-size="9.5" fill="#B45309">'s4hana' → Blocked OData Stub</text>
+
+            <rect x="915" y="34" width="205" height="90" rx="8" fill="#ECFDF5" stroke="#15803D" stroke-width="1.6"/>
+            <text x="927" y="56" font-size="11.5" font-weight="700" fill="#15803D">5. CalculationEngine</text>
+            <text x="927" y="74" font-size="10" fill="#181615">Sums FinanceRecord[] in RAM</text>
+            <text x="927" y="90" font-size="10" fill="#57534E">Returns MetricResult[] JSON</text>
+            <text x="927" y="106" font-size="9.5" fill="#B91C1C">Raw rows garbage-collected</text>
+
+            <line x1="205" y1="79" x2="233" y2="79" stroke="#57534E" stroke-width="1.6" marker-end="url(#arr2)"/>
+            <line x1="410" y1="79" x2="438" y2="79" stroke="#57534E" stroke-width="1.6" marker-end="url(#arr2)"/>
+            <line x1="650" y1="79" x2="678" y2="79" stroke="#57534E" stroke-width="1.6" marker-end="url(#arr2)"/>
+            <line x1="885" y1="79" x2="913" y2="79" stroke="#57534E" stroke-width="1.6" marker-end="url(#arr2)"/>
+
+            <!-- Offline Fallback Box -->
+            <rect x="20" y="168" width="1100" height="114" rx="10" fill="#FFFBEB" stroke="#FDE68A"/>
+            <text x="38" y="194" font-size="12" font-weight="700" fill="#B45309">What Happens If CAP Backend (port 4004) Is Stopped?</text>
+            <text x="38" y="216" font-size="11" fill="#181615">• ApiClient catches the failed fetch to /api/orchestration/ExecutePlan or /api/finance/GetFinanceMetrics (1.5s–2.5s timeout).</text>
+            <text x="38" y="236" font-size="11" fill="#181615">• It automatically calls _localMockExecution() / _fetchFinanceSlice() inside apps/web/src/services/api-client.ts using the exact same SYNTHETIC_FINANCE_RECORDS.</text>
+            <text x="38" y="256" font-size="11" fill="#57534E">• Save/List/Reopen/Rename/Delete fall back to browser localStorage["sria_saved_dashboards"] so the UI stays functional offline.</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: SQLite ERD -->
+  <section class="card" id="sqlite-erd">
+    <div class="head-row">
+      <div class="eyebrow">Chapter 03 · Inside the Database</div>
+      <h2>Actual Tables Inside <code>apps/cap/sqlite.db</code> (Inspected Directly)</h2>
+      <p class="lead">Your CAP database at <code>apps/cap/sqlite.db</code> (192,512 bytes) uses SAP CDS schemas (<code>apps/cap/db/*.cds</code>) compiled to 9 SQLite tables. Notice there is <strong>no financial transactions table</strong>.</p>
+    </div>
+
+    <div class="zoom-frame" data-zoom-box style="margin-bottom:18px;">
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Diagram 3 · SQLite / SAP HANA Entity-Relationship Diagram (Actual Columns &amp; Row Counts)</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1140" height="420" viewBox="0 0 1140 420" xmlns="http://www.w3.org/2000/svg" style="background:#fff; border-radius:10px; border:1px solid #E7E4DE;">
+            <defs>
+              <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#15803D"/>
+              </marker>
+            </defs>
+
+            <!-- Organizations -->
+            <rect x="24" y="24" width="230" height="110" rx="8" fill="#FAFAF8" stroke="#15803D" stroke-width="1.5"/>
+            <rect x="24" y="24" width="230" height="28" rx="8" fill="#15803D"/>
+            <text x="36" y="42" font-size="11" font-weight="700" fill="#fff">sria_finance_Organizations (50 rows)</text>
+            <text x="36" y="68" font-size="10.5" fill="#181615">PK: ID (UUID)</text>
+            <text x="36" y="85" font-size="10.5" fill="#57534E">code, name, description</text>
+            <text x="36" y="102" font-size="10" fill="#8C8680">Tenant isolation root</text>
+
+            <!-- Workspaces -->
+            <rect x="24" y="176" width="230" height="110" rx="8" fill="#FAFAF8" stroke="#15803D" stroke-width="1.5"/>
+            <rect x="24" y="176" width="230" height="28" rx="8" fill="#15803D"/>
+            <text x="36" y="194" font-size="11" font-weight="700" fill="#fff">sria_finance_Workspaces (50 rows)</text>
+            <text x="36" y="220" font-size="10.5" fill="#181615">PK: ID · FK: organization_ID</text>
+            <text x="36" y="237" font-size="10.5" fill="#57534E">code, name, description</text>
+            <text x="36" y="254" font-size="10" fill="#8C8680">Logical folder per tenant</text>
+
+            <!-- Dashboards -->
+            <rect x="330" y="24" width="250" height="134" rx="8" fill="#FFFFFF" stroke="#0369A1" stroke-width="1.8"/>
+            <rect x="330" y="24" width="250" height="28" rx="8" fill="#0369A1"/>
+            <text x="342" y="42" font-size="11" font-weight="700" fill="#fff">sria_finance_Dashboards (31 rows)</text>
+            <text x="342" y="68" font-size="10.5" fill="#181615">PK: ID (UUID)</text>
+            <text x="342" y="85" font-size="10.5" fill="#181615">FK: organization_ID, workspace_ID</text>
+            <text x="342" y="102" font-size="10.5" fill="#57534E">title, description, ownerId</text>
+            <text x="342" y="119" font-size="10.5" fill="#57534E">isArchived (soft delete flag)</text>
+            <text x="342" y="138" font-size="10" fill="#0369A1">Scoped by WHERE organization_ID = ?</text>
+
+            <!-- DashboardSpecs -->
+            <rect x="655" y="24" width="275" height="145" rx="8" fill="#FFFFFF" stroke="#C2531A" stroke-width="1.8"/>
+            <rect x="655" y="24" width="275" height="28" rx="8" fill="#C2531A"/>
+            <text x="667" y="42" font-size="11" font-weight="700" fill="#fff">sria_finance_DashboardSpecs (55 rows)</text>
+            <text x="667" y="68" font-size="10.5" fill="#181615">PK: ID · FK: dashboard_ID</text>
+            <text x="667" y="85" font-size="10.5" fill="#57534E">version ('1.0', '1.1')</text>
+            <text x="667" y="102" font-size="10.5" fill="#C2531A" font-weight="600">specJson (NCLOB full JSON config)</text>
+            <text x="667" y="119" font-size="10.5" fill="#57534E">metricIds, dimensions, sourceType</text>
+            <text x="667" y="136" font-size="10.5" fill="#57534E">retrievedAt (timestamp)</text>
+
+            <!-- DashboardShares -->
+            <rect x="655" y="196" width="275" height="114" rx="8" fill="#FAFAF8" stroke="#D4CFC7"/>
+            <rect x="655" y="196" width="275" height="28" rx="8" fill="#57534E"/>
+            <text x="667" y="214" font-size="11" font-weight="700" fill="#fff">sria_finance_DashboardShares (7 rows)</text>
+            <text x="667" y="240" font-size="10.5" fill="#181615">PK: ID · FK: dashboard_ID</text>
+            <text x="667" y="257" font-size="10.5" fill="#57534E">principalType ('USER' | 'ROLE')</text>
+            <text x="667" y="274" font-size="10.5" fill="#57534E">principalId, permission ('READ'|'EDIT')</text>
+
+            <!-- AuditEvents -->
+            <rect x="330" y="196" width="275" height="130" rx="8" fill="#FAFAF8" stroke="#6D28D9"/>
+            <rect x="330" y="196" width="275" height="28" rx="8" fill="#6D28D9"/>
+            <text x="342" y="214" font-size="11" font-weight="700" fill="#fff">sria_finance_AuditEvents (87 rows)</text>
+            <text x="342" y="240" font-size="10.5" fill="#181615">organizationId, workspaceId, userId</text>
+            <text x="342" y="257" font-size="10.5" fill="#57534E">action (CREATE / UPDATE / ARCHIVE / SHARE)</text>
+            <text x="342" y="274" font-size="10.5" fill="#57534E">targetId, sourceSystem, metricVersion</text>
+            <text x="342" y="294" font-size="10" fill="#6D28D9">Zero monetary figures or raw rows logged</text>
+
+            <!-- DataSourceReferences & MetricConfigurations -->
+            <rect x="24" y="314" width="280" height="84" rx="8" fill="#FFFDF7" stroke="#F59E0B" stroke-dasharray="4,3"/>
+            <text x="36" y="336" font-size="11" font-weight="700" fill="#B45309">DataSourceReferences (0 rows)</text>
+            <text x="36" y="354" font-size="10" fill="#57534E">Stores BTP Destination alias ONLY (no passwords).</text>
+            <text x="36" y="370" font-size="10" fill="#57534E">Columns: workspace_ID, alias, sourceType, systemId</text>
+
+            <rect x="330" y="340" width="275" height="58" rx="8" fill="#FFFDF7" stroke="#F59E0B" stroke-dasharray="4,3"/>
+            <text x="342" y="362" font-size="11" font-weight="700" fill="#B45309">MetricConfigurations (0 rows)</text>
+            <text x="342" y="379" font-size="10" fill="#57534E">Catalog currently served from BASELINE_METRIC_CATALOG</text>
+
+            <!-- Connectors -->
+            <line x1="139" y1="134" x2="139" y2="174" stroke="#15803D" stroke-width="1.5" marker-end="url(#arr3)"/>
+            <line x1="254" y1="79" x2="328" y2="79" stroke="#15803D" stroke-width="1.5" marker-end="url(#arr3)"/>
+            <path d="M 254 220 L 290 220 L 290 110 L 328 110" fill="none" stroke="#15803D" stroke-width="1.5" marker-end="url(#arr3)"/>
+            <line x1="580" y1="79" x2="653" y2="79" stroke="#15803D" stroke-width="1.5" marker-end="url(#arr3)"/>
+            <path d="M 580 120 L 615 120 L 615 245 L 653 245" fill="none" stroke="#15803D" stroke-width="1.5" marker-end="url(#arr3)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: Where Data is Stored on Local Device -->
+  <section class="card" id="device-locations">
+    <div class="head-row">
+      <div class="eyebrow">Chapter 04 · Local Windows Machine Map</div>
+      <h2>Exact File &amp; Storage Locations on Your Computer</h2>
+      <p class="lead">If you want to inspect, back up, or reset where data lives on your Windows PC, here is every exact location.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="box">
+        <h3>1. Primary SQLite Database</h3>
+        <p style="font-size:12.5px; color:var(--text-2); margin:0;">
+          All CAP persistence (<code>SaveDashboard</code>, <code>ListDashboards</code>, <code>ShareDashboard</code>, <code>AuditEvents</code>) writes here. Configured by <code>.cdsrc.json</code> &amp; <code>apps/cap/.cdsrc.json</code>.
+        </p>
+        <div class="path-dark">c:\Users\darla\OneDrive\Desktop\SAP,AI project\apps\cap\sqlite.db</div>
+      </div>
+
+      <div class="box">
+        <h3>2. Browser Fallback Cache</h3>
+        <p style="font-size:12.5px; color:var(--text-2); margin:0;">
+          If the CAP backend on port <code>4004</code> is not running, the React app stores saved dashboards in your browser's local storage so demo workflows still work.
+        </p>
+        <div class="path-dark">Browser DevTools → Application → Local Storage → key: sria_saved_dashboards</div>
+      </div>
+
+      <div class="box">
+        <h3>3. Synthetic Finance Source</h3>
+        <p style="font-size:12.5px; color:var(--text-2); margin:0;">
+          The 10 sample SAP accounting postings live inside the shared TypeScript contracts package and are compiled into both CAP and Web.
+        </p>
+        <div class="path-dark">packages/contracts/src/fixtures/synthetic-fixtures.ts</div>
+      </div>
+
+      <div class="box">
+        <h3>4. Active Session Memory (RAM)</h3>
+        <p style="font-size:12.5px; color:var(--text-2); margin:0;">
+          Currently displayed dashboard, period P01/P02 series, business unit breakdown, and "Recent" sidebar items live in React memory (cleared on hard refresh unless saved).
+        </p>
+        <div class="path-dark">apps/web/src/hooks/useFinanceWorkspace.ts</div>
+      </div>
+
+      <div class="box">
+        <h3>5. Environment &amp; Provider Flags</h3>
+        <p style="font-size:12.5px; color:var(--text-2); margin:0;">
+          Controls whether CAP uses <code>mock</code> or <code>s4hana</code> data provider and <code>mock</code> or live AI provider. Template is in <code>.env.example</code>.
+        </p>
+        <div class="path-dark">.env (local, gitignored) · .cdsrc.json · apps/cap/.cdsrc.json</div>
+      </div>
+
+      <div class="box">
+        <h3>6. Root SQLite Stub</h3>
+        <p style="font-size:12.5px; color:var(--text-2); margin:0;">
+          A small 4 KB SQLite file exists at repo root, while root <code>.cdsrc.json</code> explicitly redirects CAP DB reads/writes to <code>apps/cap/sqlite.db</code>.
+        </p>
+        <div class="path-dark">c:\Users\darla\OneDrive\Desktop\SAP,AI project\sqlite.db (4 KB)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: Save, Stale & Refresh Lifecycle -->
+  <section class="card" id="lifecycle-dynamics">
+    <div class="head-row">
+      <div class="eyebrow">Chapter 05 · Lifecycle &amp; Stale-Data Safety</div>
+      <h2>Why Reopened Dashboards Show "Stale" &amp; How Refresh Works</h2>
+      <p class="lead">Because raw accounting rows are never stored, reopening a saved dashboard shows an older snapshot—so the system protects finance users from trusting outdated figures.</p>
+    </div>
+
+    <div class="zoom-frame" data-zoom-box>
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Diagram 4 · Save → Reopen (isStale: true) → Refresh (Live Recalculation)</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1080" height="240" viewBox="0 0 1080 240" xmlns="http://www.w3.org/2000/svg" style="background:#fff; border-radius:10px; border:1px solid #E7E4DE;">
+            <defs>
+              <marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#57534E"/>
+              </marker>
+            </defs>
+
+            <rect x="20" y="46" width="220" height="130" rx="10" fill="#ECFDF5" stroke="#15803D"/>
+            <text x="34" y="72" font-size="12" font-weight="700" fill="#15803D">1. Click "Save"</text>
+            <text x="34" y="92" font-size="10.5" fill="#181615">POST /api/v1/lifecycle/SaveDashboard</text>
+            <text x="34" y="110" font-size="10" fill="#57534E">Writes Dashboards + DashboardSpecs</text>
+            <text x="34" y="126" font-size="10" fill="#57534E">(v1.0) into apps/cap/sqlite.db.</text>
+            <text x="34" y="146" font-size="9.5" fill="#8C8680">Logs CREATE_DASHBOARD audit.</text>
+
+            <rect x="285" y="46" width="230" height="130" rx="10" fill="#FFFBEB" stroke="#F59E0B"/>
+            <text x="299" y="72" font-size="12" font-weight="700" fill="#B45309">2. Reopen Later</text>
+            <text x="299" y="92" font-size="10.5" fill="#181615">POST /api/v1/lifecycle/ReopenDashboard</text>
+            <text x="299" y="110" font-size="10" fill="#57534E">Reads saved specJson from SQLite.</text>
+            <text x="299" y="128" font-size="10.5" font-weight="700" fill="#B45309">Server forces isStale: true!</text>
+            <text x="299" y="148" font-size="9.5" fill="#8C8680">UI shows amber "Stale Saved Snapshot".</text>
+
+            <rect x="560" y="46" width="235" height="130" rx="10" fill="#F0F9FF" stroke="#0284C7"/>
+            <text x="574" y="72" font-size="12" font-weight="700" fill="#0369A1">3. Click "Refresh Stale"</text>
+            <text x="574" y="92" font-size="10.5" fill="#181615">POST /api/v1/lifecycle/RefreshDashboard</text>
+            <text x="574" y="110" font-size="10" fill="#57534E">FollowUpRouter('refresh') re-runs</text>
+            <text x="574" y="126" font-size="10" fill="#57534E">Orchestrator + Provider + CalcEngine</text>
+            <text x="574" y="144" font-size="10" fill="#0369A1">against current SAP / Mock records.</text>
+
+            <rect x="840" y="46" width="220" height="130" rx="10" fill="#FDF1EA" stroke="#C2531A"/>
+            <text x="854" y="72" font-size="12" font-weight="700" fill="#C2531A">4. Fresh &amp; Versioned</text>
+            <text x="854" y="92" font-size="10.5" fill="#181615">Saves spec v1.1 in DashboardSpecs.</text>
+            <text x="854" y="110" font-size="10" fill="#15803D" font-weight="700">Clears isStale: false</text>
+            <text x="854" y="128" font-size="10" fill="#57534E">Updates retrievedAt timestamp</text>
+            <text x="854" y="146" font-size="10" fill="#57534E">and re-renders UI charts/KPIs.</text>
+
+            <line x1="240" y1="111" x2="283" y2="111" stroke="#57534E" stroke-width="1.6" marker-end="url(#arr4)"/>
+            <line x1="515" y1="111" x2="558" y2="111" stroke="#57534E" stroke-width="1.6" marker-end="url(#arr4)"/>
+            <line x1="795" y1="111" x2="838" y2="111" stroke="#57534E" stroke-width="1.6" marker-end="url(#arr4)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 6: Cheat Sheet -->
+  <section class="card" id="cheat-sheet">
+    <div class="head-row">
+      <div class="eyebrow">Chapter 06 · Developer Quick Reference</div>
+      <h2>"Which File Do I Open If I Want To Change Data Behavior?"</h2>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Goal / Question</th>
+            <th>Exact File to Open</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Change or add local synthetic accounting numbers</td><td><code>packages/contracts/src/fixtures/synthetic-fixtures.ts</code></td></tr>
+          <tr><td>Connect a real SAP S/4HANA OData service</td><td><code>apps/cap/srv/lib/providers/s4hana-odata-provider.ts</code> + <code>apps/cap/mta.yaml</code></td></tr>
+          <tr><td>Switch between <code>mock</code> and <code>s4hana</code> data providers</td><td><code>.env</code> (<code>FINANCE_DATA_PROVIDER</code>) &amp; <code>apps/cap/srv/lib/providers/provider-factory.ts</code></td></tr>
+          <tr><td>Approve or add new KPI metrics (e.g. Cash Flow)</td><td><code>packages/contracts/src/finance-metrics.ts</code> &amp; <code>apps/cap/srv/finance-metric-registry.ts</code></td></tr>
+          <tr><td>Modify revenue/expense/profit math formulas</td><td><code>apps/cap/srv/lib/finance/calculation-engine.ts</code></td></tr>
+          <tr><td>Modify SQLite / HANA database tables or columns</td><td><code>apps/cap/db/tenant.cds</code>, <code>dashboard.cds</code>, <code>metric-config.cds</code></td></tr>
+          <tr><td>Inspect SQLite database queries &amp; tenant isolation</td><td><code>apps/cap/srv/lib/repositories/dashboard-repository.ts</code></td></tr>
+          <tr><td>Change frontend API calls or offline fallback</td><td><code>apps/web/src/services/api-client.ts</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <div class="lightbox-bar">
+    <span id="lbTitle" style="font-weight:700; font-size:13px;">Zoomed View</span>
+    <div class="zoom-controls">
+      <button class="zoom-btn" type="button" onclick="lbZoom(-0.15)">− Zoom Out</button>
+      <span class="zoom-level" id="lbLabel" style="color:#E7E5E4;">100%</span>
+      <button class="zoom-btn" type="button" onclick="lbZoom(0.15)">+ Zoom In</button>
+      <button class="zoom-btn" type="button" onclick="lbReset()">Reset</button>
+      <button class="zoom-btn" type="button" onclick="lbClose()" style="background:#C2531A; color:#fff; border-color:#C2531A;">✕ Close</button>
+    </div>
+  </div>
+  <div class="lightbox-stage">
+    <div class="lightbox-content" id="lbContent"></div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('[data-zoom-box]').forEach((box) => {
+  const vp = box.querySelector('.zoom-viewport');
+  const cv = box.querySelector('.zoom-canvas');
+  const lbl = box.querySelector('[data-zoom-label]');
+  const title = box.querySelector('.zoom-toolbar span').textContent;
+  let scale = 1;
+  const apply = () => {
+    cv.style.transform = `scale(${scale.toFixed(2)})`;
+    lbl.textContent = `${Math.round(scale * 100)}%`;
+  };
+  box.querySelector('[data-zoom-in]').addEventListener('click', () => { scale = Math.min(2.5, scale + 0.15); apply(); });
+  box.querySelector('[data-zoom-out]').addEventListener('click', () => { scale = Math.max(0.45, scale - 0.15); apply(); });
+  box.querySelector('[data-zoom-reset]').addEventListener('click', () => { scale = 1; vp.scrollTo({top:0,left:0}); apply(); });
+  box.querySelector('[data-zoom-full]').addEventListener('click', () => {
+    document.getElementById('lbTitle').textContent = title;
+    document.getElementById('lbContent').innerHTML = cv.innerHTML;
+    lbScale = 1.1; lbApply();
+    document.getElementById('lightbox').classList.add('open');
+  });
+  vp.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      scale = Math.max(0.45, Math.min(2.5, scale + (e.deltaY < 0 ? 0.1 : -0.1)));
+      apply();
+    }
+  }, { passive: false });
+  let drag = false, sx = 0, sy = 0, sl = 0, st = 0;
+  vp.addEventListener('mousedown', (e) => { drag = true; sx = e.pageX - vp.offsetLeft; sy = e.pageY - vp.offsetTop; sl = vp.scrollLeft; st = vp.scrollTop; });
+  window.addEventListener('mouseup', () => { drag = false; });
+  vp.addEventListener('mousemove', (e) => {
+    if (!drag) return;
+    e.preventDefault();
+    vp.scrollLeft = sl - ((e.pageX - vp.offsetLeft) - sx);
+    vp.scrollTop = st - ((e.pageY - vp.offsetTop) - sy);
+  });
+});
+let lbScale = 1.1;
+function lbApply() {
+  document.getElementById('lbContent').style.transform = `scale(${lbScale.toFixed(2)})`;
+  document.getElementById('lbLabel').textContent = `${Math.round(lbScale * 100)}%`;
+}
+function lbZoom(d) { lbScale = Math.max(0.5, Math.min(3.0, lbScale + d)); lbApply(); }
+function lbReset() { lbScale = 1; lbApply(); }
+function lbClose() { document.getElementById('lightbox').classList.remove('open'); }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lbClose(); });
+function downloadHtml() {
+  const blob = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'SRIA-DATA-ARCHITECTURE-AND-FLOW.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

@@ -126,18 +126,26 @@ export class MockLLMProvider implements LLMProvider {
 
     // If no approved metric is found at all
     if (extractedMetrics.length === 0) {
+      if (lower.includes('dashboard') || lower.includes('finance') || lower.includes('report') || lower.includes('kpi') || lower.includes('metrics')) {
+        return {
+          intentType: 'clarification_needed',
+          clarificationQuestions: [
+            {
+              questionId: 'clarify-metric',
+              parameterName: 'metric',
+              prompt: 'Which financial metric would you like to view on your dashboard?',
+              reason: 'No recognized financial metric was specified in the request.',
+              options: ['Total Revenue', 'Total Expenses', 'Net Profit', 'Profit Margin'],
+              suggestedDefault: 'Total Revenue'
+            }
+          ]
+        };
+      }
+
       return {
-        intentType: 'clarification_needed',
-        clarificationQuestions: [
-          {
-            questionId: 'clarify-metric',
-            parameterName: 'metric',
-            prompt: 'Which financial metric would you like to view on your dashboard?',
-            reason: 'No recognized financial metric was specified in the request.',
-            options: ['Total Revenue', 'Total Expenses', 'Net Profit', 'Profit Margin'],
-            suggestedDefault: 'Total Revenue'
-          }
-        ]
+        intentType: 'unsupported_request',
+        rejectionReason: `"${prompt}" is not recognized as a financial reporting request. Supported metrics: Total Revenue, Total Expenses, Net Profit, and Profit Margin.`,
+        suggestedAlternatives: ['total_revenue', 'total_expenses', 'net_profit', 'profit_margin']
       };
     }
 

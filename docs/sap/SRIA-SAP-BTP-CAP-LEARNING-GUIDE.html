@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sria Analytics — SAP BTP &amp; CAP Complete Learning Guide (58% Coverage + 100% Roadmap)</title>
+  <style>
+    :root {
+      --bg: #F6F5F2;
+      --surface: #FFFFFF;
+      --subtle: #FAFAF8;
+      --text: #181615;
+      --text-2: #57534E;
+      --text-3: #8C8680;
+      --border: #E7E4DE;
+      --border-strong: #D4CFC7;
+      --sap: #0369A1;
+      --sap-bg: #F0F9FF;
+      --sap-border: #BAE6FD;
+      --brand: #C2531A;
+      --brand-bg: #FDF1EA;
+      --pos: #15803D;
+      --pos-bg: #ECFDF5;
+      --warn: #B45309;
+      --warn-bg: #FFFBEB;
+      --ai: #6D28D9;
+      --ai-bg: #F5F3FF;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+    }
+    code {
+      background: #F1EFEA;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    pre {
+      background: #181615;
+      color: #F5F5F4;
+      padding: 14px 16px;
+      border-radius: 9px;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: 10px 0 0 0;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #161412;
+      color: #F5F5F4;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-pill {
+      color: #D6D3D1;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+    .nav-pill:hover { background: rgba(255,255,255,0.09); color: #fff; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 32px; padding: 0 12px; border-radius: 7px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08); color: #fff; font-family: inherit;
+    }
+    .btn:hover { background: rgba(255,255,255,0.16); }
+    .btn-primary { background: var(--brand); border-color: var(--brand); }
+    .btn-primary:hover { background: #A84412; }
+
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 26px 24px 72px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 26px;
+      box-shadow: 0 1px 3px rgba(24,22,21,0.05);
+    }
+    .eyebrow {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--sap); margin-bottom: 4px;
+    }
+    h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.025em; }
+    h2 { margin: 0; font-size: 19px; font-weight: 750; letter-spacing: -0.02em; }
+    h3 { margin: 0 0 8px 0; font-size: 15px; font-weight: 700; }
+    .lead { margin: 6px 0 0 0; font-size: 13.5px; color: var(--text-2); max-width: 84ch; }
+    .head-row { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      border: 1px solid transparent; white-space: nowrap;
+    }
+    .b-sap { background: var(--sap-bg); color: var(--sap); border-color: var(--sap-border); }
+    .b-pos { background: var(--pos-bg); color: var(--pos); border-color: #BBF7D0; }
+    .b-warn { background: var(--warn-bg); color: var(--warn); border-color: #FDE68A; }
+    .b-brand { background: var(--brand-bg); color: var(--brand); border-color: rgba(194,83,26,0.25); }
+    .b-ai { background: var(--ai-bg); color: var(--ai); border-color: #DDD6FE; }
+    .b-neutral { background: #F1EFEA; color: var(--text-2); border-color: var(--border); }
+
+    /* Zoom Frame */
+    .zoom-frame {
+      border: 1px solid var(--border-strong); border-radius: 12px;
+      background: #FCFBF9; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .zoom-toolbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 8px 14px; background: var(--subtle); border-bottom: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .zoom-controls { display: flex; align-items: center; gap: 6px; }
+    .zoom-btn {
+      height: 28px; padding: 0 10px; border-radius: 6px;
+      border: 1px solid var(--border-strong); background: var(--surface);
+      color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .zoom-btn:hover { background: var(--bg); }
+    .zoom-level { font-family: ui-monospace, monospace; font-size: 11.5px; color: var(--text-2); min-width: 44px; text-align: center; }
+    .zoom-viewport { overflow: auto; cursor: grab; padding: 16px; max-height: 740px; }
+    .zoom-viewport:active { cursor: grabbing; }
+    .zoom-canvas { transform-origin: top left; transition: transform 0.12s ease; display: inline-block; min-width: 100%; }
+
+    /* Concept Cards */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 16px;
+    }
+    .concept-card {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 18px;
+      background: var(--subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .concept-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 6px;
+      background: var(--sap); color: #fff; font-size: 11.5px; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* Scorecard Bars */
+    .score-hero {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .score-ring-box {
+      background: #161412;
+      color: #fff;
+      border-radius: 12px;
+      padding: 22px;
+      text-align: center;
+    }
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #EAE6DF;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    /* File Table */
+    .controls-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
+    }
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-pill {
+      padding: 5px 11px; border-radius: 999px;
+      border: 1px solid var(--border-strong); background: var(--surface);
+      font-size: 12px; font-weight: 600; color: var(--text-2); cursor: pointer;
+    }
+    .filter-pill.active { background: #0369A1; color: #fff; border-color: #0369A1; }
+    .search-input {
+      height: 34px; padding: 0 12px; border-radius: 8px;
+      border: 1px solid var(--border-strong); font-size: 13px; width: 280px; max-width: 100%;
+    }
+    table.sap-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    table.sap-table th {
+      text-align: left; padding: 10px 12px; background: var(--subtle);
+      border-bottom: 1px solid var(--border-strong);
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2);
+    }
+    table.sap-table td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top;
+    }
+    table.sap-table tr:hover td { background: #FAFAF7; }
+
+    /* Lightbox */
+    .lightbox {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(22,20,18,0.88); backdrop-filter: blur(4px); flex-direction: column;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; background: #161412; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .lightbox-stage { flex: 1; overflow: auto; padding: 24px; display: flex; justify-content: center; align-items: flex-start; }
+    .lightbox-content { transform-origin: top center; transition: transform 0.12s ease; }
+
+    @media (max-width: 820px) {
+      .score-hero { grid-template-columns: 1fr; }
+      .concept-grid { grid-template-columns: 1fr; }
+    }
+    @media print {
+      .topbar, .zoom-toolbar, .controls-row { display: none !important; }
+      body { background: #fff; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .zoom-viewport { overflow: visible !important; max-height: none !important; }
+      .zoom-canvas { transform: scale(0.74) !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg width="28" height="28" viewBox="0 0 332 332" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="14" y="18" width="96" height="292" rx="48" fill="#FBB900"/>
+      <rect x="122" y="96" width="92" height="214" rx="46" fill="#F96302"/>
+      <circle cx="268" cy="260" r="50" fill="#F54E00"/>
+    </svg>
+    <div>
+      <div style="font-size:14px; font-weight:700; color:#fff;">SAP BTP &amp; CAP — Complete Project Learning Guide</div>
+      <div style="font-size:11px; color:#A8A29E;">Sria Analytics Codebase · Every SAP File, Visual Flows, Concepts &amp; 100% Knowledge Scorecard</div>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a class="nav-pill" href="#sap-files">1. Every SAP File</a>
+    <a class="nav-pill" href="#sap-flows">2. What SAP Does (Flows)</a>
+    <a class="nav-pill" href="#concepts">3. Concepts You Gained</a>
+    <a class="nav-pill" href="#scorecard">4. Coverage % &amp; Roadmap</a>
+  </nav>
+
+  <div style="display:flex; gap:8px;">
+    <button class="btn" type="button" onclick="downloadHtml()">Download HTML</button>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Print / Save PDF</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Intro -->
+  <section class="card">
+    <div class="eyebrow">SAP BTP &amp; CAP Beginner-to-Architect Guide</div>
+    <h1>Learning SAP BTP &amp; CAP Through This Exact Codebase</h1>
+    <p class="lead">
+      You took over this project to learn <strong>SAP BTP (Business Technology Platform)</strong> and <strong>SAP CAP (Cloud Application Programming Model)</strong>. Here is the honest, complete breakdown: every SAP-related file in your repo, visual diagrams showing what SAP CAP &amp; BTP do step-by-step with real code examples, every SAP concept you cover by running this project, and an honest <strong>out of 100% scorecard</strong> showing what you've already covered (<strong>58%</strong>) and what the remaining <strong>42%</strong> looks like.
+    </p>
+  </section>
+
+  <!-- SECTION 1: Every Single SAP File -->
+  <section class="card" id="sap-files">
+    <div class="head-row">
+      <div class="eyebrow">Section 01 · Exhaustive SAP File Inventory</div>
+      <h2>Every File Used for SAP Operations in This Codebase</h2>
+      <p class="lead">All <strong>61 SAP-related entries</strong> across CAP config &amp; BTP deployment, CDS database models, services &amp; handlers, security, providers, tests, SAP documentation, and generated CAP build artifacts.</p>
+    </div>
+
+    <div class="controls-row">
+      <div class="filter-pills" id="sapFilters">
+        <button class="filter-pill active" data-cat="ALL">All SAP Files</button>
+        <button class="filter-pill" data-cat="CONFIG_BTP">Config &amp; BTP Cloud</button>
+        <button class="filter-pill" data-cat="DB_CDS">CDS DB Models</button>
+        <button class="filter-pill" data-cat="SERVICES">CDS Services &amp; Handlers</button>
+        <button class="filter-pill" data-cat="PROVIDERS">Security, Repo &amp; S/4 Providers</button>
+        <button class="filter-pill" data-cat="TESTS_DOCS">CAP Tests &amp; SAP Docs</button>
+      </div>
+      <input class="search-input" id="sapSearch" type="search" placeholder="Search SAP file or concept..." aria-label="Search SAP files" />
+    </div>
+
+    <div id="sapCount" style="font-size:12px; color:var(--text-2); margin-bottom:10px;"></div>
+
+    <div style="overflow-x:auto;">
+      <table class="sap-table">
+        <thead>
+          <tr>
+            <th style="width:36%;">Exact File Path</th>
+            <th style="width:16%;">SAP Layer</th>
+            <th>What It Does</th>
+          </tr>
+        </thead>
+        <tbody id="sapTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 2: What SAP Is Doing + Visual Flows + Examples -->
+  <section class="card" id="sap-flows">
+    <div class="head-row">
+      <div class="eyebrow">Section 02 · How SAP Works in This Project</div>
+      <h2>What SAP CAP &amp; SAP BTP Are Actually Doing Here (With Visual Flows &amp; Examples)</h2>
+      <p class="lead">In plain English: <strong>SAP CAP</strong> is the Node.js backend framework that turns your database definitions (<code>.cds</code>) and business logic (<code>.ts</code>) into secure REST/OData APIs. <strong>SAP BTP</strong> is the cloud platform where those apps, databases (HANA), logins (XSUAA), and S/4HANA connections run in production.</p>
+    </div>
+
+    <!-- Flow 1: CAP Anatomy -->
+    <div class="zoom-frame" data-zoom-box style="margin-bottom:20px;">
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Flow 1 · Inside SAP CAP (@sap/cds) — How a Request Flows Through CDS, AuthGuard, CQL &amp; Providers</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1160" height="420" viewBox="0 0 1160 420" xmlns="http://www.w3.org/2000/svg" style="background:#fff; border-radius:10px; border:1px solid #E7E4DE;">
+            <defs>
+              <marker id="arrS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#0369A1"/>
+              </marker>
+            </defs>
+
+            <!-- Client -->
+            <rect x="20" y="135" width="170" height="120" rx="10" fill="#FDF1EA" stroke="#C2531A" stroke-width="1.5"/>
+            <text x="34" y="160" font-size="12" font-weight="700" fill="#C2531A">React Browser</text>
+            <text x="34" y="180" font-size="10" fill="#181615">Example Call:</text>
+            <text x="34" y="196" font-size="10" fill="#57534E">POST /api/finance/</text>
+            <text x="34" y="211" font-size="10" fill="#57534E">GetFinanceMetrics</text>
+            <text x="34" y="229" font-size="9.5" fill="#8C8680">{ companyCode: "1000",</text>
+            <text x="34" y="242" font-size="9.5" fill="#8C8680">  fiscalYear: 2026 }</text>
+
+            <!-- CAP Bootstrap & CDS Service Layer -->
+            <rect x="230" y="30" width="270" height="356" rx="10" fill="#F0F9FF" stroke="#0284C7" stroke-width="1.6"/>
+            <text x="246" y="54" font-size="11.5" font-weight="700" fill="#0369A1">SAP CAP SERVICE LAYER (port 4004)</text>
+
+            <rect x="246" y="70" width="238" height="62" rx="7" fill="#fff" stroke="#BAE6FD"/>
+            <text x="258" y="90" font-size="11" font-weight="700" fill="#181615">1. Express Bootstrap (server.js)</text>
+            <text x="258" y="106" font-size="10" fill="#57534E">Adds CORS + GET /health probe</text>
+            <text x="258" y="121" font-size="9.5" fill="#8C8680">cds.on('bootstrap', app =&gt; ...)</text>
+
+            <rect x="246" y="146" width="238" height="72" rx="7" fill="#fff" stroke="#BAE6FD"/>
+            <text x="258" y="166" font-size="11" font-weight="700" fill="#181615">2. CDS Contract (*.cds files)</text>
+            <text x="258" y="182" font-size="10" fill="#57534E">Declares URLs, entities &amp; actions:</text>
+            <text x="258" y="197" font-size="9.5" fill="#0369A1">@path: '/api/finance' · @path: '/api/ai'</text>
+            <text x="258" y="210" font-size="9.5" fill="#0369A1">@path: '/api/v1/lifecycle' · '/api/v1/dashboards'</text>
+
+            <rect x="246" y="232" width="238" height="64" rx="7" fill="#fff" stroke="#15803D"/>
+            <text x="258" y="252" font-size="11" font-weight="700" fill="#15803D">3. AuthGuard (auth-guard.ts)</text>
+            <text x="258" y="268" font-size="10" fill="#57534E">Reads req.user (XSUAA JWT in Prod)</text>
+            <text x="258" y="283" font-size="9.5" fill="#57534E">Checks FinanceAnalyst / Manager / Admin</text>
+
+            <rect x="246" y="310" width="238" height="60" rx="7" fill="#fff" stroke="#0284C7"/>
+            <text x="258" y="330" font-size="11" font-weight="700" fill="#181615">4. TS Handler (*.ts)</text>
+            <text x="258" y="346" font-size="10" fill="#57534E">class extends cds.ApplicationService</text>
+            <text x="258" y="361" font-size="9.5" fill="#57534E">this.on('GetFinanceMetrics', handler)</text>
+
+            <!-- Two Downstream Branches -->
+            <rect x="550" y="30" width="585" height="170" rx="10" fill="#ECFDF5" stroke="#15803D"/>
+            <text x="568" y="54" font-size="11.5" font-weight="700" fill="#15803D">BRANCH A · CAP PERSISTENCE (CDS DB + CQL)</text>
+
+            <rect x="568" y="70" width="250" height="112" rx="7" fill="#fff" stroke="#BBF7D0"/>
+            <text x="580" y="92" font-size="11" font-weight="700" fill="#181615">DashboardRepository + CQL</text>
+            <text x="580" y="109" font-size="10" fill="#57534E">Example: SaveDashboard / ListDashboards</text>
+            <text x="580" y="126" font-size="9.5" fill="#15803D">SELECT.from('sria.finance.Dashboards')</text>
+            <text x="580" y="141" font-size="9.5" fill="#15803D">.where({ organization_ID: ctx.org })</text>
+            <text x="580" y="160" font-size="9.5" fill="#8C8680">CQL runs on SQLite OR HANA without code edits!</text>
+
+            <rect x="845" y="70" width="270" height="112" rx="7" fill="#fff" stroke="#15803D"/>
+            <text x="858" y="92" font-size="11" font-weight="700" fill="#181615">.cdsrc.json Switches Database</text>
+            <text x="858" y="110" font-size="10" fill="#15803D" font-weight="600">[development] → SQLite (sqlite.db)</text>
+            <text x="858" y="128" font-size="10" fill="#B45309" font-weight="600">[production] → SAP HANA Cloud</text>
+            <text x="858" y="148" font-size="9.5" fill="#57534E">Tables compiled from db/*.cds:</text>
+            <text x="858" y="163" font-size="9.5" fill="#57534E">Dashboards, DashboardSpecs, Shares, Audit</text>
+
+            <!-- Branch B: S/4HANA / Finance Provider -->
+            <rect x="550" y="218" width="585" height="168" rx="10" fill="#FFFBEB" stroke="#F59E0B"/>
+            <text x="568" y="242" font-size="11.5" font-weight="700" fill="#B45309">BRANCH B · SAP FINANCE DATA ACCESS (TRANSIENT PROVIDER)</text>
+
+            <rect x="568" y="258" width="250" height="110" rx="7" fill="#fff" stroke="#FDE68A"/>
+            <text x="580" y="278" font-size="11" font-weight="700" fill="#181615">ProviderFactory</text>
+            <text x="580" y="295" font-size="10" fill="#57534E">Checks FINANCE_DATA_PROVIDER:</text>
+            <text x="580" y="313" font-size="10" fill="#15803D" font-weight="600">'mock' → MockFinanceDataProvider (Active)</text>
+            <text x="580" y="331" font-size="10" fill="#B45309" font-weight="600">'s4hana' → S4HanaODataProvider (Stub)</text>
+            <text x="580" y="350" font-size="9.5" fill="#8C8680">Passes FinanceRecord[] to CalculationEngine</text>
+
+            <rect x="845" y="258" width="270" height="110" rx="7" fill="#fff" stroke="#F59E0B" stroke-dasharray="5,3"/>
+            <text x="858" y="278" font-size="11" font-weight="700" fill="#B45309">SAP S/4HANA OData (Future Live)</text>
+            <text x="858" y="296" font-size="10" fill="#57534E">Service: API_JOURNALENTRYITEMBASIC_SRV</text>
+            <text x="858" y="313" font-size="10" fill="#57534E">Entity: I_JournalEntryItemBasic</text>
+            <text x="858" y="331" font-size="9.5" fill="#57534E">Auth via BTP Destination (S4HANA_FINANCE_API)</text>
+            <text x="858" y="349" font-size="9.5" fill="#B91C1C" font-weight="600">Currently BLOCKED until BASIS + Finance sign-off</text>
+
+            <line x1="190" y1="195" x2="228" y2="195" stroke="#0369A1" stroke-width="1.8" marker-end="url(#arrS)"/>
+            <line x1="500" y1="125" x2="566" y2="125" stroke="#0369A1" stroke-width="1.6" marker-end="url(#arrS)"/>
+            <line x1="500" y1="315" x2="566" y2="315" stroke="#0369A1" stroke-width="1.6" marker-end="url(#arrS)"/>
+            <line x1="818" y1="125" x2="843" y2="125" stroke="#0369A1" stroke-width="1.5" marker-end="url(#arrS)"/>
+            <line x1="818" y1="315" x2="843" y2="315" stroke="#0369A1" stroke-width="1.5" marker-end="url(#arrS)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow 2: SAP BTP Cloud Foundry Landscape -->
+    <div class="zoom-frame" data-zoom-box style="margin-bottom:20px;">
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Flow 2 · How SAP BTP &amp; Cloud Foundry Wrap This App in Production (mta.yaml + xs-security.json)</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1140" height="330" viewBox="0 0 1140 330" xmlns="http://www.w3.org/2000/svg" style="background:#fff; border-radius:10px; border:1px solid #E7E4DE;">
+            <defs>
+              <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#57534E"/>
+              </marker>
+            </defs>
+
+            <rect x="16" y="16" width="1108" height="298" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+            <text x="32" y="40" font-size="11.5" font-weight="700" fill="#0F172A">SAP BTP SUBACCOUNT → CLOUD FOUNDRY SPACE (Defined in apps/cap/mta.yaml)</text>
+
+            <!-- Web Module -->
+            <rect x="36" y="66" width="230" height="104" rx="8" fill="#FDF1EA" stroke="#C2531A"/>
+            <text x="50" y="90" font-size="12" font-weight="700" fill="#C2531A">sria-web-ui (HTML5 App)</text>
+            <text x="50" y="108" font-size="10" fill="#57534E">Path: apps/web/dist</text>
+            <text x="50" y="124" font-size="10" fill="#57534E">Buildpack: staticfile_buildpack</text>
+            <text x="50" y="140" font-size="10" fill="#57534E">Forwards Auth Token → srv-api</text>
+
+            <!-- CAP Backend Module -->
+            <rect x="330" y="66" width="290" height="126" rx="8" fill="#F0F9FF" stroke="#0284C7" stroke-width="1.6"/>
+            <text x="346" y="90" font-size="12" font-weight="700" fill="#0369A1">sria-cap-srv (Node.js CAP)</text>
+            <text x="346" y="108" font-size="10" fill="#57534E">Path: apps/cap/gen/srv (512M RAM)</text>
+            <text x="346" y="124" font-size="10" fill="#57534E">Buildpack: nodejs_buildpack</text>
+            <text x="346" y="142" font-size="10" fill="#0369A1" font-weight="600">Reads bound services automatically</text>
+            <text x="346" y="158" font-size="10" fill="#0369A1" font-weight="600">from VCAP_SERVICES env var!</text>
+            <text x="346" y="176" font-size="9.5" fill="#8C8680">NODE_ENV=production · CDS_ENV=production</text>
+
+            <!-- BTP Managed Services -->
+            <rect x="695" y="54" width="405" height="72" rx="8" fill="#ECFDF5" stroke="#15803D"/>
+            <text x="712" y="76" font-size="11.5" font-weight="700" fill="#15803D">sria-xsuaa (Service: xsuaa, Plan: application)</text>
+            <text x="712" y="94" font-size="10" fill="#57534E">Configured by xs-security.json: validates OAuth2 JWTs &amp;</text>
+            <text x="712" y="110" font-size="10" fill="#57534E">assigns FinanceAnalyst / FinanceManager / TenantAdmin scopes.</text>
+
+            <rect x="695" y="140" width="405" height="72" rx="8" fill="#FFFBEB" stroke="#F59E0B"/>
+            <text x="712" y="162" font-size="11.5" font-weight="700" fill="#B45309">sria-destination (Service: destination, Plan: lite)</text>
+            <text x="712" y="180" font-size="10" fill="#57534E">Holds S4HANA_FINANCE_API URL + OAuth2 secrets securely</text>
+            <text x="712" y="196" font-size="10" fill="#57534E">outside code &amp; DB. Used when FINANCE_DATA_PROVIDER=s4hana.</text>
+
+            <rect x="695" y="226" width="405" height="72" rx="8" fill="#F8FAFC" stroke="#94A3B8" stroke-dasharray="5,4"/>
+            <text x="712" y="248" font-size="11.5" font-weight="700" fill="#334155">SAP HANA Cloud (Service: hana, Plan: hdi-shared)</text>
+            <text x="712" y="266" font-size="10" fill="#57534E">Activated in production (.cdsrc.json) when provisioned per</text>
+            <text x="712" y="282" font-size="10" fill="#57534E">docs/sap/HANA-CLOUD-PROVISIONING.md (blocked until trial/prod).</text>
+
+            <line x1="266" y1="118" x2="328" y2="118" stroke="#57534E" stroke-width="1.6" marker-end="url(#arrB)"/>
+            <line x1="620" y1="95" x2="693" y2="90" stroke="#57534E" stroke-width="1.5" marker-end="url(#arrB)"/>
+            <line x1="620" y1="130" x2="693" y2="175" stroke="#57534E" stroke-width="1.5" marker-end="url(#arrB)"/>
+            <path d="M 475 192 L 475 262 L 693 262" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrB)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real Example Box -->
+    <div style="background:#FAFAF8; border:1px solid var(--border); border-radius:10px; padding:18px;">
+      <h3>Concrete Example from Your Actual Code</h3>
+      <p style="margin:0 0 8px 0; font-size:13px; color:var(--text-2);">
+        Notice how a single CDS declaration in <code>apps/cap/db/dashboard.cds</code> automatically generates SQLite/HANA tables, OData endpoints, and connects to TypeScript CQL queries:
+      </p>
+      <pre>// 1. CDS Model (apps/cap/db/dashboard.cds)
+entity Dashboards : cuid, managed {
+  organization : Association to Organizations not null;
+  title        : String(150) not null;
+  ownerId      : String(100) not null;
+  isArchived   : Boolean default false;
+}
+
+// 2. CDS Service API (apps/cap/srv/dashboard-lifecycle-service.cds)
+@path: '/api/v1/lifecycle'
+service DashboardLifecycleService {
+  action SaveDashboard(title: String(150), specJson: LargeString not null) returns { dashboardId: UUID; status: String; };
+}
+
+// 3. CAP Handler + CQL Query (apps/cap/srv/lib/repositories/dashboard-repository.ts)
+await db.run(
+  SELECT.from('sria.finance.Dashboards').where({ organization_ID: ctx.organizationId, isArchived: 0 })
+);</pre>
+    </div>
+  </section>
+
+  <!-- SECTION 3: Concepts You Gained & How Every Concept Works -->
+  <section class="card" id="concepts">
+    <div class="head-row">
+      <div class="eyebrow">Section 03 · Core Knowledge Inventory</div>
+      <h2>12 SAP BTP &amp; CAP Concepts You Cover by Executing This Codebase</h2>
+      <p class="lead">Each card explains what the concept is in SAP, how it works in real life, and exactly where it lives in your repo.</p>
+    </div>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">1</span>
+          <h3 style="margin:0;">CDS Domain Modeling (<code>db/*.cds</code>)</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> Instead of writing raw SQL <code>CREATE TABLE</code> scripts, SAP CAP uses Core Data Services (<code>.cds</code>). Using <code>cuid</code> adds an auto-UUID primary key <code>ID</code>; <code>managed</code> adds <code>createdAt</code>, <code>createdBy</code>, <code>modifiedAt</code>, <code>modifiedBy</code> automatically. <code>Association</code> links tables loosely; <code>Composition</code> expresses parent-child ownership (like <code>Dashboards</code> owning <code>DashboardSpecs</code>).
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">2</span>
+          <h3 style="margin:0;">CDS Service Projections, Actions &amp; Functions</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> In <code>srv/*.cds</code>, <code>entity X as projection on my.X</code> safely exposes DB tables as OData/REST APIs without exposing raw schema internals. <code>action</code> is used for POST operations that change state or run workflows (<code>SaveDashboard</code>, <code>ExecutePlan</code>), while <code>function</code> is used for read-only GET queries (<code>ListDashboards()</code>, <code>getApprovedMetrics()</code>).
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">3</span>
+          <h3 style="margin:0;"><code>cds.ApplicationService</code> Custom Handlers</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> Every <code>.cds</code> service file automatically pairs with a same-named <code>.ts</code>/<code>.js</code> file (e.g., <code>ai-service.cds</code> + <code>ai-service.ts</code>). Inside <code>init()</code>, <code>this.on('ActionName', handler)</code> hooks your TypeScript code into CAP's HTTP/OData pipeline, giving you <code>req.data</code>, <code>req.user</code>, and <code>req.error(code, msg)</code>.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">4</span>
+          <h3 style="margin:0;">CQL (CAP Query Language)</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> <code>SELECT.from(...)</code>, <code>INSERT.into(...)</code>, and <code>UPDATE(...)</code> in <code>dashboard-repository.ts</code> are fluent JavaScript query builders. CAP compiles CQL into SQLite SQL locally and SAP HANA SQL in production automatically—making your code database-portable.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">5</span>
+          <h3 style="margin:0;">CAP Environment Profiles (<code>.cdsrc.json</code>)</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> CAP switches infrastructure using profiles. Under <code>[development]</code>, <code>requires.db.kind = "sqlite"</code> uses local <code>sqlite.db</code> and mock auth. Under <code>[production]</code>, CAP switches to <code>"hana"</code> and <code>"xsuaa"</code> without changing a single line of TypeScript service code.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">6</span>
+          <h3 style="margin:0;">CAP Server Bootstrap &amp; Custom Express Routes</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> CAP runs on top of Express.js. In <code>apps/cap/srv/server.js</code>, <code>cds.on('bootstrap', app =&gt; ...)</code> lets you attach standard Express middleware (CORS headers) and custom REST endpoints like <code>GET /health</code> before CAP mounts its OData routes.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">7</span>
+          <h3 style="margin:0;">SAP XSUAA RBAC (<code>xs-security.json</code>)</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> SAP BTP's OAuth2 authorization server uses a 3-tier security hierarchy: <strong>Scopes</strong> (<code>$XSAPPNAME.FinanceAnalyst</code>) → grouped into <strong>Role Templates</strong> (<code>FinanceManager</code>) → assigned to business users via <strong>Role Collections</strong> (<code>SriaFinanceManager</code>) in BTP Cockpit. At runtime, <code>AuthGuard</code> checks <code>req.user.is('FinanceManager')</code>.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">8</span>
+          <h3 style="margin:0;">Server-Side Multi-Tenant Isolation</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> In SaaS BTP apps, multiple customer companies share one runtime. <code>AuthGuard</code> extracts the tenant ID from the verified token (never trusting client headers alone), and <code>DashboardRepository</code> injects <code>organization_ID</code> into every query so Tenant A can never read Tenant B's dashboards.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">9</span>
+          <h3 style="margin:0;">CAP Build Artifacts (<code>cds build</code> → <code>gen/srv</code>)</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> Running <code>npm run build --workspace=apps/cap</code> compiles all <code>.cds</code> models into a single Core Schema Notation file (<code>csn.json</code>) and generates OData v4 XML <code>$metadata</code> files inside <code>apps/cap/gen/srv/</code> ready for Cloud Foundry deployment.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">10</span>
+          <h3 style="margin:0;">SAP BTP Multi-Target Application (<code>mta.yaml</code>)</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> Instead of deploying frontend, backend, security, and destinations separately, <code>mta.yaml</code> packages <code>sria-cap-srv</code> (Node.js) + <code>sria-web-ui</code> (HTML5 static) + <code>sria-xsuaa</code> + <code>sria-destination</code> into one deployable <code>.mtar</code> archive for Cloud Foundry.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">11</span>
+          <h3 style="margin:0;">BTP <code>VCAP_SERVICES</code> &amp; Destination Concept</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> On SAP BTP Cloud Foundry, credentials are never placed in code. When you bind <code>sria-xsuaa</code> or <code>sria-destination</code> to an app, BTP injects connection credentials into the container's <code>VCAP_SERVICES</code> JSON env variable, which CAP reads automatically on startup.
+        </p>
+      </div>
+
+      <div class="concept-card">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span class="concept-num">12</span>
+          <h3 style="margin:0;">SAP S/4HANA OData Side-by-Side Extension Pattern</h3>
+        </div>
+        <p style="margin:0; font-size:12.5px; color:var(--text-2);">
+          <strong>How it works:</strong> This app demonstrates SAP's recommended <strong>"Clean Core / Side-by-Side Extension"</strong> pattern: never modify S/4HANA core ABAP code; instead, query standard SAP OData CDS views (<code>I_JournalEntryItemBasic</code>) transiently over HTTPS from CAP on BTP, and build AI/analytics outside S/4HANA.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: Scorecard Out of 100% + Next Roadmap -->
+  <section class="card" id="scorecard">
+    <div class="head-row">
+      <div class="eyebrow">Section 04 · Honest Learning Assessment</div>
+      <h2>SAP BTP &amp; CAP Learning Coverage: 58% / 100% (And What Remains)</h2>
+      <p class="lead">Here is an honest, realistic measurement of how much of real-world SAP BTP &amp; CAP you gain from this codebase—and the remaining 42% you should practice next to become job-ready.</p>
+    </div>
+
+    <div class="score-hero">
+      <div class="score-ring-box">
+        <svg width="146" height="146" viewBox="0 0 120 120" style="display:block; margin:0 auto 10px auto;">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="11"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#F96302" stroke-width="11" stroke-linecap="round"
+                  stroke-dasharray="314.16" stroke-dashoffset="131.95" transform="rotate(-90 60 60)"/>
+          <text x="60" y="57" text-anchor="middle" font-size="26" font-weight="800" fill="#FFFFFF">58%</text>
+          <text x="60" y="74" text-anchor="middle" font-size="10" fill="#D6D3D1">SAP BTP + CAP</text>
+        </svg>
+        <div style="font-size:13px; font-weight:700; color:#F5F5F4;">Strong CAP Core Foundation</div>
+        <div style="font-size:11.5px; color:#A8A29E; margin-top:4px;">~70% CAP Basics · ~42% BTP Cloud</div>
+      </div>
+
+      <!-- Domain Breakdown Bars -->
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; margin-bottom:4px;">
+            <span>1. CAP CDS Data Modeling &amp; SQLite Persistence</span>
+            <span style="color:var(--pos);">85% Covered</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:85%; background:#15803D;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; margin-bottom:4px;">
+            <span>2. CAP Services, Actions, Functions, CQL &amp; Handlers</span>
+            <span style="color:var(--pos);">80% Covered</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:80%; background:#0284C7;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; margin-bottom:4px;">
+            <span>3. SAP XSUAA Security Descriptors &amp; Multi-Tenancy</span>
+            <span style="color:var(--sap);">60% Covered</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:60%; background:#0369A1;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; margin-bottom:4px;">
+            <span>4. BTP Cloud Foundry Packaging (<code>mta.yaml</code> / <code>manifest.yml</code>)</span>
+            <span style="color:var(--warn);">50% Covered</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:50%; background:#D97706;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; margin-bottom:4px;">
+            <span>5. SAP HANA Cloud HDI &amp; S/4HANA Live OData Connectivity</span>
+            <span style="color:var(--brand);">30% Covered (Stub / Docs)</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:30%; background:#C2531A;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; margin-bottom:4px;">
+            <span>6. Broader BTP Ecosystem (Fiori Elements, AppRouter, Event Mesh, Cloud SDK)</span>
+            <span style="color:var(--text-3);">15% Covered</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:15%; background:#64748B;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zoomable Learning Composition & Next 42% Diagram -->
+    <div class="zoom-frame" data-zoom-box>
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Diagram 3 · Knowledge Map: Covered in This Project (58%) vs. What To Learn Next (42%)</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1120" height="390" viewBox="0 0 1120 390" xmlns="http://www.w3.org/2000/svg" style="background:#fff; border-radius:10px; border:1px solid #E7E4DE;">
+            <!-- Left: Mastered Here (58%) -->
+            <rect x="20" y="20" width="530" height="350" rx="10" fill="#ECFDF5" stroke="#15803D" stroke-width="1.6"/>
+            <text x="38" y="46" font-size="13" font-weight="800" fill="#15803D">ALREADY COVERED IN THIS PROJECT (58%)</text>
+
+            <rect x="38" y="64" width="494" height="62" rx="8" fill="#fff" stroke="#BBF7D0"/>
+            <text x="52" y="85" font-size="11.5" font-weight="700" fill="#181615">CAP Core Modeling &amp; Persistence (85%)</text>
+            <text x="52" y="103" font-size="10.5" fill="#57534E">CDS entities, cuid/managed, Associations, Compositions, cds deploy to SQLite, CQL</text>
+            <text x="52" y="118" font-size="10" fill="#15803D">Files: db/*.cds, dashboard-repository.ts, .cdsrc.json</text>
+
+            <rect x="38" y="138" width="494" height="62" rx="8" fill="#fff" stroke="#BBF7D0"/>
+            <text x="52" y="159" font-size="11.5" font-weight="700" fill="#181615">CAP Service Handlers &amp; OData/REST (80%)</text>
+            <text x="52" y="177" font-size="10.5" fill="#57534E">8 services, @path, actions/functions, cds.ApplicationService, bootstrap CORS &amp; /health</text>
+            <text x="52" y="192" font-size="10" fill="#15803D">Files: srv/*.cds, srv/*.ts, server.js</text>
+
+            <rect x="38" y="212" width="494" height="62" rx="8" fill="#fff" stroke="#BBF7D0"/>
+            <text x="52" y="233" font-size="11.5" font-weight="700" fill="#181615">XSUAA Concepts &amp; Tenant Isolation (60%)</text>
+            <text x="52" y="251" font-size="10.5" fill="#57534E">Scopes, Role Templates, Role Collections, AuthGuard scope checks, organization_ID filtering</text>
+            <text x="52" y="266" font-size="10" fill="#15803D">Files: xs-security.json, auth-guard.ts</text>
+
+            <rect x="38" y="286" width="494" height="68" rx="8" fill="#fff" stroke="#BBF7D0"/>
+            <text x="52" y="307" font-size="11.5" font-weight="700" fill="#181615">BTP Packaging &amp; Clean-Core Adapter Design (40%)</text>
+            <text x="52" y="325" font-size="10.5" fill="#57534E">mta.yaml, manifest.yml, VCAP_SERVICES mental model, ProviderFactory + S/4 field mapping</text>
+            <text x="52" y="340" font-size="10" fill="#15803D">Files: mta.yaml, manifest.yml, s4hana-odata-provider.ts, docs/sap/*</text>
+
+            <!-- Right: Next 42% to Learn -->
+            <rect x="572" y="20" width="528" height="350" rx="10" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.6"/>
+            <text x="590" y="46" font-size="13" font-weight="800" fill="#B45309">NEXT 42% TO LEARN FOR REAL BTP JOBS</text>
+
+            <rect x="590" y="64" width="492" height="62" rx="8" fill="#fff" stroke="#FDE68A"/>
+            <text x="604" y="85" font-size="11.5" font-weight="700" fill="#181615">1. Hands-on SAP BTP Cockpit &amp; Cloud Foundry CLI (+12%)</text>
+            <text x="604" y="103" font-size="10.5" fill="#57534E">Create a free BTP Trial account, run mbt build + cf login + cf deploy on mta.yaml,</text>
+            <text x="604" y="118" font-size="10" fill="#B45309">bind real xsuaa &amp; hdi-shared services, inspect VCAP_SERVICES with cf env.</text>
+
+            <rect x="590" y="138" width="492" height="62" rx="8" fill="#fff" stroke="#FDE68A"/>
+            <text x="604" y="159" font-size="11.5" font-weight="700" fill="#181615">2. Live SAP Cloud SDK &amp; External OData Import (+10%)</text>
+            <text x="604" y="177" font-size="10.5" fill="#57534E">Use cds import with S/4HANA .edmx, cds.connect.to('API_JOURNALENTRYITEMBASIC_SRV'),</text>
+            <text x="604" y="192" font-size="10" fill="#B45309">and @sap-cloud-sdk/http-client + Destination Service + SAP Cloud Connector.</text>
+
+            <rect x="590" y="212" width="492" height="62" rx="8" fill="#fff" stroke="#FDE68A"/>
+            <text x="604" y="233" font-size="11.5" font-weight="700" fill="#181615">3. SAP AppRouter &amp; Live XSUAA + IAS Login (+8%)</text>
+            <text x="604" y="251" font-size="10.5" fill="#57534E">Add @sap/approuter (xs-app.json) in front of React + CAP for real OAuth2 SSO login,</text>
+            <text x="604" y="266" font-size="10" fill="#B45309">CSRF protection, and SAP Cloud Identity (IAS) trust configuration.</text>
+
+            <rect x="590" y="286" width="492" height="68" rx="8" fill="#fff" stroke="#FDE68A"/>
+            <text x="604" y="307" font-size="11.5" font-weight="700" fill="#181615">4. Advanced CAP &amp; BTP Ecosystem (+12%)</text>
+            <text x="604" y="325" font-size="10.5" fill="#57534E">SAP HANA Cloud HDI &amp; Calculation Views, Fiori Elements (@UI annotations + Draft),</text>
+            <text x="604" y="340" font-size="10" fill="#B45309">CAP before/after hooks, Event Mesh messaging, and SAP Build / Integration Suite.</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <div class="lightbox-bar">
+    <span id="lbTitle" style="font-weight:700; font-size:13px;">Zoomed View</span>
+    <div class="zoom-controls">
+      <button class="zoom-btn" type="button" onclick="lbZoom(-0.15)">− Zoom Out</button>
+      <span class="zoom-level" id="lbLabel" style="color:#E7E5E4;">100%</span>
+      <button class="zoom-btn" type="button" onclick="lbZoom(0.15)">+ Zoom In</button>
+      <button class="zoom-btn" type="button" onclick="lbReset()">Reset</button>
+      <button class="zoom-btn" type="button" onclick="lbClose()" style="background:#C2531A; color:#fff; border-color:#C2531A;">✕ Close</button>
+    </div>
+  </div>
+  <div class="lightbox-stage">
+    <div class="lightbox-content" id="lbContent"></div>
+  </div>
+</div>
+
+<script>
+// ─── 1. Exhaustive SAP File List ────────────────────────────────────────────
+const SAP_FILES = [
+  // Config & BTP Cloud
+  ['.cdsrc.json', 'CONFIG_BTP', 'CAP Config', 'Root CAP CDS config routing default SQLite connection to apps/cap/sqlite.db.'],
+  ['apps/cap/.cdsrc.json', 'CONFIG_BTP', 'CAP Profiles', 'Switches db kind between sqlite ([development]) and hana + xsuaa ([production]).'],
+  ['apps/cap/package.json', 'CONFIG_BTP', 'CAP Package', 'Declares @sap/cds, @cap-js/sqlite, @sap/cds-dk, express, and cds watch/build/deploy scripts.'],
+  ['apps/cap/tsconfig.json', 'CONFIG_BTP', 'TypeScript', 'TypeScript settings for compiling and typechecking CAP Node.js services.'],
+  ['apps/cap/mta.yaml', 'CONFIG_BTP', 'BTP MTA', 'SAP BTP Multi-Target Application descriptor bundling sria-cap-srv, sria-web-ui, sria-xsuaa, and sria-destination.'],
+  ['apps/cap/manifest.yml', 'CONFIG_BTP', 'Cloud Foundry', 'Direct Cloud Foundry push manifest for sria-cap-srv (nodejs_buildpack, 512M RAM, sria-xsuaa binding).'],
+  ['apps/cap/xs-security.json', 'CONFIG_BTP', 'SAP XSUAA', 'Defines OAuth2 scopes ($XSAPPNAME.FinanceAnalyst, FinanceManager, TenantAdmin), role templates, and role collections.'],
+  ['apps/cap/sqlite.db', 'CONFIG_BTP', 'Local CAP DB', 'Compiled SQLite database on disk storing Organizations, Workspaces, Dashboards, DashboardSpecs, Shares, AuditEvents.'],
+  ['apps/cap/srv/types/cds.d.ts', 'CONFIG_BTP', 'CDS Types', 'TypeScript ambient declarations for @sap/cds, ApplicationService, SELECT, INSERT, UPDATE, DELETE.'],
+  ['apps/cap/gen/* (auto-generated)', 'CONFIG_BTP', 'CDS Build Output', 'Generated by cds build: contains compiled csn.json and OData v4 XML $metadata files for all 8 services.'],
+
+  // CDS DB Models
+  ['apps/cap/db/schema.cds', 'DB_CDS', 'CDS Root', 'Namespace sria.finance root schema importing tenant, dashboard, and metric-config CDS models.'],
+  ['apps/cap/db/tenant.cds', 'DB_CDS', 'CDS Entity', 'Defines multi-tenant Organizations and Workspaces entities using cuid and managed aspects.'],
+  ['apps/cap/db/dashboard.cds', 'DB_CDS', 'CDS Entity', 'Defines Dashboards, DashboardSpecs (versioned JSON), and DashboardShares (READ/WRITE access).'],
+  ['apps/cap/db/metric-config.cds', 'DB_CDS', 'CDS Entity', 'Defines MetricConfigurations, DataSourceReferences (BTP destination aliases only), and AuditEvents.'],
+
+  // CDS Services & Handlers
+  ['apps/cap/srv/server.js', 'SERVICES', 'CAP Bootstrap', 'Hooks cds.on("bootstrap") to attach Express CORS middleware and GET /health readiness probe.'],
+  ['apps/cap/srv/health-service.cds', 'SERVICES', 'CDS Service', 'Defines /api/v1/health HealthService and getStatus() function.'],
+  ['apps/cap/srv/health-service.js', 'SERVICES', 'CAP Handler', 'Implements getStatus() returning CAP environment, SQLite dialect, and active data provider mode.'],
+  ['apps/cap/srv/ai-service.cds', 'SERVICES', 'CDS Service', 'Defines /api/ai AiService exposing UnderstandRequest(prompt) action.'],
+  ['apps/cap/srv/ai-service.ts', 'SERVICES', 'CAP Handler', 'Authenticates user via AuthGuard and calls IntentService to parse natural-language requests.'],
+  ['apps/cap/srv/orchestration-service.cds', 'SERVICES', 'CDS Service', 'Defines /api/orchestration OrchestrationService exposing PlanRequest and ExecutePlan actions.'],
+  ['apps/cap/srv/orchestration-service.ts', 'SERVICES', 'CAP Handler', 'Binds server-side tenant/user context and executes Planner + Orchestrator workflow.'],
+  ['apps/cap/srv/finance-data-service.cds', 'SERVICES', 'CDS Service', 'Defines /api/finance FinanceDataService exposing GetFinanceMetrics and GetProviderStatus.'],
+  ['apps/cap/srv/finance-data-service.ts', 'SERVICES', 'CAP Handler', 'Calls ProviderFactory + CalculationEngine to return deterministic MetricResult[] without storing raw rows.'],
+  ['apps/cap/srv/dashboard-service.cds', 'SERVICES', 'CDS Service', 'Defines /api/v1/dashboards CRUD actions and Dashboards/Specs/Shares projections.'],
+  ['apps/cap/srv/dashboard-service.ts', 'SERVICES', 'CAP Handler', 'Enforces FinanceManager/FinanceAnalyst scopes and injects tenant isolation on READ Dashboards.'],
+  ['apps/cap/srv/dashboard-lifecycle-service.cds', 'SERVICES', 'CDS Service', 'Defines /api/v1/lifecycle actions: Save, Rename, Delete, Share, Reopen, Refresh, ListDashboards.'],
+  ['apps/cap/srv/dashboard-lifecycle-service.ts', 'SERVICES', 'CAP Handler', 'Implements dashboard lifecycle persistence, stale reopen flags, sharing, and on-demand refresh.'],
+  ['apps/cap/srv/metric-service.cds', 'SERVICES', 'CDS Service', 'Defines /api/v1/metrics MetricCatalogService and getApprovedMetrics() function.'],
+  ['apps/cap/srv/metric-service.ts', 'SERVICES', 'CAP Handler', 'Returns approved/candidate metrics and SAP formulas from FinanceMetricRegistry.'],
+  ['apps/cap/srv/admin-service.cds', 'SERVICES', 'CDS Service', 'Defines /api/v1/admin AdminService projections for Organizations, Workspaces, DataSourceReferences, AuditEvents.'],
+  ['apps/cap/srv/admin-service.ts', 'SERVICES', 'CAP Handler', 'Registers AdminService CAP ApplicationService boundary.'],
+
+  // Security, Repo, Providers & SAP Mapping
+  ['apps/cap/srv/lib/auth/auth-guard.ts', 'PROVIDERS', 'SAP Security', 'Extracts XSUAA/CAP user ID, tenant, roles, and enforces assertAuthenticated / assertScope checks.'],
+  ['apps/cap/srv/lib/repositories/dashboard-repository.ts', 'PROVIDERS', 'CAP CQL Repo', 'Executes tenant-scoped CQL (SELECT, INSERT, UPDATE) against SQLite/HANA and logs AuditEvents.'],
+  ['apps/cap/srv/lib/providers/finance-data-provider.ts', 'PROVIDERS', 'SAP Contract', 'Defines transient FinanceDataProvider interface (no persistence of FinanceRecord[]).'],
+  ['apps/cap/srv/lib/providers/provider-factory.ts', 'PROVIDERS', 'SAP Adapter', 'Selects MockFinanceDataProvider or S4HanaODataFinanceDataProvider from FINANCE_DATA_PROVIDER env.'],
+  ['apps/cap/srv/lib/providers/mock-finance-data-provider.ts', 'PROVIDERS', 'Mock SAP Source', 'Filters SYNTHETIC_FINANCE_RECORDS in-memory simulating SAP journal entries (isSynthetic: true).'],
+  ['apps/cap/srv/lib/providers/s4hana-odata-provider.ts', 'PROVIDERS', 'S/4HANA Stub', 'Blocked stub for live SAP S/4HANA OData (I_JournalEntryItemBasic) via BTP Destination Service.'],
+  ['apps/cap/srv/finance-metric-registry.ts', 'PROVIDERS', 'SAP Governance', 'Manages metric allowlists, approval statuses, and SAP field mapping readiness.'],
+  ['apps/cap/srv/dashboard/dashboard-spec-compiler.ts', 'PROVIDERS', 'CAP Compiler', 'Compiles verified metrics & SAP provenance into schema-validated DashboardSpec JSON.'],
+  ['apps/cap/srv/lib/finance/calculation-engine.ts', 'PROVIDERS', 'Finance Engine', 'Deterministic TypeScript arithmetic for Revenue (Credit-Debit), Expenses (Debit-Credit), Net Profit, Margin.'],
+  ['apps/cap/srv/finance/normalization.ts', 'PROVIDERS', 'Finance Engine', 'Validates currency consistency, duplicate IDs, and distinguishes zero-balance vs missing SAP data.'],
+  ['apps/cap/srv/finance/calculations/index.ts', 'PROVIDERS', 'Finance Engine', 'Barrel export exposing revenue, expenses, and profit calculation modules.'],
+  ['apps/cap/srv/finance/calculations/revenue-calculator.ts', 'PROVIDERS', 'Finance Engine', 'Modularized revenue calculation helper (Credit minus Debit returns).'],
+  ['apps/cap/srv/finance/calculations/expenses-calculator.ts', 'PROVIDERS', 'Finance Engine', 'Modularized expenses calculation helper (Debit minus Credit refunds).'],
+  ['apps/cap/srv/finance/calculations/profit-calculator.ts', 'PROVIDERS', 'Finance Engine', 'Modularized net profit and zero-denominator-safe profit margin helper.'],
+  ['packages/contracts/src/finance-metrics.ts', 'PROVIDERS', 'SAP Field Hints', 'Defines BASELINE_METRIC_CATALOG including suggested SAP S/4HANA entity sets and debit/credit rules.'],
+
+  // CAP Tests & SAP Docs
+  ['apps/cap/test/auth-guard.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests XSUAA role/scope resolution and 401/403 authorization guards.'],
+  ['apps/cap/test/dashboard-persistence.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests CQL SQLite persistence, tenant boundary isolation, and audit logs.'],
+  ['apps/cap/test/dashboard-lifecycle.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests Save, Reopen (isStale), Rename, Share, Refresh, and Delete lifecycle.'],
+  ['apps/cap/test/health.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests /health readiness probe across CAP, SQLite, and provider status.'],
+  ['apps/cap/test/mock-provider.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests MockFinanceDataProvider filtering, synthetic tagging, and provenance.'],
+  ['apps/cap/test/calculation-engine.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests deterministic SAP sign rules and zero-denominator margin protection.'],
+  ['apps/cap/test/metric-registry.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests FinanceMetricRegistry allowlist validation and approval gating.'],
+  ['apps/cap/test/dashboard-spec-compiler.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests strict DashboardSpec compilation and allowed widget types.'],
+  ['apps/cap/test/follow-up-router.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests FollowUpRouter presentation vs. data-changing vs. refresh routing.'],
+  ['apps/cap/test/intent-service.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests IntentService prompt parsing, clarification, and security rejections.'],
+  ['apps/cap/test/orchestrator.test.ts', 'TESTS_DOCS', 'CAP Test', 'Tests CAP AI orchestration, tool registry bounds, and execution traces.'],
+  ['docs/sap/BTP-ENVIRONMENTS.md', 'TESTS_DOCS', 'SAP Docs', 'Explains BTP Global Account → Subaccount → CF Org → Space → VCAP_SERVICES bindings.'],
+  ['docs/sap/HANA-CLOUD-PROVISIONING.md', 'TESTS_DOCS', 'SAP Docs', 'Runbook for provisioning SAP HANA Cloud and binding sria-finance-hdi in BTP.'],
+  ['docs/sap/IDENTITY-SETUP.md', 'TESTS_DOCS', 'SAP Docs', 'Runbook for deploying xs-security.json to XSUAA and assigning Role Collections in BTP Cockpit.'],
+  ['docs/domain/SAP-FIELD-MAPPING.md', 'TESTS_DOCS', 'SAP Docs', 'Maps DTO fields to SAP S/4HANA API_JOURNALENTRYITEMBASIC_SRV / I_JournalEntryItemBasic properties.']
+];
+
+const BADGE_MAP = {
+  CONFIG_BTP: 'b-brand',
+  DB_CDS: 'b-pos',
+  SERVICES: 'b-sap',
+  PROVIDERS: 'b-ai',
+  TESTS_DOCS: 'b-neutral'
+};
+
+let currentCat = 'ALL';
+const sapTbody = document.getElementById('sapTbody');
+const sapCount = document.getElementById('sapCount');
+const sapSearch = document.getElementById('sapSearch');
+
+function renderSapFiles() {
+  const q = sapSearch.value.toLowerCase().trim();
+  const list = SAP_FILES.filter(([path, cat, tag, desc]) => {
+    const catOk = currentCat === 'ALL' || cat === currentCat;
+    const qOk = !q || path.toLowerCase().includes(q) || tag.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
+    return catOk && qOk;
+  });
+  sapCount.textContent = `Showing ${list.length} of ${SAP_FILES.length} SAP-related file entries`;
+  sapTbody.innerHTML = list.map(([path, cat, tag, desc]) => `
+    <tr>
+      <td><code>${path}</code></td>
+      <td><span class="badge ${BADGE_MAP[cat] || 'b-neutral'}">${tag}</span></td>
+      <td style="color:var(--text-2);">${desc}</td>
+    </tr>
+  `).join('');
+}
+
+document.getElementById('sapFilters').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-pill');
+  if (!btn) return;
+  document.querySelectorAll('.filter-pill').forEach((b) => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat = btn.dataset.cat;
+  renderSapFiles();
+});
+sapSearch.addEventListener('input', renderSapFiles);
+renderSapFiles();
+
+// ─── 2. Zoom & Pan Logic ────────────────────────────────────────────────────
+document.querySelectorAll('[data-zoom-box]').forEach((box) => {
+  const vp = box.querySelector('.zoom-viewport');
+  const cv = box.querySelector('.zoom-canvas');
+  const lbl = box.querySelector('[data-zoom-label]');
+  const title = box.querySelector('.zoom-toolbar span').textContent;
+  let scale = 1;
+  const apply = () => {
+    cv.style.transform = `scale(${scale.toFixed(2)})`;
+    lbl.textContent = `${Math.round(scale * 100)}%`;
+  };
+  box.querySelector('[data-zoom-in]').addEventListener('click', () => { scale = Math.min(2.5, scale + 0.15); apply(); });
+  box.querySelector('[data-zoom-out]').addEventListener('click', () => { scale = Math.max(0.45, scale - 0.15); apply(); });
+  box.querySelector('[data-zoom-reset]').addEventListener('click', () => { scale = 1; vp.scrollTo({top:0,left:0}); apply(); });
+  box.querySelector('[data-zoom-full]').addEventListener('click', () => {
+    document.getElementById('lbTitle').textContent = title;
+    document.getElementById('lbContent').innerHTML = cv.innerHTML;
+    lbScale = 1.1; lbApply();
+    document.getElementById('lightbox').classList.add('open');
+  });
+  vp.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      scale = Math.max(0.45, Math.min(2.5, scale + (e.deltaY < 0 ? 0.1 : -0.1)));
+      apply();
+    }
+  }, { passive: false });
+  let drag = false, sx = 0, sy = 0, sl = 0, st = 0;
+  vp.addEventListener('mousedown', (e) => { drag = true; sx = e.pageX - vp.offsetLeft; sy = e.pageY - vp.offsetTop; sl = vp.scrollLeft; st = vp.scrollTop; });
+  window.addEventListener('mouseup', () => { drag = false; });
+  vp.addEventListener('mousemove', (e) => {
+    if (!drag) return;
+    e.preventDefault();
+    vp.scrollLeft = sl - ((e.pageX - vp.offsetLeft) - sx);
+    vp.scrollTop = st - ((e.pageY - vp.offsetTop) - sy);
+  });
+});
+
+let lbScale = 1.1;
+function lbApply() {
+  document.getElementById('lbContent').style.transform = `scale(${lbScale.toFixed(2)})`;
+  document.getElementById('lbLabel').textContent = `${Math.round(lbScale * 100)}%`;
+}
+function lbZoom(d) { lbScale = Math.max(0.5, Math.min(3.0, lbScale + d)); lbApply(); }
+function lbReset() { lbScale = 1; lbApply(); }
+function lbClose() { document.getElementById('lightbox').classList.remove('open'); }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lbClose(); });
+
+function downloadHtml() {
+  const blob = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'SRIA-SAP-BTP-CAP-LEARNING-GUIDE.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

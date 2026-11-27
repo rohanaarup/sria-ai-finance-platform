@@ -150,3 +150,4 @@ The system provides standard health endpoints for container liveness and readine
 | `HTTP 403 Forbidden` | User lacks `FinanceManager` or `FinanceAnalyst` scope. | Assign the user to the appropriate Role Collection (`SriaFinanceManager` or `SriaFinanceAnalyst`) in the BTP Cockpit. |
 | `S4HanaProviderBlockedError` | `DATA_SOURCE_MODE` is set to `s4hana` but destination credentials are not yet configured. | Revert `DATA_SOURCE_MODE=mock` for synthetic operation until BTP communication arrangement is active. |
 | `Port 4004 already in use` | Zombie background CAP process running on Windows. | Run `Get-NetTCPConnection -LocalPort 4004` and `Stop-Process -Id <PID>` in PowerShell. |
+

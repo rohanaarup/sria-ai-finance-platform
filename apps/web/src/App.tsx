@@ -1,93 +1,122 @@
+import { useState, useEffect } from 'react';
+import { AppShell } from './components/layout/AppShell';
+import { SystemSettingsDialog } from './components/layout/SystemSettingsDialog';
+import { CommandPalette } from './components/ui/CommandPalette';
 import { WorkspacePage } from './pages/WorkspacePage';
+import { MyDashboardsPage } from './pages/MyDashboardsPage';
+import { useFinanceWorkspace } from './hooks/useFinanceWorkspace';
+import { useTheme } from './hooks/useTheme';
 
 export default function App() {
+  const ws = useFinanceWorkspace();
+  const { theme, toggleTheme } = useTheme();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandOpen((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Enterprise Navigation Header */}
-      <header
-        style={{
-          background: 'var(--ink)',
-          color: 'var(--cream)',
-          padding: '16px 32px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div
-            style={{
-              width: '38px',
-              height: '38px',
-              border: '1px solid var(--copper)',
-              borderRadius: '8px',
-              display: 'grid',
-              placeItems: 'center',
-              fontWeight: 800,
-              fontSize: '18px',
-              color: 'var(--copper)',
-              fontFamily: 'Georgia, serif'
-            }}
-          >
-            S
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, letterSpacing: '0.04em', fontSize: '15px' }}>
-              SRIA INFO TECH <span style={{ color: 'var(--copper)' }}>/</span> AI FINANCE GENERATOR
-            </div>
-            <div style={{ fontSize: '11px', color: '#c4b09e' }}>
-              SAP S/4HANA On-Demand · Deterministic Math Engine
-            </div>
-          </div>
-        </div>
+    <AppShell
+      currentView={ws.currentView}
+      onNavigate={ws.setCurrentView}
+      activeTitle={ws.currentSpec.title}
+      savedDashboards={ws.savedDashboards}
+      recentDashboards={ws.recentDashboards}
+      activeDashboardId={ws.activeDashboardDbId || ws.currentSpec.dashboardId}
+      onOpenSavedDashboard={ws.handleOpenSaved}
+      onSelectRecentDashboard={ws.handleOpenRecent}
+      onOpenSystemSettings={() => setSettingsOpen(true)}
+      onOpenCommandPalette={() => setCommandOpen(true)}
+      theme={theme}
+      onToggleTheme={toggleTheme}
+      systemStatus={ws.systemStatus}
+      dataSourceSummary={{
+        sourceType: ws.currentSpec.dataProvenance.sourceType,
+        sourceSystem: ws.currentSpec.dataProvenance.sourceSystem,
+        isSynthetic: ws.currentSpec.dataProvenance.isSynthetic,
+      }}
+    >
+      {ws.currentView === 'dashboards' ? (
+        <MyDashboardsPage
+          dashboards={ws.savedDashboards}
+          recentDashboards={ws.recentDashboards}
+          onOpenSaved={ws.handleOpenSaved}
+          onOpenRecent={ws.handleOpenRecent}
+          onRename={ws.handleRenameDashboard}
+          onDuplicate={ws.handleDuplicateSaved}
+          onShare={ws.handleShareDashboard}
+          onDelete={ws.handleDeleteDashboard}
+          onCreateNew={() => ws.setCurrentView('studio')}
+        />
+      ) : (
+        <WorkspacePage
+          mode={ws.currentView === 'canvas' ? 'canvas' : 'studio'}
+          onSwitchMode={(m) => ws.setCurrentView(m)}
+          currentSpec={ws.currentSpec}
+          periodSeries={ws.periodSeries}
+          buSlices={ws.buSlices}
+          comparisonData={ws.comparisonData}
+          comparisonMode={ws.comparisonMode}
+          isLoading={ws.isLoading}
+          currentStep={ws.currentStep}
+          clarifications={ws.clarifications}
+          errorMessage={ws.errorMessage}
+          isStale={ws.isStale}
+          hasUnsavedChanges={ws.hasUnsavedChanges}
+          activeDashboardDbId={ws.activeDashboardDbId}
+          visibleSections={ws.visibleSections}
+          preferredChartMode={ws.preferredChartMode}
+          explanationNote={ws.explanationNote}
+          renameDialogOpen={ws.renameDialogOpen}
+          shareDialogOpen={ws.shareDialogOpen}
+          onPromptSubmit={ws.handlePromptSubmit}
+          onSelectTemplate={ws.handleSelectTemplate}
+          onClarificationOption={ws.handleClarificationOption}
+          onCancelClarification={() => ws.setClarifications(null)}
+          onDismissError={() => ws.setErrorMessage(null)}
+          onApplyFilter={ws.applyFilterChange}
+          onToggleSection={ws.toggleSection}
+          onRefresh={ws.handleRefresh}
+          onSave={ws.handleSave}
+          onOpenRename={() => ws.setRenameDialogOpen(true)}
+          onCloseRename={() => ws.setRenameDialogOpen(false)}
+          onConfirmRename={ws.handleRenameCurrent}
+          onDuplicate={ws.handleDuplicateCurrent}
+          onOpenShare={() => ws.setShareDialogOpen(true)}
+          onCloseShare={() => ws.setShareDialogOpen(false)}
+          onConfirmShare={ws.handleShareDashboard}
+          onExportCsv={ws.exportCsv}
+          onExportJson={ws.exportJson}
+          onFollowUp={ws.handleFollowUp}
+        />
+      )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '13px' }}>
-          <span
-            style={{
-              border: '1px solid rgba(212,161,132,0.4)',
-              padding: '4px 12px',
-              borderRadius: '99px',
-              background: 'rgba(255,255,255,0.05)',
-              color: 'var(--copper)',
-              fontWeight: 600
-            }}
-          >
-            WORKSPACE: ACME COMMERCIAL PILOT
-          </span>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              color: '#d9c7b4'
-            }}
-          >
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} />
-            <span>Connected (localhost:4004)</span>
-          </div>
-        </div>
-      </header>
+      <SystemSettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        systemStatus={ws.systemStatus}
+        metrics={ws.approvedMetrics}
+      />
 
-      {/* Main Workspace Body */}
-      <main style={{ flex: 1 }}>
-        <WorkspacePage />
-      </main>
-
-      {/* Footer */}
-      <footer
-        style={{
-          borderTop: '1px solid var(--line)',
-          padding: '20px 32px',
-          fontSize: '12px',
-          color: 'var(--muted)',
-          textAlign: 'center',
-          background: 'var(--cream)',
-          marginTop: '40px'
-        }}
-      >
-        Sria Info Tech AI Finance Dashboard Generator · Protected by SAP CAP & Deterministic Calculation Engine
-      </footer>
-    </div>
+      <CommandPalette
+        open={commandOpen}
+        onClose={() => setCommandOpen(false)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onGoStudio={() => ws.setCurrentView('studio')}
+        onGoCanvas={() => ws.setCurrentView('canvas')}
+        onGoSaved={() => ws.setCurrentView('dashboards')}
+        onRunPrompt={(prompt, cmp) => ws.handlePromptSubmit(prompt, { compareEntities: cmp })}
+      />
+    </AppShell>
   );
 }

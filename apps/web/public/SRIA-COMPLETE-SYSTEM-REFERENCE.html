@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sria Analytics — Complete System Architecture, Data Access &amp; Codebase Reference</title>
+  <style>
+    :root {
+      --bg: #F6F5F2;
+      --surface: #FFFFFF;
+      --surface-subtle: #FAFAF8;
+      --nav: #161412;
+      --text: #181615;
+      --text-2: #57534E;
+      --text-3: #8C8680;
+      --border: #E7E4DE;
+      --border-strong: #D4CFC7;
+      --brand: #C2531A;
+      --brand-bg: #FDF1EA;
+      --sap: #0369A1;
+      --sap-bg: #F0F9FF;
+      --ai: #6D28D9;
+      --ai-bg: #F5F3FF;
+      --db: #15803D;
+      --db-bg: #ECFDF5;
+      --warn: #B45309;
+      --warn-bg: #FFFBEB;
+      --shadow-sm: 0 1px 3px rgba(24,22,21,0.06);
+      --shadow-md: 0 6px 20px rgba(24,22,21,0.10);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+    code, .mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+    }
+    /* Top Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #161412;
+      color: #F5F5F4;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: #A8A29E;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .nav-pill {
+      color: #D6D3D1;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .nav-pill:hover {
+      background: rgba(255,255,255,0.08);
+      color: #FFFFFF;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.08);
+      color: #FFFFFF;
+      font-family: inherit;
+    }
+    .btn:hover { background: rgba(255,255,255,0.16); }
+    .btn-primary {
+      background: #C2531A;
+      border-color: #C2531A;
+    }
+    .btn-primary:hover { background: #A84412; }
+    .btn-light {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border-strong);
+    }
+    .btn-light:hover { background: var(--surface-subtle); }
+
+    /* Container */
+    .container {
+      max-width: 1420px;
+      margin: 0 auto;
+      padding: 28px 24px 72px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 26px;
+      box-shadow: var(--shadow-sm);
+    }
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    h2 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+    }
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    p.lead {
+      margin: 6px 0 0 0;
+      font-size: 13.5px;
+      color: var(--text-2);
+      max-width: 82ch;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .b-sap { background: var(--sap-bg); color: var(--sap); border-color: #BAE6FD; }
+    .b-nonsap { background: var(--brand-bg); color: var(--brand); border-color: rgba(194,83,26,0.25); }
+    .b-ai { background: var(--ai-bg); color: var(--ai); border-color: #DDD6FE; }
+    .b-db { background: var(--db-bg); color: var(--db); border-color: #BBF7D0; }
+    .b-warn { background: var(--warn-bg); color: var(--warn); border-color: #FDE68A; }
+    .b-neutral { background: #F1EFEA; color: var(--text-2); border-color: var(--border); }
+
+    /* Zoomable Diagram Frame */
+    .zoom-frame {
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      background: #FCFBF9;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .zoom-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 14px;
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .zoom-btn {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .zoom-btn:hover { background: var(--bg); }
+    .zoom-level {
+      font-family: ui-monospace, monospace;
+      font-size: 11.5px;
+      color: var(--text-2);
+      min-width: 44px;
+      text-align: center;
+    }
+    .zoom-viewport {
+      overflow: auto;
+      position: relative;
+      cursor: grab;
+      padding: 18px;
+      max-height: 760px;
+    }
+    .zoom-viewport:active { cursor: grabbing; }
+    .zoom-canvas {
+      transform-origin: top left;
+      transition: transform 0.12s ease;
+      display: inline-block;
+      min-width: 100%;
+    }
+
+    /* Reference-Style 12-Pillar Architecture Poster */
+    .poster-board {
+      min-width: 1280px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .poster-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #F0EDE6;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(96px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .pillar {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #FAFAF8;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .pillar-head {
+      padding: 8px 6px;
+      color: #FFFFFF;
+      text-align: center;
+      font-weight: 700;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+    .pillar-num {
+      display: block;
+      font-size: 10px;
+      opacity: 0.85;
+      font-family: ui-monospace, monospace;
+      margin-bottom: 2px;
+    }
+    .pillar-body {
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .tool-chip {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 5px;
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .tool-chip small {
+      display: block;
+      font-weight: 500;
+      font-size: 9.5px;
+      color: var(--text-2);
+      margin-top: 2px;
+    }
+    .tool-chip.stub {
+      border-style: dashed;
+      background: #FFFDF7;
+      border-color: #FCD34D;
+    }
+    .poster-crossbar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .cross-box {
+      border-radius: 9px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      font-size: 11.5px;
+    }
+    .poster-flow-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 10px 14px;
+      border-radius: 9px;
+      background: #161412;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 600;
+      flex-wrap: wrap;
+    }
+    .flow-node {
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.16);
+      white-space: nowrap;
+    }
+
+    /* Data & Access Grid */
+    .qa-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .qa-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      background: var(--surface-subtle);
+    }
+    .path-box {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 7px;
+      background: #1C1917;
+      color: #F5F5F4;
+      font-family: ui-monospace, monospace;
+      font-size: 11.5px;
+      word-break: break-all;
+    }
+
+    /* File Table */
+    .file-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      cursor: pointer;
+    }
+    .filter-pill.active {
+      background: #181615;
+      color: #FFFFFF;
+      border-color: #181615;
+    }
+    .search-input {
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      font-size: 13px;
+      width: 280px;
+      max-width: 100%;
+    }
+    table.files-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    table.files-table th {
+      text-align: left;
+      padding: 10px 12px;
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border-strong);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-2);
+    }
+    table.files-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    table.files-table tr:hover td {
+      background: #FAFAF7;
+    }
+
+    /* Fullscreen Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(22,20,18,0.86);
+      backdrop-filter: blur(4px);
+      flex-direction: column;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: #161412;
+      color: #FFFFFF;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .lightbox-stage {
+      flex: 1;
+      overflow: auto;
+      padding: 24px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .lightbox-content {
+      transform-origin: top center;
+      transition: transform 0.12s ease;
+    }
+
+    @media print {
+      .topbar, .zoom-toolbar, .file-controls { display: none !important; }
+      body { background: #FFFFFF; }
+      .section-card { box-shadow: none; break-inside: avoid; border-color: #D4CFC7; }
+      .zoom-viewport { overflow: visible !important; max-height: none !important; }
+      .zoom-canvas { transform: scale(0.72) !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand-lockup">
+    <!-- Crisp Inline Vector of Sria Analytics 3-Bar Mark (100% offline lifetime safe) -->
+    <svg width="30" height="30" viewBox="0 0 332 332" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="14" y="18" width="96" height="292" rx="48" fill="#FBB900"/>
+      <rect x="122" y="96" width="92" height="214" rx="46" fill="#F96302"/>
+      <circle cx="268" cy="260" r="50" fill="#F54E00"/>
+    </svg>
+    <div>
+      <div class="brand-title">Sria Analytics — Complete System Architecture &amp; Codebase Reference</div>
+      <div class="brand-sub">Sria Info Tech AI Finance Dashboard Generator · Lifetime Offline Edition</div>
+    </div>
+  </div>
+
+  <nav class="nav-links" aria-label="Document sections">
+    <a class="nav-pill" href="#pillar-poster">12-Pillar Stack</a>
+    <a class="nav-pill" href="#flow-diagrams">Operation Flows</a>
+    <a class="nav-pill" href="#data-access">Data &amp; Local Storage</a>
+    <a class="nav-pill" href="#file-inventory">All Codebase Files</a>
+  </nav>
+
+  <div class="actions">
+    <button class="btn" type="button" onclick="downloadHtmlCopy()">Download Offline HTML</button>
+    <button class="btn btn-primary" type="button" onclick="window.print()">Print / Save PDF</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Overview Hero -->
+  <section class="section-card">
+    <div class="section-eyebrow">Executive Technical Guide</div>
+    <h1>How This Entire System Works (SAP + Non-SAP + AI + Storage)</h1>
+    <p class="lead">
+      This self-contained document explains every technology, tool, connection, data flow, local Windows storage location, and every authored file in the <strong>Sria Info Tech AI Finance Dashboard Generator</strong>. Every diagram below supports <strong>Zoom In / Out, Mouse Wheel Zoom, Drag-to-Pan, and Fullscreen Lightbox Inspection</strong>, and works completely offline forever.
+    </p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
+      <span class="badge b-nonsap">Frontend: React 18 + TypeScript + Vite + Recharts</span>
+      <span class="badge b-sap">Backend: SAP CAP (@sap/cds 10) + Node.js + Express</span>
+      <span class="badge b-ai">AI Layer: IntentService + MockLLM (Active) / ApprovedLLM (Gated)</span>
+      <span class="badge b-db">Persistence: SQLite (Local) / SAP HANA Cloud (Prod)</span>
+      <span class="badge b-warn">ERP Source: Mock Synthetic (Active) / S/4HANA OData (Stub)</span>
+    </div>
+  </section>
+
+  <!-- SECTION 1: 12-Pillar Architecture Poster -->
+  <section class="section-card" id="pillar-poster">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Section 01 · Tech, Tool &amp; Resource Stack</div>
+        <h2>Complete System Architecture (12-Pillar Blueprint)</h2>
+        <p class="lead">Modeled after enterprise system blueprints, mapped strictly to the exact tools, libraries, and SAP services implemented in this repository. Dashed yellow boxes indicate production stubs configured for SAP BTP / S/4HANA.</p>
+      </div>
+    </div>
+
+    <div class="zoom-frame" data-zoom-box>
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Diagram 1 · 12-Pillar Stack Matrix (Drag or use + / − to zoom)</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <div class="poster-board">
+            <div class="poster-title-row">
+              <div>
+                <div style="font-size:20px; font-weight:800; letter-spacing:-0.02em;">Sria Analytics — Complete System Architecture</div>
+                <div style="font-size:11.5px; color:var(--text-2);">End-to-End Components of the AI Finance Dashboard Generator (Local Active Runtime + SAP BTP Cloud Descriptors)</div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <span class="badge b-db">Solid Border = Active Locally</span>
+                <span class="badge b-warn">Dashed Border = BTP / S4 Stub</span>
+              </div>
+            </div>
+
+            <div class="pillars-grid">
+              <!-- 01 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#6D28D9;"><span class="pillar-num">01</span>Clients &amp; UI</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">React 18.3.1<small>SPA Components</small></div>
+                  <div class="tool-chip">TypeScript 5.7<small>Strict Type Safety</small></div>
+                  <div class="tool-chip">Recharts 2.15<small>Bar/Line/Area/Donut</small></div>
+                  <div class="tool-chip">Lucide + Sonner<small>Icons &amp; Toasts</small></div>
+                  <div class="tool-chip">5 Layouts<small>Dynamic Specs</small></div>
+                </div>
+              </div>
+
+              <!-- 02 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#0284C7;"><span class="pillar-num">02</span>Proxy &amp; Edge</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">Vite 6.4.6<small>localhost:5173</small></div>
+                  <div class="tool-chip">HTTP Proxy<small>/api &amp; /health → 4004</small></div>
+                  <div class="tool-chip">CORS Middleware<small>apps/cap/srv/server.js</small></div>
+                  <div class="tool-chip stub">Staticfile Buildpack<small>mta.yaml (sria-web-ui)</small></div>
+                </div>
+              </div>
+
+              <!-- 03 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#15803D;"><span class="pillar-num">03</span>Identity &amp; Security</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">AuthGuard<small>auth-guard.ts</small></div>
+                  <div class="tool-chip">Tenant Scoping<small>organization_ID filter</small></div>
+                  <div class="tool-chip">Prompt Guard<small>Injection &amp; SQL block</small></div>
+                  <div class="tool-chip">Metric Allowlist<small>4 Approved KPIs</small></div>
+                  <div class="tool-chip stub">SAP XSUAA<small>xs-security.json</small></div>
+                </div>
+              </div>
+
+              <!-- 04 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#4F46E5;"><span class="pillar-num">04</span>SAP CAP Backend</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">@sap/cds 10.2<small>CAP Node Runtime</small></div>
+                  <div class="tool-chip">Express 4.21<small>Port 4004</small></div>
+                  <div class="tool-chip">OData v4 / REST<small>8 CDS Services</small></div>
+                  <div class="tool-chip">Lifecycle Svc<small>Save/Share/Refresh</small></div>
+                  <div class="tool-chip">Metric Registry<small>Approval Gate</small></div>
+                </div>
+              </div>
+
+              <!-- 05 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#9333EA;"><span class="pillar-num">05</span>AI &amp; Orchestration</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">IntentService<small>Clarify / Reject / Parse</small></div>
+                  <div class="tool-chip">MockLLMProvider<small>Active Rule Parser</small></div>
+                  <div class="tool-chip stub">ApprovedLLM<small>OpenAI / Gemini Gate</small></div>
+                  <div class="tool-chip">Orchestrator<small>State Machine + Trace</small></div>
+                  <div class="tool-chip">FollowUpRouter<small>View vs Data Change</small></div>
+                </div>
+              </div>
+
+              <!-- 06 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#C2531A;"><span class="pillar-num">06</span>Calc &amp; Compiler</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">CalculationEngine<small>Deterministic Math</small></div>
+                  <div class="tool-chip">Zero-Denom Guard<small>Safe Profit Margin</small></div>
+                  <div class="tool-chip">Normalization<small>Currency &amp; Duplicates</small></div>
+                  <div class="tool-chip">Spec Compiler<small>DashboardSpec v1.0</small></div>
+                </div>
+              </div>
+
+              <!-- 07 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#0F766E;"><span class="pillar-num">07</span>SAP Data Source</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">ProviderFactory<small>FINANCE_DATA_PROVIDER</small></div>
+                  <div class="tool-chip">MockProvider<small>SYNTHETIC_RECORDS</small></div>
+                  <div class="tool-chip">Transient RAM<small>Never Persisted</small></div>
+                  <div class="tool-chip stub">S/4HANA OData<small>I_JournalEntryItemBasic</small></div>
+                </div>
+              </div>
+
+              <!-- 08 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#1D4ED8;"><span class="pillar-num">08</span>Database &amp; Cache</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">SQLite<small>apps/cap/sqlite.db</small></div>
+                  <div class="tool-chip">Browser Cache<small>localStorage fallback</small></div>
+                  <div class="tool-chip">React State<small>Session Recent Specs</small></div>
+                  <div class="tool-chip stub">SAP HANA Cloud<small>.cdsrc.json [prod]</small></div>
+                </div>
+              </div>
+
+              <!-- 09 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#B45309;"><span class="pillar-num">09</span>Shared Contracts</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">@sria/contracts<small>Monorepo Package</small></div>
+                  <div class="tool-chip">Zod v4.6.7<small>Strict JSON Schemas</small></div>
+                  <div class="tool-chip">Metric Catalog<small>BASELINE_CATALOG</small></div>
+                  <div class="tool-chip">Golden Fixtures<small>10 Journal Entries</small></div>
+                </div>
+              </div>
+
+              <!-- 10 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#0369A1;"><span class="pillar-num">10</span>SAP BTP Platform</div>
+                <div class="pillar-body">
+                  <div class="tool-chip stub">MTA Descriptor<small>apps/cap/mta.yaml</small></div>
+                  <div class="tool-chip stub">Cloud Foundry<small>manifest.yml</small></div>
+                  <div class="tool-chip stub">BTP Destination<small>S4HANA_FINANCE_API</small></div>
+                  <div class="tool-chip stub">Node Buildpack<small>512M CAP Service</small></div>
+                </div>
+              </div>
+
+              <!-- 11 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#059669;"><span class="pillar-num">11</span>CI/CD &amp; Testing</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">GitHub Actions<small>ci.yml (Node 20 &amp; 22)</small></div>
+                  <div class="tool-chip">node --test<small>CAP + Web + Contracts</small></div>
+                  <div class="tool-chip">OWASP LLM Tests<small>Injection &amp; Leakage</small></div>
+                  <div class="tool-chip">npm Workspaces<small>Monorepo Scripts</small></div>
+                </div>
+              </div>
+
+              <!-- 12 -->
+              <div class="pillar">
+                <div class="pillar-head" style="background:#334155;"><span class="pillar-num">12</span>Observability</div>
+                <div class="pillar-body">
+                  <div class="tool-chip">GET /health<small>DB/AI/Provider Probe</small></div>
+                  <div class="tool-chip">AuditEvents<small>Metadata-only Log</small></div>
+                  <div class="tool-chip">ExecutionTrace<small>Step Timings &amp; FSM</small></div>
+                  <div class="tool-chip">Provenance<small>Mock vs Live Badge</small></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="poster-crossbar">
+              <div class="cross-box" style="background:#F5F3FF; border-color:#DDD6FE;">
+                <strong style="color:#6D28D9;">AI Safety Boundary (ADR-003)</strong><br/>
+                LLM extracts intent JSON only. It has <strong>zero</strong> arithmetic capability, zero SAP credentials, and zero SQL/OData access.
+              </div>
+              <div class="cross-box" style="background:#ECFDF5; border-color:#BBF7D0;">
+                <strong style="color:#15803D;">Data Storage Boundary</strong><br/>
+                Raw SAP rows live in Node RAM only during calculation. SQLite persists only <code>DashboardSpecs</code> JSON, shares, and audit logs.
+              </div>
+              <div class="cross-box" style="background:#FDF1EA; border-color:rgba(194,83,26,0.28);">
+                <strong style="color:#C2531A;">Configuration &amp; Secrets</strong><br/>
+                Controlled via <code>.env</code> locally (<code>FINANCE_DATA_PROVIDER=mock</code>) and SAP BTP Destination Service + XSUAA in production.
+              </div>
+            </div>
+
+            <div class="poster-flow-strip">
+              <span style="color:#E8A07A;">END-TO-END FLOW:</span>
+              <span class="flow-node">1. React UI (:5173)</span> →
+              <span class="flow-node">2. Vite Proxy (/api)</span> →
+              <span class="flow-node">3. CAP AuthGuard</span> →
+              <span class="flow-node">4. IntentService</span> →
+              <span class="flow-node">5. Orchestrator</span> →
+              <span class="flow-node">6. FinanceDataProvider</span> →
+              <span class="flow-node">7. CalculationEngine</span> →
+              <span class="flow-node">8. DashboardSpec</span> →
+              <span class="flow-node">9. Multi-Layout UI</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: End-to-End Operation Flow Diagrams -->
+  <section class="section-card" id="flow-diagrams">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Section 02 · Connected Flow of Operation</div>
+        <h2>From Clicking "Generate Dashboard" to Final Render &amp; Lifecycle</h2>
+        <p class="lead">Zoomable vector flowcharts tracing every network call, validation gate, calculation step, and UI update.</p>
+      </div>
+    </div>
+
+    <!-- Diagram 2: Generate Dashboard Flow -->
+    <div class="zoom-frame" data-zoom-box style="margin-bottom:20px;">
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Diagram 2 · End-to-End "Generate Dashboard" Execution Flow</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1180" height="560" viewBox="0 0 1180 560" xmlns="http://www.w3.org/2000/svg" style="background:#FFFFFF; border-radius:10px; border:1px solid #E7E4DE;">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#57534E"/>
+              </marker>
+              <marker id="arrow-brand" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#C2531A"/>
+              </marker>
+            </defs>
+
+            <!-- Lane Backgrounds -->
+            <rect x="16" y="16" width="270" height="528" rx="10" fill="#FDF8F4" stroke="#E8C9B8"/>
+            <text x="30" y="38" font-size="11" font-weight="700" fill="#C2531A">FRONTEND · REACT 18 (apps/web :5173)</text>
+
+            <rect x="304" y="16" width="440" height="528" rx="10" fill="#F0F9FF" stroke="#BAE6FD"/>
+            <text x="318" y="38" font-size="11" font-weight="700" fill="#0369A1">SAP CAP BACKEND · @sap/cds (apps/cap :4004)</text>
+
+            <rect x="762" y="16" width="402" height="528" rx="10" fill="#ECFDF5" stroke="#BBF7D0"/>
+            <text x="776" y="38" font-size="11" font-weight="700" fill="#15803D">DATA PROVIDER, CALC ENGINE &amp; STORAGE</text>
+
+            <!-- Step 1 -->
+            <rect x="34" y="60" width="234" height="66" rx="8" fill="#FFFFFF" stroke="#C2531A" stroke-width="1.5"/>
+            <text x="48" y="82" font-size="12" font-weight="700" fill="#181615">1. User Clicks Generate</text>
+            <text x="48" y="99" font-size="10.5" fill="#57534E">PromptComposer.tsx / TemplateGallery</text>
+            <text x="48" y="114" font-size="10" fill="#8C8680">Calls useFinanceWorkspace.handlePromptSubmit()</text>
+
+            <!-- Step 2 -->
+            <rect x="34" y="156" width="234" height="62" rx="8" fill="#FFFFFF" stroke="#D4CFC7"/>
+            <text x="48" y="177" font-size="12" font-weight="700" fill="#181615">2. ApiClient.understandPrompt()</text>
+            <text x="48" y="194" font-size="10.5" fill="#57534E">POST /api/ai/UnderstandRequest</text>
+            <text x="48" y="209" font-size="10" fill="#8C8680">Proxied by vite.config.ts → :4004</text>
+
+            <!-- Step 3 -->
+            <rect x="322" y="60" width="404" height="76" rx="8" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5"/>
+            <text x="336" y="82" font-size="12" font-weight="700" fill="#181615">3. AiServiceHandler → IntentService</text>
+            <text x="336" y="99" font-size="10.5" fill="#57534E">AuthGuard resolves user/tenant · MockLLMProvider (or ApprovedLLM)</text>
+            <text x="336" y="114" font-size="10" fill="#57534E">Validates against RawIntentOutputSchema &amp; BASELINE_METRIC_CATALOG</text>
+            <text x="336" y="128" font-size="10" fill="#0369A1">Checks required filters: companyCode + fiscalYear</text>
+
+            <!-- Branch: Clarify or Reject -->
+            <rect x="322" y="160" width="192" height="58" rx="8" fill="#FFFBEB" stroke="#F59E0B"/>
+            <text x="334" y="180" font-size="11" font-weight="700" fill="#B45309">If Missing Company/Year</text>
+            <text x="334" y="196" font-size="10" fill="#57534E">Returns CLARIFICATION_REQUIRED</text>
+            <text x="334" y="210" font-size="10" fill="#57534E">→ ClarificationModal in UI</text>
+
+            <rect x="534" y="160" width="192" height="58" rx="8" fill="#FEF2F2" stroke="#EF4444"/>
+            <text x="546" y="180" font-size="11" font-weight="700" fill="#B91C1C">If Injection / Unknown Metric</text>
+            <text x="546" y="196" font-size="10" fill="#57534E">Blocks EBITDA, Cash Flow, SQL</text>
+            <text x="546" y="210" font-size="10" fill="#57534E">→ Returns REJECTED to UI</text>
+
+            <!-- Step 4 -->
+            <rect x="322" y="246" width="404" height="84" rx="8" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5"/>
+            <text x="336" y="268" font-size="12" font-weight="700" fill="#181615">4. OrchestrationService (/api/orchestration/ExecutePlan)</text>
+            <text x="336" y="285" font-size="10.5" fill="#57534E">Planner builds step-budgeted DataPlan (maxSteps=3)</text>
+            <text x="336" y="300" font-size="10.5" fill="#57534E">WorkflowStateMachine: PLANNING → AUTHORIZING → EXECUTING_TOOLS</text>
+            <text x="336" y="315" font-size="10" fill="#0369A1">ToolRegistry.execute('get_finance_metrics') with Zod param check</text>
+
+            <!-- Step 5 -->
+            <rect x="780" y="60" width="366" height="92" rx="8" fill="#FFFFFF" stroke="#15803D" stroke-width="1.5"/>
+            <text x="794" y="82" font-size="12" font-weight="700" fill="#181615">5. ProviderFactory → FinanceDataProvider</text>
+            <text x="794" y="100" font-size="10.5" fill="#57534E">FINANCE_DATA_PROVIDER=mock → MockFinanceDataProvider</text>
+            <text x="794" y="116" font-size="10.5" fill="#57534E">Reads SYNTHETIC_FINANCE_RECORDS in RAM (P01/P02)</text>
+            <text x="794" y="132" font-size="10" fill="#B45309">Prod target: S4HanaODataFinanceDataProvider (BLOCKED stub)</text>
+            <text x="794" y="145" font-size="9.5" fill="#8C8680">Rule: Raw FinanceRecord[] is NEVER stored in SQLite or logged</text>
+
+            <!-- Step 6 -->
+            <rect x="780" y="182" width="366" height="86" rx="8" fill="#FFFFFF" stroke="#15803D" stroke-width="1.5"/>
+            <text x="794" y="204" font-size="12" font-weight="700" fill="#181615">6. CalculationEngine (Deterministic Math)</text>
+            <text x="794" y="222" font-size="10.5" fill="#57534E">Revenue (Credit - Debit) · Expenses (Debit - Credit)</text>
+            <text x="794" y="238" font-size="10.5" fill="#57534E">Net Profit = Revenue - Expenses · Margin = (Profit/Rev)*100</text>
+            <text x="794" y="254" font-size="10" fill="#15803D">Zero-Denominator Guard + ProvenanceMetadata attached</text>
+
+            <!-- Step 7 -->
+            <rect x="780" y="298" width="366" height="72" rx="8" fill="#FFFFFF" stroke="#D4CFC7"/>
+            <text x="794" y="320" font-size="12" font-weight="700" fill="#181615">7. Period &amp; Business Unit Slices</text>
+            <text x="794" y="337" font-size="10.5" fill="#57534E">POST /api/finance/GetFinanceMetrics for P01, P02 &amp; BUs</text>
+            <text x="794" y="353" font-size="10" fill="#8C8680">Optional Company 1000 vs 2000 comparison fetch</text>
+
+            <!-- Step 8 -->
+            <rect x="34" y="366" width="692" height="156" rx="8" fill="#FFFFFF" stroke="#C2531A" stroke-width="1.8"/>
+            <text x="50" y="390" font-size="13" font-weight="750" fill="#C2531A">8. Final UI Compilation &amp; Multi-Layout Render (apps/web)</text>
+            <text x="50" y="410" font-size="11" fill="#181615">• useFinanceWorkspace builds schema-valid DashboardSpec JSON + attaches PeriodSeriesPoint[] &amp; BusinessUnitSlice[]</text>
+            <text x="50" y="428" font-size="11" fill="#181615">• detectDashboardLayout() picks 1 of 5 layouts: Executive Overview · Revenue · Expense · Profitability · Comparison</text>
+            <text x="50" y="446" font-size="11" fill="#181615">• Renders Hero/Compact KPIs + Margin Gauge + Recharts (Bar/Line/Area/Donut) + Insights + Sortable Ledger Table</text>
+            <text x="50" y="464" font-size="11" fill="#57534E">• Interactive Toolbar ready: Change Company/Year/Period, Toggle Sections, Follow-up, Export CSV/JSON, Save to SQLite</text>
+            <text x="50" y="484" font-size="10.5" fill="#8C8680">Offline Safety: If :4004 is unreachable, ApiClient runs identical deterministic fallback locally via @sria/contracts.</text>
+            <text x="50" y="502" font-size="10.5" fill="#8C8680">Toast notification via Sonner confirms completion; recentDashboards list in Sidebar updates automatically.</text>
+
+            <!-- Arrows -->
+            <line x1="151" y1="126" x2="151" y2="154" stroke="#C2531A" stroke-width="1.8" marker-end="url(#arrow-brand)"/>
+            <path d="M 268 187 L 295 187 L 295 98 L 320 98" fill="none" stroke="#57534E" stroke-width="1.6" marker-end="url(#arrow)"/>
+            <line x1="418" y1="136" x2="418" y2="158" stroke="#57534E" stroke-width="1.4" marker-end="url(#arrow)"/>
+            <line x1="630" y1="136" x2="630" y2="158" stroke="#57534E" stroke-width="1.4" marker-end="url(#arrow)"/>
+            <line x1="524" y1="136" x2="524" y2="244" stroke="#0284C7" stroke-width="1.8" marker-end="url(#arrow)"/>
+            <path d="M 726 286 L 750 286 L 750 106 L 778 106" fill="none" stroke="#57534E" stroke-width="1.6" marker-end="url(#arrow)"/>
+            <line x1="963" y1="152" x2="963" y2="180" stroke="#15803D" stroke-width="1.8" marker-end="url(#arrow)"/>
+            <line x1="963" y1="268" x2="963" y2="296" stroke="#15803D" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <path d="M 963 370 L 963 444 L 728 444" fill="none" stroke="#C2531A" stroke-width="1.8" marker-end="url(#arrow-brand)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagram 3: Lifecycle Flow -->
+    <div class="zoom-frame" data-zoom-box>
+      <div class="zoom-toolbar">
+        <span style="font-size:12px; font-weight:600; color:var(--text-2);">Diagram 3 · Follow-up, Save, Reopen, Share &amp; Refresh Lifecycle</span>
+        <div class="zoom-controls">
+          <button class="zoom-btn" type="button" data-zoom-out>− Zoom Out</button>
+          <span class="zoom-level" data-zoom-label>100%</span>
+          <button class="zoom-btn" type="button" data-zoom-in>+ Zoom In</button>
+          <button class="zoom-btn" type="button" data-zoom-reset>Reset</button>
+          <button class="zoom-btn" type="button" data-zoom-full>⛶ Fullscreen Zoom</button>
+        </div>
+      </div>
+      <div class="zoom-viewport">
+        <div class="zoom-canvas">
+          <svg width="1120" height="310" viewBox="0 0 1120 310" xmlns="http://www.w3.org/2000/svg" style="background:#FFFFFF; border-radius:10px; border:1px solid #E7E4DE;">
+            <defs>
+              <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#57534E"/>
+              </marker>
+            </defs>
+
+            <rect x="20" y="110" width="200" height="80" rx="10" fill="#FDF1EA" stroke="#C2531A" stroke-width="1.6"/>
+            <text x="36" y="140" font-size="12" font-weight="700" fill="#C2531A">Active Dashboard</text>
+            <text x="36" y="158" font-size="10.5" fill="#57534E">DashboardSpec in React state</text>
+            <text x="36" y="174" font-size="10" fill="#8C8680">FollowUpComposer + Toolbar</text>
+
+            <!-- Branch 1: Presentation Only -->
+            <rect x="285" y="20" width="320" height="66" rx="8" fill="#FAFAF8" stroke="#D4CFC7"/>
+            <text x="300" y="42" font-size="11.5" font-weight="700" fill="#181615">Presentation Follow-up (View Only)</text>
+            <text x="300" y="58" font-size="10" fill="#57534E">"Change to line/area", "Rename", "Explain trend"</text>
+            <text x="300" y="73" font-size="10" fill="#15803D">Zero SAP calls — reuses validated numbers instantly</text>
+
+            <!-- Branch 2: Data Changing -->
+            <rect x="285" y="110" width="320" height="70" rx="8" fill="#F0F9FF" stroke="#BAE6FD"/>
+            <text x="300" y="132" font-size="11.5" font-weight="700" fill="#0369A1">Data Filter / Follow-up (SAP Query)</text>
+            <text x="300" y="149" font-size="10" fill="#57534E">"Switch to Co. 2000", "Filter Period 02", "Compare"</text>
+            <text x="300" y="165" font-size="10" fill="#0369A1">Re-runs CAP ExecutePlan + CalculationEngine</text>
+
+            <!-- Branch 3: Save / Persist -->
+            <rect x="285" y="205" width="320" height="82" rx="8" fill="#ECFDF5" stroke="#BBF7D0"/>
+            <text x="300" y="227" font-size="11.5" font-weight="700" fill="#15803D">Save / Share / Archive (LifecycleService)</text>
+            <text x="300" y="244" font-size="10" fill="#57534E">POST /api/v1/lifecycle/SaveDashboard → DashboardRepository</text>
+            <text x="300" y="260" font-size="10" fill="#15803D">Writes Dashboards + DashboardSpecs + AuditEvents to SQLite</text>
+            <text x="300" y="275" font-size="9.5" fill="#8C8680">(Falls back to browser localStorage if CAP is offline)</text>
+
+            <!-- Right Side: Reopen & Refresh -->
+            <rect x="680" y="110" width="415" height="177" rx="10" fill="#FFFBEB" stroke="#FDE68A"/>
+            <text x="698" y="136" font-size="12" font-weight="700" fill="#B45309">Reopen from My Dashboards → Stale Guard → Refresh</text>
+            <text x="698" y="158" font-size="10.5" fill="#57534E">1. ReopenDashboard loads saved specJson from SQLite.</text>
+            <text x="698" y="176" font-size="10.5" fill="#57534E">2. Server returns isStale: true so old snapshots never pose as live books.</text>
+            <text x="698" y="194" font-size="10.5" fill="#57534E">3. UI displays amber "Stale Saved Snapshot" badge &amp; Refresh button.</text>
+            <text x="698" y="212" font-size="10.5" fill="#57534E">4. Clicking Refresh calls POST /api/v1/lifecycle/RefreshDashboard:</text>
+            <text x="712" y="229" font-size="10" fill="#15803D">→ FollowUpRouter('refresh') re-queries Provider + CalculationEngine</text>
+            <text x="712" y="246" font-size="10" fill="#15803D">→ Saves new spec version (v1.1) and clears isStale = false</text>
+            <text x="698" y="268" font-size="10" fill="#8C8680">ShareDashboard &amp; DeleteDashboard also enforce ownerId + organization_ID checks.</text>
+
+            <line x1="220" y1="130" x2="283" y2="53" stroke="#57534E" stroke-width="1.5" marker-end="url(#arrow2)"/>
+            <line x1="220" y1="150" x2="283" y2="145" stroke="#57534E" stroke-width="1.5" marker-end="url(#arrow2)"/>
+            <line x1="220" y1="170" x2="283" y2="245" stroke="#57534E" stroke-width="1.5" marker-end="url(#arrow2)"/>
+            <line x1="605" y1="245" x2="678" y2="210" stroke="#57534E" stroke-width="1.5" marker-end="url(#arrow2)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: Data & Access Deep Dive -->
+  <section class="section-card" id="data-access">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Section 03 · Data &amp; Access Explained</div>
+        <h2>Where the Data Lives, How We Access It &amp; Where It Is Stored Locally</h2>
+        <p class="lead">Answers every key question about ERP source data vs. application storage on your local Windows machine.</p>
+      </div>
+    </div>
+
+    <div class="qa-grid">
+      <div class="qa-card">
+        <h3>1. Where is the financial data right now?</h3>
+        <p style="font-size:13px; color:var(--text-2); margin:0;">
+          Right now in local/pilot mode (<code>FINANCE_DATA_PROVIDER=mock</code>), all accounting figures come from <strong>10 deterministic synthetic journal entries</strong> across Company <code>1000</code> and <code>2000</code> (FY <code>2026</code>, Periods <code>01</code> &amp; <code>02</code>). In production, the target source is <strong>SAP S/4HANA</strong> entity <code>I_JournalEntryItemBasic</code> via SAP BTP Destination Service (currently an explicitly blocked stub).
+        </p>
+        <div class="path-box">packages/contracts/src/fixtures/synthetic-fixtures.ts<br/>apps/cap/srv/lib/providers/s4hana-odata-provider.ts (BLOCKED stub)</div>
+      </div>
+
+      <div class="qa-card">
+        <h3>2. How do we access it in code?</h3>
+        <p style="font-size:13px; color:var(--text-2); margin:0;">
+          The React UI calls <code>ApiClient</code> (<code>apps/web/src/services/api-client.ts</code>) → Vite proxies <code>/api/*</code> to port <code>4004</code> → CAP <code>OrchestrationService</code> or <code>FinanceDataService</code> calls <code>ProviderFactory.getFinanceDataProvider()</code> → <code>MockFinanceDataProvider.fetchRecords()</code> → <code>CalculationEngine</code> aggregates in RAM and returns only <code>MetricResult[]</code>. If port <code>4004</code> is offline, <code>ApiClient</code> runs the same math locally via <code>@sria/contracts</code>.
+        </p>
+        <div class="path-box">apps/web/src/services/api-client.ts → apps/cap/srv/lib/providers/provider-factory.ts → apps/cap/srv/lib/finance/calculation-engine.ts</div>
+      </div>
+
+      <div class="qa-card">
+        <h3>3. Where is data stored on your local device?</h3>
+        <p style="font-size:13px; color:var(--text-2); margin:0;">
+          <strong>SQLite on disk:</strong> CAP persists saved dashboards, <code>DashboardSpec</code> JSON configs, shares, metric catalog rows, and metadata-only audit logs in local SQLite files.<br/>
+          <strong>Browser storage:</strong> If CAP is offline when saving, <code>ApiClient</code> caches saved dashboards in Chrome/Edge <code>localStorage</code> under key <code>sria_saved_dashboards</code>.<br/>
+          <strong>Raw SAP ledger rows:</strong> <strong>NEVER</strong> saved to disk or SQLite — transient in RAM only!
+        </p>
+        <div class="path-box">c:\Users\darla\OneDrive\Desktop\SAP,AI project\apps\cap\sqlite.db<br/>c:\Users\darla\OneDrive\Desktop\SAP,AI project\sqlite.db<br/>Browser localStorage["sria_saved_dashboards"]</div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px; overflow-x:auto;">
+      <table class="files-table">
+        <thead>
+          <tr>
+            <th>Data Type</th>
+            <th>Persisted to Disk?</th>
+            <th>Local Device Location</th>
+            <th>Production Cloud Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Raw Journal Entries (<code>FinanceRecord[]</code>)</strong></td>
+            <td><span class="badge b-warn">NO — RAM Only</span></td>
+            <td>Not stored (discarded after calculation)</td>
+            <td>SAP S/4HANA (System of Record)</td>
+          </tr>
+          <tr>
+            <td><strong>Saved Dashboards &amp; <code>DashboardSpec</code> JSON</strong></td>
+            <td><span class="badge b-db">YES — SQLite</span></td>
+            <td><code>apps/cap/sqlite.db</code> (tables: <code>Dashboards</code>, <code>DashboardSpecs</code>)</td>
+            <td>SAP HANA Cloud (via HDI / CAP)</td>
+          </tr>
+          <tr>
+            <td><strong>Offline Save Fallback Cache</strong></td>
+            <td><span class="badge b-db">YES — Browser</span></td>
+            <td>Browser <code>localStorage["sria_saved_dashboards"]</code></td>
+            <td>Only used if CAP server unreachable</td>
+          </tr>
+          <tr>
+            <td><strong>Tenant, Shares, Metric Registry &amp; Audit</strong></td>
+            <td><span class="badge b-db">YES — SQLite</span></td>
+            <td><code>apps/cap/sqlite.db</code> (<code>Organizations</code>, <code>DashboardShares</code>, <code>AuditEvents</code>)</td>
+            <td>SAP HANA Cloud</td>
+          </tr>
+          <tr>
+            <td><strong>Provider &amp; AI Environment Flags</strong></td>
+            <td><span class="badge b-neutral">Config File</span></td>
+            <td><code>.env</code> (gitignored; template in <code>.env.example</code>)</td>
+            <td>BTP CF Env + Destination Service + XSUAA</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 4: Complete File & System Composition -->
+  <section class="section-card" id="file-inventory">
+    <div class="section-head">
+      <div>
+        <div class="section-eyebrow">Section 04 · Full Codebase Composition (SAP vs Non-SAP)</div>
+        <h2>Every Authored File in the Repository &amp; What It Does</h2>
+        <p class="lead">Filter by subsystem or search by filename/keyword. Generated build artifacts (<code>node_modules/</code>, <code>dist/</code>, <code>apps/cap/gen/</code>) are excluded.</p>
+      </div>
+    </div>
+
+    <div class="file-controls">
+      <div class="filter-pills" id="fileFilters">
+        <button class="filter-pill active" data-cat="ALL">All Files</button>
+        <button class="filter-pill" data-cat="FRONTEND">Frontend (Non-SAP)</button>
+        <button class="filter-pill" data-cat="SAP_CAP">SAP CAP &amp; DB (SAP)</button>
+        <button class="filter-pill" data-cat="AI_ORCH">AI &amp; Orchestration (Non-SAP)</button>
+        <button class="filter-pill" data-cat="CONTRACTS">Contracts (Shared)</button>
+        <button class="filter-pill" data-cat="TESTS">Tests &amp; Fixtures</button>
+        <button class="filter-pill" data-cat="CONFIG_DOCS">Root, BTP &amp; Docs</button>
+      </div>
+      <input class="search-input" id="fileSearch" type="search" placeholder="Search path or description..." aria-label="Search codebase files" />
+    </div>
+
+    <div style="font-size:12px; color:var(--text-2); margin-bottom:10px;" id="fileCountLabel"></div>
+
+    <div style="overflow-x:auto;">
+      <table class="files-table">
+        <thead>
+          <tr>
+            <th style="width:36%;">File Path</th>
+            <th style="width:16%;">Layer / Stack</th>
+            <th>What It Does</th>
+          </tr>
+        </thead>
+        <tbody id="filesTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- Fullscreen Zoom Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Zoomed diagram viewer">
+  <div class="lightbox-bar">
+    <span id="lightboxTitle" style="font-weight:700; font-size:13px;">Diagram Inspector</span>
+    <div class="zoom-controls">
+      <button class="zoom-btn" type="button" onclick="lightboxZoom(-0.15)">− Zoom Out</button>
+      <span class="zoom-level" id="lightboxScaleLabel" style="color:#E7E5E4;">100%</span>
+      <button class="zoom-btn" type="button" onclick="lightboxZoom(0.15)">+ Zoom In</button>
+      <button class="zoom-btn" type="button" onclick="lightboxReset()">Reset</button>
+      <button class="zoom-btn" type="button" onclick="closeLightbox()" style="background:#C2531A; color:#fff; border-color:#C2531A;">✕ Close</button>
+    </div>
+  </div>
+  <div class="lightbox-stage">
+    <div class="lightbox-content" id="lightboxContent"></div>
+  </div>
+</div>
+
+<script>
+// ─── 1. Zoom & Pan Controls for All Diagrams ────────────────────────────────
+document.querySelectorAll('[data-zoom-box]').forEach((box) => {
+  const viewport = box.querySelector('.zoom-viewport');
+  const canvas = box.querySelector('.zoom-canvas');
+  const label = box.querySelector('[data-zoom-label]');
+  const titleText = box.querySelector('.zoom-toolbar span').textContent;
+  let scale = 1;
+
+  const apply = () => {
+    canvas.style.transform = `scale(${scale.toFixed(2)})`;
+    label.textContent = `${Math.round(scale * 100)}%`;
+  };
+
+  box.querySelector('[data-zoom-in]').addEventListener('click', () => {
+    scale = Math.min(2.5, scale + 0.15);
+    apply();
+  });
+  box.querySelector('[data-zoom-out]').addEventListener('click', () => {
+    scale = Math.max(0.45, scale - 0.15);
+    apply();
+  });
+  box.querySelector('[data-zoom-reset]').addEventListener('click', () => {
+    scale = 1;
+    viewport.scrollTo({ top: 0, left: 0 });
+    apply();
+  });
+  box.querySelector('[data-zoom-full]').addEventListener('click', () => {
+    openLightbox(titleText, canvas.innerHTML);
+  });
+
+  // Ctrl + Wheel zoom
+  viewport.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      scale = Math.max(0.45, Math.min(2.5, scale + (e.deltaY < 0 ? 0.1 : -0.1)));
+      apply();
+    }
+  }, { passive: false });
+
+  // Drag to pan
+  let dragging = false, startX = 0, startY = 0, scrollL = 0, scrollT = 0;
+  viewport.addEventListener('mousedown', (e) => {
+    dragging = true;
+    startX = e.pageX - viewport.offsetLeft;
+    startY = e.pageY - viewport.offsetTop;
+    scrollL = viewport.scrollLeft;
+    scrollT = viewport.scrollTop;
+  });
+  window.addEventListener('mouseup', () => { dragging = false; });
+  viewport.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    e.preventDefault();
+    const x = e.pageX - viewport.offsetLeft;
+    const y = e.pageY - viewport.offsetTop;
+    viewport.scrollLeft = scrollL - (x - startX);
+    viewport.scrollTop = scrollT - (y - startY);
+  });
+});
+
+let lbScale = 1.1;
+function openLightbox(title, html) {
+  document.getElementById('lightboxTitle').textContent = title;
+  document.getElementById('lightboxContent').innerHTML = html;
+  lbScale = 1.1;
+  applyLb();
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+function lightboxZoom(delta) {
+  lbScale = Math.max(0.5, Math.min(3.0, lbScale + delta));
+  applyLb();
+}
+function lightboxReset() {
+  lbScale = 1;
+  applyLb();
+}
+function applyLb() {
+  document.getElementById('lightboxContent').style.transform = `scale(${lbScale.toFixed(2)})`;
+  document.getElementById('lightboxScaleLabel').textContent = `${Math.round(lbScale * 100)}%`;
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+// ─── 2. Self-Download Function ──────────────────────────────────────────────
+function downloadHtmlCopy() {
+  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'SRIA-COMPLETE-SYSTEM-REFERENCE.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ─── 3. Complete Authored File Inventory ────────────────────────────────────
+const FILES = [
+  // Root & CI
+  ['package.json', 'CONFIG_DOCS', 'Non-SAP Config', 'NPM workspaces root (packages/*, apps/*) and scripts (build, typecheck, test, dev:web, dev:cap).'],
+  ['package-lock.json', 'CONFIG_DOCS', 'Non-SAP Config', 'Exact locked dependency versions for reproducible installs.'],
+  ['.cdsrc.json', 'CONFIG_DOCS', 'SAP CAP Config', 'Root CAP CDS config pointing default SQLite database to apps/cap/sqlite.db.'],
+  ['.env.example', 'CONFIG_DOCS', 'Config Template', 'Environment template for PORT, FINANCE_DATA_PROVIDER, AI_RUNTIME_PROVIDER, and S4HANA_DESTINATION_NAME.'],
+  ['.gitignore', 'CONFIG_DOCS', 'Git Config', 'Excludes node_modules, dist, .env secrets, and build artifacts from Git.'],
+  ['.github/workflows/ci.yml', 'CONFIG_DOCS', 'CI/CD Pipeline', 'GitHub Actions workflow testing Node 20.x & 22.x (build contracts, typecheck, test, build).'],
+  ['sqlite.db', 'SAP_CAP', 'Local DB', 'Root SQLite database file created during CAP CDS runs.'],
+  ['README.md', 'CONFIG_DOCS', 'Documentation', 'Project overview, 12-phase roadmap, and local quick-start instructions.'],
+
+  // Shared Contracts
+  ['packages/contracts/package.json', 'CONTRACTS', 'Shared Package', 'Defines @sria/contracts workspace package and Zod v4 dependency.'],
+  ['packages/contracts/tsconfig.json', 'CONTRACTS', 'Shared Package', 'TypeScript compiler config for @sria/contracts.'],
+  ['packages/contracts/src/index.ts', 'CONTRACTS', 'Shared Package', 'Barrel export exposing all schemas, types, catalogs, and fixtures.'],
+  ['packages/contracts/src/finance-metrics.ts', 'CONTRACTS', 'SAP + Shared', 'Defines MetricIdEnum (4 KPIs), SupportedDimensionEnum, and BASELINE_METRIC_CATALOG with SAP field hints.'],
+  ['packages/contracts/src/dashboard-request.ts', 'CONTRACTS', 'Shared Schema', 'Zod schemas for DashboardRequest, RequestFilters, and ClarificationQuestion.'],
+  ['packages/contracts/src/data-plan.ts', 'CONTRACTS', 'Shared Schema', 'Zod schemas for DataPlan and DataPlanStep used by Planner/Orchestrator.'],
+  ['packages/contracts/src/metric-result.ts', 'CONTRACTS', 'Shared Schema', 'Zod schemas for MetricResult, ProvenanceMetadata, and transient FinanceRecord DTO.'],
+  ['packages/contracts/src/dashboard-spec.ts', 'CONTRACTS', 'Shared Schema', 'Strict DashboardSpecSchema and DashboardWidgetSpecSchema consumed by React renderer.'],
+  ['packages/contracts/src/dashboard.ts', 'CONTRACTS', 'Shared Schema', 'Backward-compatibility re-export of core contract schemas.'],
+  ['packages/contracts/src/health.ts', 'CONTRACTS', 'Shared Schema', 'TypeScript contract for /health multi-component response.'],
+  ['packages/contracts/src/fixtures/synthetic-fixtures.ts', 'CONTRACTS', 'Mock Finance Data', 'SYNTHETIC_FINANCE_RECORDS (10 postings across Co. 1000 & 2000) and EXPECTED_FINANCE_CALCULATIONS.'],
+  ['packages/contracts/test/contracts.test.ts', 'TESTS', 'Contract Tests', 'Unit tests validating Zod schemas and synthetic fixtures.'],
+
+  // Frontend (apps/web)
+  ['apps/web/package.json', 'FRONTEND', 'Non-SAP UI', 'Frontend dependencies (React 18, Recharts, Lucide, Clsx, Sonner, Vite, TypeScript).'],
+  ['apps/web/tsconfig.json', 'FRONTEND', 'Non-SAP UI', 'Strict TypeScript configuration for apps/web/src.'],
+  ['apps/web/tsconfig.node.json', 'FRONTEND', 'Non-SAP UI', 'TypeScript configuration for Vite build config.'],
+  ['apps/web/vite.config.ts', 'FRONTEND', 'Proxy & Build', 'Vite server (:5173) proxying /api and /health requests to SAP CAP (:4004).'],
+  ['apps/web/index.html', 'FRONTEND', 'Non-SAP UI', 'HTML shell loading Inter & JetBrains Mono fonts and Sria Analytics favicon.'],
+  ['apps/web/public/sria-analytics-logo.png', 'FRONTEND', 'Brand Asset', 'Official Sria Analytics horizontal logo PNG (1024x348) for expanded dark sidebar.'],
+  ['apps/web/public/sria-analytics-mark.png', 'FRONTEND', 'Brand Asset', 'Extracted 3-bar brand emblem PNG (332x332) for collapsed sidebar and favicon.'],
+  ['apps/web/public/ARCHITECTURE-AND-FLOW-GUIDE.html', 'FRONTEND', 'In-App Docs', 'Built-in HTML architecture guide opened via sidebar Architecture Guide link.'],
+  ['apps/web/public/ARCHITECTURE-AND-FLOW-GUIDE.md', 'FRONTEND', 'In-App Docs', 'Markdown copy of the in-app architecture guide.'],
+  ['apps/web/public/SRIA-COMPLETE-SYSTEM-REFERENCE.html', 'FRONTEND', 'In-App Docs', 'Self-contained offline copy of this complete zoomable system reference.'],
+  ['apps/web/src/main.tsx', 'FRONTEND', 'Entry Point', 'Mounts React App and Sonner toast notification container.'],
+  ['apps/web/src/App.tsx', 'FRONTEND', 'Root View', 'Coordinates AppShell, WorkspacePage, MyDashboardsPage, and SystemSettingsDialog.'],
+  ['apps/web/src/index.css', 'FRONTEND', 'Design System', 'CSS custom properties, tabular numerals, focus rings, and reduced-motion rules.'],
+  ['apps/web/src/styles/components.css', 'FRONTEND', 'Design System', 'Responsive layout styles for shell, composer, bento templates, multi-layout grids, and mobile drawer.'],
+  ['apps/web/src/design-system/tokens.ts', 'FRONTEND', 'Design Tokens', 'Typed colors, semantic chart palette, shadows, and METRIC_GLOSSARY formulas.'],
+  ['apps/web/src/hooks/useFinanceWorkspace.ts', 'FRONTEND', 'State Manager', 'Central hook driving prompt flow, CAP queries, period/BU breakdowns, save/reopen/refresh/share state.'],
+  ['apps/web/src/services/api-client.ts', 'FRONTEND', 'API Client', 'Connects to CAP /api/* endpoints + deterministic local fallback when offline or in tests.'],
+  ['apps/web/src/services/dashboard-intelligence.ts', 'FRONTEND', 'UI Intelligence', 'Selects 1 of 5 dashboard layout archetypes, builds narratives/insights, exports CSV/JSON.'],
+  ['apps/web/src/pages/WorkspacePage.tsx', 'FRONTEND', 'Page View', 'Main analytics workspace combining PromptComposer, TemplateGallery, Toolbar, DashboardRenderer, and FollowUp.'],
+  ['apps/web/src/pages/MyDashboardsPage.tsx', 'FRONTEND', 'Page View', 'Full-page dashboard library with Saved/Recent tabs, search, sort, rename, duplicate, share, and delete dialogs.'],
+  ['apps/web/src/components/brand/SriaLogo.tsx', 'FRONTEND', 'Brand Component', 'Renders official Sria Analytics logo across expanded, collapsed, and light modes.'],
+  ['apps/web/src/components/layout/AppShell.tsx', 'FRONTEND', 'App Shell', 'Collapsible dark sidebar, mobile drawer, recent/saved quick links, topbar, and Data Source popover.'],
+  ['apps/web/src/components/layout/SystemSettingsDialog.tsx', 'FRONTEND', 'Governance Modal', 'Displays live /health, GetProviderStatus, and registered metrics from CAP MetricCatalogService.'],
+  ['apps/web/src/components/ai/PromptComposer.tsx', 'FRONTEND', 'Creation UI', 'Natural-language prompt box with company/year/period selectors, suggestions, and Ctrl+Enter shortcut.'],
+  ['apps/web/src/components/ai/TemplateGallery.tsx', 'FRONTEND', 'Creation UI', 'Asymmetric gallery of 5 templates strictly matching allowlisted catalog metrics.'],
+  ['apps/web/src/components/ai/WorkflowProgressIndicator.tsx', 'FRONTEND', 'Feedback UI', '5-step pipeline tracker (Intent → Plan → SAP Fetch → Engine → Render).'],
+  ['apps/web/src/components/ai/ClarificationModal.tsx', 'FRONTEND', 'Feedback UI', 'Interactive modal prompting user for missing companyCode or fiscalYear.'],
+  ['apps/web/src/components/dashboard/DashboardRenderer.tsx', 'FRONTEND', 'Layout Engine', 'Renders 5 distinct analytical layouts (Executive, Revenue, Expense, Profitability, Comparison) + chart zoom modal.'],
+  ['apps/web/src/components/dashboard/DashboardToolbar.tsx', 'FRONTEND', 'Controls Bar', 'Entity/year/period filters, comparison toggle, section visibility, refresh, save, share, and export menu.'],
+  ['apps/web/src/components/dashboard/KpiWidgets.tsx', 'FRONTEND', 'KPI Variants', 'HeroKpiCard, CompactKpiCard, MarginRatioCard, ComparisonKpiCard with formula tooltips and period deltas.'],
+  ['apps/web/src/components/dashboard/ChartWidgets.tsx', 'FRONTEND', 'Recharts Suite', 'AggregatesBarChart, PeriodTrendChart (Line/Area/Bar), BusinessUnitChart (Donut/Ranked), EntityComparisonChart.'],
+  ['apps/web/src/components/dashboard/InsightPanel.tsx', 'FRONTEND', 'Insights UI', 'Semantic positive/negative/warning/neutral analytical observations.'],
+  ['apps/web/src/components/dashboard/DataTableWidget.tsx', 'FRONTEND', 'Table UI', 'Filterable, sortable accounting ledger with Summary and By Period drilldown tabs.'],
+  ['apps/web/src/components/dashboard/FollowUpComposer.tsx', 'FRONTEND', 'Follow-up UI', 'Contextual follow-up bar distinguishing instant View changes from fresh SAP Queries.'],
+  ['apps/web/src/components/ui/Badge.tsx', 'FRONTEND', 'UI Primitive', 'Semantic status badge component.'],
+  ['apps/web/src/components/ui/Button.tsx', 'FRONTEND', 'UI Primitive', 'Design-system button with loading spinner and variants.'],
+  ['apps/web/src/components/ui/Dialog.tsx', 'FRONTEND', 'UI Primitive', 'Accessible modal dialog with Escape & backdrop close.'],
+  ['apps/web/src/components/ui/EmptyState.tsx', 'FRONTEND', 'UI Primitive', 'Empty/zero-record state display.'],
+  ['apps/web/src/components/ui/Popover.tsx', 'FRONTEND', 'UI Primitive', 'Click-outside & Escape-aware popover surface.'],
+  ['apps/web/src/components/ui/Skeleton.tsx', 'FRONTEND', 'UI Primitive', 'Loading skeleton matching asymmetric KPI + chart layout.'],
+  ['apps/web/src/components/ui/Tabs.tsx', 'FRONTEND', 'UI Primitive', 'Segmented tab control.'],
+  ['apps/web/src/components/ui/Tooltip.tsx', 'FRONTEND', 'UI Primitive', 'Hover/focus tooltip for metric formulas and metadata.'],
+  ['apps/web/test/components.test.ts', 'TESTS', 'Frontend Tests', '7 unit tests verifying ApiClient, period/BU breakdowns, and layout detection.'],
+
+  // SAP CAP Backend (apps/cap)
+  ['apps/cap/package.json', 'SAP_CAP', 'SAP CAP Config', 'CAP backend dependencies (@sap/cds, @cap-js/sqlite, express) and cds scripts.'],
+  ['apps/cap/tsconfig.json', 'SAP_CAP', 'SAP CAP Config', 'TypeScript compiler config for CAP services.'],
+  ['apps/cap/.cdsrc.json', 'SAP_CAP', 'SAP CAP Config', 'Configures SQLite locally (sqlite.db) and HANA + XSUAA in [production].'],
+  ['apps/cap/sqlite.db', 'SAP_CAP', 'Local SQLite DB', 'Active local SQLite database holding Dashboards, DashboardSpecs, Shares, Metrics, and AuditEvents.'],
+  ['apps/cap/mta.yaml', 'SAP_CAP', 'SAP BTP MTA', 'Multi-Target Application blueprint wiring sria-cap-srv, sria-web-ui, sria-xsuaa, and sria-destination.'],
+  ['apps/cap/manifest.yml', 'SAP_CAP', 'SAP BTP CF', 'Cloud Foundry deployment manifest for sria-cap-srv.'],
+  ['apps/cap/xs-security.json', 'SAP_CAP', 'SAP XSUAA', 'OAuth2 scopes (FinanceAnalyst, FinanceManager, TenantAdmin) and BTP role collections.'],
+  ['apps/cap/db/schema.cds', 'SAP_CAP', 'CDS Schema', 'Root CDS schema aggregating tenant, dashboard, and metric-config models.'],
+  ['apps/cap/db/tenant.cds', 'SAP_CAP', 'CDS Schema', 'Defines Organizations and Workspaces multi-tenant entities.'],
+  ['apps/cap/db/dashboard.cds', 'SAP_CAP', 'CDS Schema', 'Defines Dashboards, DashboardSpecs (JSON only), and DashboardShares entities.'],
+  ['apps/cap/db/metric-config.cds', 'SAP_CAP', 'CDS Schema', 'Defines MetricConfigurations, DataSourceReferences (aliases only), and AuditEvents.'],
+  ['apps/cap/srv/server.js', 'SAP_CAP', 'CAP Bootstrap', 'Configures Express CORS middleware and GET /health liveness probe.'],
+  ['apps/cap/srv/types/cds.d.ts', 'SAP_CAP', 'TypeScript Defs', 'Ambient TypeScript declarations for @sap/cds.'],
+  ['apps/cap/srv/health-service.cds', 'SAP_CAP', 'CDS Service', 'CDS definition for /api/v1/health.'],
+  ['apps/cap/srv/health-service.js', 'SAP_CAP', 'CAP Handler', 'Returns CAP health report including DB dialect and active finance provider mode.'],
+  ['apps/cap/srv/lib/auth/auth-guard.ts', 'SAP_CAP', 'Security Guard', 'AuthGuard extracting verified user/tenant/roles from CAP/XSUAA request context.'],
+  ['apps/cap/srv/ai-service.cds', 'SAP_CAP', 'CDS Service', 'Exposes /api/ai/UnderstandRequest action.'],
+  ['apps/cap/srv/ai-service.ts', 'SAP_CAP', 'CAP Handler', 'Wires AuthGuard + IntentService into AiService.'],
+  ['apps/cap/srv/orchestration-service.cds', 'SAP_CAP', 'CDS Service', 'Exposes /api/orchestration/PlanRequest and ExecutePlan actions.'],
+  ['apps/cap/srv/orchestration-service.ts', 'SAP_CAP', 'CAP Handler', 'Runs Planner and Orchestrator bound to server-authenticated tenant/user context.'],
+  ['apps/cap/srv/finance-data-service.cds', 'SAP_CAP', 'CDS Service', 'Exposes /api/finance/GetFinanceMetrics and GetProviderStatus.'],
+  ['apps/cap/srv/finance-data-service.ts', 'SAP_CAP', 'CAP Handler', 'Fetches transient FinanceRecord[] and computes deterministic metrics via CalculationEngine.'],
+  ['apps/cap/srv/dashboard-service.cds', 'SAP_CAP', 'CDS Service', 'Exposes /api/v1/dashboards CRUD actions and entity projections.'],
+  ['apps/cap/srv/dashboard-service.ts', 'SAP_CAP', 'CAP Handler', 'Enforces FinanceManager/FinanceAnalyst scopes and tenant-isolated dashboard reads/writes.'],
+  ['apps/cap/srv/dashboard-lifecycle-service.cds', 'SAP_CAP', 'CDS Service', 'Exposes /api/v1/lifecycle (Save, Rename, Delete, Share, Reopen, Refresh, List).'],
+  ['apps/cap/srv/dashboard-lifecycle-service.ts', 'SAP_CAP', 'CAP Handler', 'Implements full dashboard lifecycle including stale reopen flags and on-demand refresh.'],
+  ['apps/cap/srv/metric-service.cds', 'SAP_CAP', 'CDS Service', 'Exposes /api/v1/metrics/getApprovedMetrics.'],
+  ['apps/cap/srv/metric-service.ts', 'SAP_CAP', 'CAP Handler', 'Returns registered metrics and formulas from FinanceMetricRegistry.'],
+  ['apps/cap/srv/admin-service.cds', 'SAP_CAP', 'CDS Service', 'Exposes /api/v1/admin projections for Organizations, Workspaces, DataSourceReferences, AuditEvents.'],
+  ['apps/cap/srv/admin-service.ts', 'SAP_CAP', 'CAP Handler', 'AdminService runtime registration.'],
+  ['apps/cap/srv/finance-metric-registry.ts', 'SAP_CAP', 'Governance', 'Enforces metric/dimension allowlists and reviewer approval gates.'],
+  ['apps/cap/srv/dashboard/dashboard-spec-compiler.ts', 'SAP_CAP', 'Compiler', 'Compiles validated metrics & provenance into strict DashboardSpec JSON.'],
+  ['apps/cap/srv/lib/repositories/dashboard-repository.ts', 'SAP_CAP', 'Persistence', 'Tenant-isolated SQLite/HANA CRUD and non-sensitive AuditEvents writer.'],
+  ['apps/cap/srv/lib/providers/finance-data-provider.ts', 'SAP_CAP', 'SAP Adapter', 'Transient FinanceDataProvider interface prohibiting raw row persistence.'],
+  ['apps/cap/srv/lib/providers/provider-factory.ts', 'SAP_CAP', 'SAP Adapter', 'Selects MockFinanceDataProvider or S4HanaODataFinanceDataProvider via env var.'],
+  ['apps/cap/srv/lib/providers/mock-finance-data-provider.ts', 'SAP_CAP', 'Mock Provider', 'Filters SYNTHETIC_FINANCE_RECORDS in-memory and tags provenance isSynthetic: true.'],
+  ['apps/cap/srv/lib/providers/s4hana-odata-provider.ts', 'SAP_CAP', 'SAP S/4 Stub', 'Blocked stub for live S/4HANA OData (I_JournalEntryItemBasic) until BTP Destination & mapping sign-off.'],
+  ['apps/cap/srv/lib/finance/calculation-engine.ts', 'SAP_CAP', 'Finance Engine', 'Deterministic TypeScript math for Total Revenue, Total Expenses, Net Profit, and Profit Margin.'],
+  ['apps/cap/srv/finance/normalization.ts', 'SAP_CAP', 'Finance Engine', 'Currency consistency checks, duplicate detection, and zero/missing state distinction.'],
+  ['apps/cap/srv/finance/calculations/index.ts', 'SAP_CAP', 'Finance Engine', 'Barrel export for modular domain calculators.'],
+  ['apps/cap/srv/finance/calculations/revenue-calculator.ts', 'SAP_CAP', 'Finance Engine', 'Modular revenue calculation logic.'],
+  ['apps/cap/srv/finance/calculations/expenses-calculator.ts', 'SAP_CAP', 'Finance Engine', 'Modular expenses calculation logic.'],
+  ['apps/cap/srv/finance/calculations/profit-calculator.ts', 'SAP_CAP', 'Finance Engine', 'Modular net profit & margin calculation logic.'],
+
+  // AI & Orchestration (apps/cap/srv/ai)
+  ['apps/cap/srv/ai/llm-provider.ts', 'AI_ORCH', 'AI Interface', 'LLMProvider contract decoupling dev models from approved corporate runtime LLMs.'],
+  ['apps/cap/srv/ai/mock-llm-provider.ts', 'AI_ORCH', 'AI Mock', 'Active deterministic rule-based intent parser with adversarial & unsupported metric detection.'],
+  ['apps/cap/srv/ai/approved-provider.ts', 'AI_ORCH', 'AI Adapter', 'Gated corporate LLM adapter (throws RuntimeLLMNotApprovedError unless configured).'],
+  ['apps/cap/srv/ai/prompts/finance-intent.v1.md', 'AI_ORCH', 'AI Prompt', 'Versioned system prompt defining allowlisted metrics, dimensions, and strict JSON structures.'],
+  ['apps/cap/srv/ai/schemas/intent-schemas.ts', 'AI_ORCH', 'AI Validation', 'Zod schemas validating raw LLM JSON outputs before DashboardRequest construction.'],
+  ['apps/cap/srv/ai/intent-service.ts', 'AI_ORCH', 'AI Service', 'Orchestrates prompt validation, bounded retries, allowlist checks, and clarifications.'],
+  ['apps/cap/srv/ai/follow-up-router.ts', 'AI_ORCH', 'AI Router', 'Classifies follow-ups into PRESENTATION_ONLY, DATA_CHANGING, REFRESH, or UNSUPPORTED.'],
+  ['apps/cap/srv/ai/planner.ts', 'AI_ORCH', 'Orchestration', 'Builds step-budgeted DataPlan objects validated against DataPlanSchema.'],
+  ['apps/cap/srv/ai/workflow-state.ts', 'AI_ORCH', 'Orchestration', 'Finite state machine enforcing bounded execution states (no autonomous loops).'],
+  ['apps/cap/srv/ai/tool-registry.ts', 'AI_ORCH', 'Orchestration', 'Locked registry executing only schema-validated allowlisted backend tools.'],
+  ['apps/cap/srv/ai/tools/get-finance-metrics.ts', 'AI_ORCH', 'AI Tool', 'Approved backend tool invoking FinanceDataProvider + CalculationEngine.'],
+  ['apps/cap/srv/ai/orchestrator.ts', 'AI_ORCH', 'Orchestration', 'Runs bounded plan execution with timeouts, duplicate-call guards, and ExecutionTrace.'],
+
+  // Tests
+  ['apps/cap/test/* (11 test files)', 'TESTS', 'CAP Unit Tests', 'Covers auth-guard, calculation-engine, persistence, lifecycle, compiler, follow-up-router, health, intent, metric-registry, mock-provider, orchestrator.'],
+  ['tests/ai/intent/intent-eval.test.ts', 'TESTS', 'Integration Test', 'Evaluates intent understanding across clear, ambiguous, and unsupported cases.'],
+  ['tests/ai/orchestration/orchestration.test.ts', 'TESTS', 'Integration Test', 'Verifies bounded step execution, tool registry, and traces.'],
+  ['tests/dashboard-lifecycle/lifecycle.test.ts', 'TESTS', 'Integration Test', 'Verifies save, reopen (isStale), rename, share, refresh, and delete.'],
+  ['tests/dashboard-spec/compiler.test.ts', 'TESTS', 'Integration Test', 'Verifies DashboardSpec compilation and widget allowlists.'],
+  ['tests/e2e/e2e-workflow.test.ts', 'TESTS', 'E2E Test', 'End-to-end test from prompt to compilation and follow-ups.'],
+  ['tests/finance/calculations/calculations.test.ts', 'TESTS', 'Finance Test', 'Validates deterministic arithmetic and zero-denominator protection.'],
+  ['tests/security/* (3 files)', 'TESTS', 'Security Tests', 'OWASP LLM tests: data-leakage.test.ts, prompt-injection.test.ts, tenant-boundary.test.ts.'],
+  ['tests/fixtures/* (2 JSON files)', 'TESTS', 'Test Fixtures', 'intent-cases.json and synthetic-finance-fixtures.json used by integration tests.'],
+
+  // Docs & Diagrams
+  ['docs/architecture/*', 'CONFIG_DOCS', 'Architecture Docs', 'SYSTEM-OVERVIEW.md, DECISIONS.md (ADR-001..008), PERSISTENCE-MODEL.md, ARCHITECTURE-AND-FLOW-GUIDE.md, COMPLETE-TECHNICAL-BREAKDOWN.md, SRIA-COMPLETE-SYSTEM-REFERENCE.html.'],
+  ['docs/ai/*, docs/domain/*, docs/data/*', 'CONFIG_DOCS', 'Domain & AI Docs', 'DASHBOARD-SPEC.md, INTENT-EVALUATION.md, ORCHESTRATION-FLOW.md, TOOL-CATALOG.md, CALCULATION-RULES.md, FINANCE-METRICS.md, SAP-FIELD-MAPPING.md, DATA-STORAGE-POLICY.md.'],
+  ['docs/sap/*, docs/security/*, docs/deployment/*', 'CONFIG_DOCS', 'Ops & BTP Docs', 'BTP-ENVIRONMENTS.md, HANA-CLOUD-PROVISIONING.md, IDENTITY-SETUP.md, SECURITY-EVALUATION.md, ACCEPTANCE-CHECKLIST.md, OPERATOR-RUNBOOK.md, ROLLBACK.md.'],
+  ['docs/implementation/* & phase-reports/*', 'CONFIG_DOCS', 'Delivery Reports', 'IMPLEMENTATION-STATUS.md, ACCESS-CHECKLIST.md, and PHASE-00-REPORT.md through PHASE-12-REPORT.md.'],
+  ['AIsap arch levels/*', 'CONFIG_DOCS', 'Visual Diagram', 'AI,sap arch levels.png and flowchart.mermaid architecture visuals.']
+];
+
+const BADGE_CLASS = {
+  FRONTEND: 'b-nonsap',
+  SAP_CAP: 'b-sap',
+  AI_ORCH: 'b-ai',
+  CONTRACTS: 'b-db',
+  TESTS: 'b-warn',
+  CONFIG_DOCS: 'b-neutral'
+};
+
+let activeCat = 'ALL';
+const tbody = document.getElementById('filesTbody');
+const countLabel = document.getElementById('fileCountLabel');
+const searchInput = document.getElementById('fileSearch');
+
+function renderFiles() {
+  const q = searchInput.value.toLowerCase().trim();
+  const filtered = FILES.filter(([path, cat, layer, desc]) => {
+    const catOk = activeCat === 'ALL' || cat === activeCat;
+    const qOk = !q || path.toLowerCase().includes(q) || layer.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
+    return catOk && qOk;
+  });
+
+  countLabel.textContent = `Showing ${filtered.length} of ${FILES.length} entries`;
+  tbody.innerHTML = filtered.map(([path, cat, layer, desc]) => `
+    <tr>
+      <td><code class="mono">${path}</code></td>
+      <td><span class="badge ${BADGE_CLASS[cat] || 'b-neutral'}">${layer}</span></td>
+      <td style="color:var(--text-2);">${desc}</td>
+    </tr>
+  `).join('');
+}
+
+document.getElementById('fileFilters').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-pill');
+  if (!btn) return;
+  document.querySelectorAll('.filter-pill').forEach((b) => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat = btn.dataset.cat;
+  renderFiles();
+});
+
+searchInput.addEventListener('input', renderFiles);
+renderFiles();
+</script>
+</body>
+</html>

@@ -1,30 +1,197 @@
-:root {
-  --ink: #2b1714;
-  --ink-light: #442a25;
-  --terracotta: #71352c;
-  --rust: #a65340;
-  --copper: #d4a184;
-  --cream: #fbf7f0;
-  --paper: #ffffff;
-  --sand: #ede3d4;
-  --line: #e3d5c4;
-  --muted: #79665c;
-  --success: #3f6943;
-  --success-bg: #eaf3ea;
-  --shadow: 0 10px 30px rgba(43, 23, 20, 0.08);
-  --radius: 12px;
+/* ─── Sria Analytics — Warm Sunflower & Cream Design System (Light + Dark) ─── */
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Warm Cream & Ivory Surfaces */
+  --bg: #FAF5E8;
+  --bg-subtle: #F2EAD7;
+  --surface: #FFFDF8;
+  --surface-subtle: #F7F0E2;
+  --surface-hover: #EFE5D1;
+  --surface-elevated: #FFFFFF;
+
+  /* Typography — Warm Espresso */
+  --text-primary: #1E1912;
+  --text-secondary: #5C5142;
+  --text-tertiary: #8E7F6B;
+
+  /* Brand Accent — Warm Sunflower & Amber Flame */
+  --sunflower: #F5B700;
+  --sunflower-soft: #FEF3C7;
+  --accent: #C85A0E;
+  --accent-hover: #A84708;
+  --accent-contrast: #FFFFFF;
+  --accent-subtle: #FDF0D5;
+  --accent-muted: #F5B700;
+  --accent-border: rgba(200, 90, 14, 0.28);
+
+  /* Borders & Hairlines */
+  --border: #E8DEC9;
+  --border-strong: #D6C8AE;
+  --inner-highlight: rgba(255, 255, 255, 0.85);
+
+  /* Semantic Financial Colors */
+  --positive: #15803D;
+  --positive-subtle: #E8F8EE;
+  --positive-border: #A7DFBC;
+
+  --negative: #B91C1C;
+  --negative-subtle: #FDECEC;
+  --negative-border: #F8BABA;
+
+  --warning: #B45309;
+  --warning-subtle: #FEF3C7;
+  --warning-border: #F7D774;
+
+  --info: #0369A1;
+  --info-subtle: #E8F4FC;
+  --info-border: #B2D9F2;
+
+  /* Sidebar — Deep Warm Espresso */
+  --nav-bg: #17130E;
+  --nav-surface: #221C15;
+  --nav-border: rgba(245, 183, 0, 0.12);
+  --nav-text: #E5DDD0;
+  --nav-muted: #9A8D7B;
+  --nav-text-active: #FFFDF8;
+
+  /* Topbar Glass */
+  --topbar-bg: rgba(255, 253, 248, 0.86);
+
+  /* Chart Palette */
+  --chart-revenue: #0284C7;
+  --chart-expenses: #D97706;
+  --chart-profit: #15803D;
+  --chart-margin: #C85A0E;
+  --chart-compare: #64748B;
+  --chart-grid: #E8DEC9;
+  --chart-axis: #7A6D5C;
+  --chart-tooltip-bg: #1E1912;
+  --chart-tooltip-text: #FAF5E8;
+
+  /* Layered Elevation */
+  --shadow-xs: 0 1px 2px rgba(30, 25, 18, 0.05);
+  --shadow-sm: 0 2px 6px rgba(30, 25, 18, 0.06), 0 1px 2px rgba(30, 25, 18, 0.04);
+  --shadow-md: 0 8px 22px rgba(30, 25, 18, 0.08), 0 2px 6px rgba(30, 25, 18, 0.04);
+  --shadow-lg: 0 18px 44px rgba(30, 25, 18, 0.14), 0 6px 14px rgba(30, 25, 18, 0.06);
+
+  --sidebar-width: 246px;
+  --sidebar-collapsed-width: 68px;
+  --topbar-height: 56px;
 }
 
-* {
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Dark Cream & Roasted Espresso Surfaces */
+  --bg: #120F0B;
+  --bg-subtle: #1C1712;
+  --surface: #1B1611;
+  --surface-subtle: #231D16;
+  --surface-hover: #2C241B;
+  --surface-elevated: #241E17;
+
+  /* Typography — Warm Dark Cream */
+  --text-primary: #F5ECD9;
+  --text-secondary: #C6B9A3;
+  --text-tertiary: #8B7D68;
+
+  /* Brand Accent — Glowing Warm Sunflower */
+  --sunflower: #F5B700;
+  --sunflower-soft: rgba(245, 183, 0, 0.14);
+  --accent: #F5B700;
+  --accent-hover: #FFC826;
+  --accent-contrast: #17130E;
+  --accent-subtle: rgba(245, 183, 0, 0.13);
+  --accent-muted: #F5B700;
+  --accent-border: rgba(245, 183, 0, 0.34);
+
+  /* Borders & Hairlines */
+  --border: #2D251C;
+  --border-strong: #3E3327;
+  --inner-highlight: rgba(255, 243, 214, 0.05);
+
+  /* Semantic Financial Colors */
+  --positive: #34D399;
+  --positive-subtle: rgba(52, 211, 153, 0.12);
+  --positive-border: rgba(52, 211, 153, 0.3);
+
+  --negative: #F87171;
+  --negative-subtle: rgba(248, 113, 113, 0.12);
+  --negative-border: rgba(248, 113, 113, 0.3);
+
+  --warning: #FBBF24;
+  --warning-subtle: rgba(251, 191, 36, 0.13);
+  --warning-border: rgba(251, 191, 36, 0.32);
+
+  --info: #38BDF8;
+  --info-subtle: rgba(56, 189, 248, 0.13);
+  --info-border: rgba(56, 189, 248, 0.3);
+
+  /* Sidebar */
+  --nav-bg: #0D0A07;
+  --nav-surface: #17130E;
+  --nav-border: rgba(245, 183, 0, 0.11);
+  --nav-text: #D7CBB8;
+  --nav-muted: #847662;
+  --nav-text-active: #FFF7E4;
+
+  /* Topbar Glass */
+  --topbar-bg: rgba(27, 22, 17, 0.86);
+
+  /* Chart Palette */
+  --chart-revenue: #38BDF8;
+  --chart-expenses: #F5B700;
+  --chart-profit: #34D399;
+  --chart-margin: #FB923C;
+  --chart-compare: #94A3B8;
+  --chart-grid: #2D251C;
+  --chart-axis: #A89A84;
+  --chart-tooltip-bg: #0D0A07;
+  --chart-tooltip-text: #F5ECD9;
+
+  /* Deep Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 10px 26px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 22px 52px rgba(0, 0, 0, 0.6), 0 8px 18px rgba(0, 0, 0, 0.38);
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--cream);
-  color: var(--ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
   line-height: 1.5;
+  font-size: 14px;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+}
+
+.tabular-nums,
+.metric-value,
+.financial-figure {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'cv05' 1;
 }
 
 button {
@@ -32,3 +199,60 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@keyframes sria-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sria-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes sria-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-spin { animation: sria-spin 0.8s linear infinite; }
+.animate-fade-in { animation: sria-fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,12 +1,13 @@
 /**
- * Frontend Component & API Client Unit Tests
- * Phase 9 — React Dashboard Creation & Rendering Experience
+ * Frontend Component, Intelligence & API Client Unit Tests
  *
  * Verifies:
  *  1. ApiClient correctly identifies missing parameters and triggers clarification.
- *  2. ApiClient executes deterministic calculation for company 1000 and 2000.
- *  3. Model outputs never render dangerous or unvetted HTML scripts.
- *  4. Formatters handle normal, negative, and zero values accurately.
+ *  2. ApiClient resolves request when company code is present.
+ *  3. ApiClient executes deterministic calculation for company 1000 and 2000.
+ *  4. Zero division safety verified for profit margin.
+ *  5. Authentic period-by-period and business unit breakdowns match synthetic golden fixtures.
+ *  6. Dashboard layout archetype selection produces distinct layouts per analytical intent.
  */
 
 import { strict as assert } from 'node:assert';
@@ -15,8 +16,14 @@ import { describe, it } from 'node:test';
 process.env.NODE_ENV = 'test';
 
 import { ApiClient } from '../src/services/api-client.ts';
+import {
+  detectDashboardLayout,
+  buildExecutiveNarrative,
+  buildAnalyticalInsights,
+} from '../src/services/dashboard-intelligence.ts';
+import type { DashboardSpec } from '@sria/contracts';
 
-describe('Phase 9: Frontend Services & Component Logic', () => {
+describe('Frontend Services, Intelligence & Component Logic', () => {
   it('1. ApiClient triggers clarification when prompt lacks company code', async () => {
     const res = await ApiClient.understandPrompt('Show me total revenue and profit');
     assert.equal(res.status, 'CLARIFICATION_REQUIRED');
@@ -40,7 +47,7 @@ describe('Phase 9: Frontend Services & Component Logic', () => {
       dimensions: ['fiscal_period'] as ('fiscal_period')[],
       filters: { companyCode: '1000', fiscalYear: 2026 },
       organizationId: 'ORG_TEST',
-      userId: 'test_user'
+      userId: 'test_user',
     };
 
     const outcome = await ApiClient.executeRequest(req);
@@ -48,28 +55,118 @@ describe('Phase 9: Frontend Services & Component Logic', () => {
     assert.equal(outcome.isSynthetic, true);
     assert.equal(outcome.results.length, 2);
 
-    const rev = outcome.results.find(m => m.metricId === 'total_revenue');
-    const profit = outcome.results.find(m => m.metricId === 'net_profit');
+    const rev = outcome.results.find((m) => m.metricId === 'total_revenue');
+    const profit = outcome.results.find((m) => m.metricId === 'net_profit');
 
     assert.equal(rev?.value, 350000);
     assert.equal(profit?.value, 120000);
   });
 
-  it('4. Zero division safety verified for profit margin', async () => {
+  it('4. Zero division safety verified for profit margin and negative net profit in company 2000', async () => {
     const req = {
       version: '1.0' as const,
       rawPrompt: 'Show profit margin for company 2000',
-      metricIds: ['profit_margin'] as ('profit_margin')[],
+      metricIds: ['total_revenue', 'total_expenses', 'net_profit', 'profit_margin'] as any,
       dimensions: ['fiscal_period'] as ('fiscal_period')[],
       filters: { companyCode: '2000', fiscalYear: 2026 },
       organizationId: 'ORG_TEST',
-      userId: 'test_user'
+      userId: 'test_user',
     };
 
     const outcome = await ApiClient.executeRequest(req);
-    const margin = outcome.results.find(m => m.metricId === 'profit_margin');
+    const margin = outcome.results.find((m) => m.metricId === 'profit_margin');
+    const expenses = outcome.results.find((m) => m.metricId === 'total_expenses');
     assert.ok(margin);
     assert.equal(typeof margin.value, 'number');
+    assert.equal(expenses?.value, 100000);
+  });
+
+  it('5. Period breakdown returns real deterministic P01/P02 records without synthetic split', async () => {
+    const periods = await ApiClient.fetchPeriodBreakdown('1000', 2026);
+    assert.equal(periods.length, 2);
+    assert.equal(periods[0]?.period, '01');
+    assert.equal(periods[0]?.total_revenue, 150000);
+    assert.equal(periods[0]?.total_expenses, 90000);
+    assert.equal(periods[1]?.period, '02');
+    assert.equal(periods[1]?.total_revenue, 200000);
+    assert.equal(periods[1]?.total_expenses, 140000);
+  });
+
+  it('6. Business unit breakdown returns active cost and revenue units', async () => {
+    const bu = await ApiClient.fetchBusinessUnitBreakdown('1000', 2026);
+    assert.ok(bu.length >= 3);
+    const ops = bu.find((b) => b.businessUnit === 'BU_OPERATIONS');
+    assert.equal(ops?.total_expenses, 140000);
+  });
+
+  it('7. Layout selector chooses distinct archetypes based on DashboardSpec intent', async () => {
+    const exec = await ApiClient.executeRequest({
+      version: '1.0',
+      rawPrompt: 'overview',
+      metricIds: ['total_revenue', 'total_expenses', 'net_profit', 'profit_margin'],
+      dimensions: ['fiscal_period'],
+      filters: { companyCode: '1000', fiscalYear: 2026 },
+      organizationId: 'ORG_TEST',
+      userId: 'test_user',
+    });
+
+    const baseSpec: DashboardSpec = {
+      version: '1.0',
+      dashboardId: '00000000-0000-4000-8000-000000000001',
+      title: 'Executive Financial Overview: Company 1000 (FY 2026)',
+      organizationId: 'ORG_TEST',
+      createdAt: new Date().toISOString(),
+      generatedBy: 'test_user',
+      widgets: [{ id: 'w1', type: 'kpi_card', title: 'Total Revenue', metricIds: ['total_revenue'] }],
+      results: exec.results,
+      dataProvenance: {
+        sourceType: 'mock',
+        sourceSystem: 'MOCK',
+        retrievedAt: new Date().toISOString(),
+        calculationVersion: '1.0.0',
+        isSynthetic: true,
+      },
+    };
+
+    assert.equal(detectDashboardLayout(baseSpec, false), 'executive_overview');
+    assert.equal(detectDashboardLayout(baseSpec, true), 'financial_comparison');
+    assert.equal(
+      detectDashboardLayout(
+        {
+          ...baseSpec,
+          title: 'Revenue Intelligence: Company 1000',
+          results: exec.results.filter((r) => r.metricId === 'total_revenue'),
+        },
+        false
+      ),
+      'revenue_intelligence'
+    );
+    assert.equal(
+      detectDashboardLayout(
+        {
+          ...baseSpec,
+          title: 'Expense Analysis: Company 1000',
+          results: exec.results.filter((r) => r.metricId === 'total_expenses'),
+        },
+        false
+      ),
+      'expense_intelligence'
+    );
+    assert.equal(
+      detectDashboardLayout(
+        {
+          ...baseSpec,
+          title: 'Profitability Analysis: Company 1000',
+          results: exec.results.filter((r) => r.metricId === 'net_profit' || r.metricId === 'profit_margin'),
+        },
+        false
+      ),
+      'profitability_analysis'
+    );
+
+    const narrative = buildExecutiveNarrative(baseSpec, []);
+    assert.ok(narrative && narrative.includes('$350,000.00'));
+    const insights = buildAnalyticalInsights(baseSpec, [], []);
+    assert.ok(insights.length > 0);
   });
 });
-
