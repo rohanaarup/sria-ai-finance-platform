@@ -10,16 +10,8 @@ import type {
   SupportedDimension
 } from '@sria/contracts';
 
-export class MetricNotExecutableError extends Error {
-  readonly metrics: string[];
-  readonly tier: EnvironmentTier;
-  constructor(metrics: string[], tier: EnvironmentTier) {
-    super(`Metric(s) not approved and enabled for the '${tier}' environment: ${metrics.join(', ')}`);
-    this.name = 'MetricNotExecutableError';
-    this.metrics = metrics;
-    this.tier = tier;
-  }
-}
+import { MetricNotExecutableError } from './semantic/catalog.ts';
+export { MetricNotExecutableError };
 
 /**
  * Validation Result Interface

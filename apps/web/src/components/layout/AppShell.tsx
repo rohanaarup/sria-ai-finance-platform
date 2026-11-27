@@ -19,6 +19,7 @@ import {
   Sun,
   Moon,
   Search,
+  BookMarked,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { SriaLogo } from '../brand/SriaLogo';
@@ -49,6 +50,7 @@ interface AppShellProps {
   onSelectRecentDashboard?: (id: string) => void;
   onOpenSystemSettings?: () => void;
   onOpenCommandPalette?: () => void;
+  onOpenMetricCatalog?: () => void;
   theme: ThemeMode;
   onToggleTheme: () => void;
   systemStatus?: SystemHealthStatus | null;
@@ -71,6 +73,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   onSelectRecentDashboard,
   onOpenSystemSettings,
   onOpenCommandPalette,
+  onOpenMetricCatalog,
   theme,
   onToggleTheme,
   systemStatus,
@@ -273,6 +276,21 @@ export const AppShell: React.FC<AppShellProps> = ({
               <SlidersHorizontal size={16} className="sidebar__item-icon" />
               {!collapsed && <span className="sidebar__item-label">Catalog &amp; Settings</span>}
             </button>
+            {onOpenMetricCatalog && (
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenMetricCatalog();
+                  setMobileOpen(false);
+                }}
+                className="sidebar__item"
+                title="Metric catalog & glossary"
+                aria-haspopup="dialog"
+              >
+                <BookMarked size={16} className="sidebar__item-icon" />
+                {!collapsed && <span className="sidebar__item-label">Metric catalog</span>}
+              </button>
+            )}
             <a
               href="/ARCHITECTURE-AND-FLOW-GUIDE.html"
               target="_blank"
@@ -382,6 +400,20 @@ export const AppShell: React.FC<AppShellProps> = ({
                 <Search size={13} />
                 <span>Quick Jump</span>
                 <span className="kbd cmd-shortcut">Ctrl+K</span>
+              </button>
+            )}
+
+            {onOpenMetricCatalog && (
+              <button
+                type="button"
+                onClick={onOpenMetricCatalog}
+                className="btn btn--subtle btn--xs"
+                style={{ height: 30, padding: '0 10px' }}
+                title="Metric catalog & glossary"
+                aria-haspopup="dialog"
+              >
+                <BookMarked size={13} style={{ color: 'var(--accent)' }} />
+                <span>Metric catalog</span>
               </button>
             )}
 

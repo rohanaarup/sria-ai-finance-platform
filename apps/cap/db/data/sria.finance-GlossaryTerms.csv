@@ -1,0 +1,48 @@
+ID;term;metricId;status;tenantId;note
+2008f85b-0ff7-5e53-bd28-1e3f27f26cb4;revenue;total_revenue;RESOLVES;GLOBAL;
+75b71f7f-76dc-52b9-ae14-e5bc28ad9d32;total revenue;total_revenue;RESOLVES;GLOBAL;
+1c0df3bc-a4f2-55d4-a52e-d9bd03443126;sales;total_revenue;RESOLVES;GLOBAL;
+6bc5d5f5-a3f0-5982-8a66-02cabd703c47;net sales;total_revenue;RESOLVES;GLOBAL;
+1ed50240-8a87-569e-923e-25c0650df205;turnover;total_revenue;RESOLVES;GLOBAL;
+dc0e8611-d449-586a-b23c-a5fa21d9ac1d;top line;total_revenue;RESOLVES;GLOBAL;
+70bfd8a4-64e0-5625-824f-97848e4cce90;income from sales;total_revenue;RESOLVES;GLOBAL;
+d6b2cbb3-cb23-5f47-897a-9f6b4b42ebe7;expenses;total_expenses;RESOLVES;GLOBAL;
+5d07d247-ce9f-5d1d-a458-4daed7f62cf0;total expenses;total_expenses;RESOLVES;GLOBAL;
+5973d9df-8ec2-55a0-9b84-571464718053;expense;total_expenses;RESOLVES;GLOBAL;
+d375856f-4d21-521e-a6e4-f0057b652ebf;costs;total_expenses;RESOLVES;GLOBAL;
+12147f7d-c01b-55f3-a67b-42ffbd7f9749;total costs;total_expenses;RESOLVES;GLOBAL;
+3776a495-6028-51f2-be15-e1e24f9a1bc6;spending;total_expenses;RESOLVES;GLOBAL;
+4f82cebb-5416-5309-a145-30ac12f7606b;spend;total_expenses;RESOLVES;GLOBAL;
+06da92f6-3caf-5a8c-87e1-6624543fb6c3;expenditure;total_expenses;RESOLVES;GLOBAL;
+d9586bfa-64a6-54be-8af0-5bd31ab01695;net profit;net_profit;RESOLVES;GLOBAL;
+5c3e77e8-612b-536f-abbe-6d521a513adf;profit;net_profit;RESOLVES;GLOBAL;
+03d1e1af-655d-56d2-b7b5-a40e1b2b0845;net income;net_profit;RESOLVES;GLOBAL;
+ad24494a-e9d7-5526-9733-f796c44342f1;earnings;net_profit;RESOLVES;GLOBAL;
+45646f70-6d6a-563f-90ef-fe169cd442ce;bottom line;net_profit;RESOLVES;GLOBAL;
+2137d8e3-df4a-5513-a697-c3ad349450c1;net loss;net_profit;RESOLVES;GLOBAL;
+c7a60d4a-47c7-5be0-b1d2-fa51388e4990;profit or loss;net_profit;RESOLVES;GLOBAL;
+56f577ad-a58b-50bf-b723-52eefc6d085f;profit margin;profit_margin;RESOLVES;GLOBAL;
+874a5e82-cefa-577d-8fd1-82728ffedb02;net margin;profit_margin;RESOLVES;GLOBAL;
+bd31db5d-d720-58be-88b0-039b7135b495;margin;profit_margin;RESOLVES;GLOBAL;
+f9c14d0d-b1e6-5cce-9480-7513ebc0c91d;net profit margin;profit_margin;RESOLVES;GLOBAL;
+c64cfda8-9df8-5a6a-9acc-a1a834679088;ebitda;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+69ea80d2-512d-5c4e-94f8-6763197663d4;ebit;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+af894a00-da74-52f6-bc1a-1316b8bd32ba;arr;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+0940a7e9-ad2b-519a-bf29-13dba24610c6;mrr;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+4d4ee82a-148f-57fc-bbe7-c5ae2dc9b03a;churn;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+f98591bc-a97f-549a-8c40-3cae6f86b796;customer churn;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+1b04c71f-5c8b-5128-b92c-83992d87b37d;headcount;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+0716c011-95d2-5a13-a2c2-fba875d044e5;stock price;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+c1b1537b-065c-5874-b7de-328001a9eeaf;share price;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+cc327641-5f3f-5ddb-98d8-8452ed7c0427;cash flow;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+edd12cad-960b-555d-9df8-f58e05475f66;free cash flow;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+03890bb6-6d20-5409-ba94-ddc700f1a225;gross margin;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+f5cddf88-2c8a-5e6b-bef0-6a56d40f6857;gross profit;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+d2b31df0-fcec-5a5b-9ce7-dc303488e788;working capital;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+2038eb73-891c-5ebf-9bbd-0fb995946378;burn rate;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+37730960-b600-50cd-8a74-99e86c150d66;inventory;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+23029511-9a13-5e14-a02e-af8f8477284c;accounts receivable;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+1e0c75fc-afac-5e4b-8df6-640fe34c0659;accounts payable;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+89907675-6b8d-59ba-a756-995b427dd7ee;dso;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+e4e156d0-0473-5bf6-8b3d-2f34cd84bb60;roi;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet
+e8b0ddde-6c7f-5e96-8023-88e24510eb48;return on equity;;UNSUPPORTED;GLOBAL;Known finance term that is not an approved metric yet

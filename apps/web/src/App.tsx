@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AppShell } from './components/layout/AppShell';
 import { SystemSettingsDialog } from './components/layout/SystemSettingsDialog';
 import { CommandPalette } from './components/ui/CommandPalette';
+import { MetricCatalog } from './components/semantic/MetricCatalog';
 import { WorkspacePage } from './pages/WorkspacePage';
 import { MyDashboardsPage } from './pages/MyDashboardsPage';
 import { useFinanceWorkspace } from './hooks/useFinanceWorkspace';
@@ -12,6 +13,7 @@ export default function App() {
   const { theme, toggleTheme } = useTheme();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -36,6 +38,7 @@ export default function App() {
       onSelectRecentDashboard={ws.handleOpenRecent}
       onOpenSystemSettings={() => setSettingsOpen(true)}
       onOpenCommandPalette={() => setCommandOpen(true)}
+      onOpenMetricCatalog={() => setCatalogOpen(true)}
       theme={theme}
       onToggleTheme={toggleTheme}
       systemStatus={ws.systemStatus}
@@ -116,7 +119,10 @@ export default function App() {
         onGoCanvas={() => ws.setCurrentView('canvas')}
         onGoSaved={() => ws.setCurrentView('dashboards')}
         onRunPrompt={(prompt, cmp) => ws.handlePromptSubmit(prompt, { compareEntities: cmp })}
+        onOpenMetricCatalog={() => setCatalogOpen(true)}
       />
+
+      <MetricCatalog open={catalogOpen} onClose={() => setCatalogOpen(false)} />
     </AppShell>
   );
 }

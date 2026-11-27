@@ -24,6 +24,7 @@ import type { RawIntentOutput, IntentProcessingResult } from './schemas/intent-s
 import { MockLLMProvider } from './mock-llm-provider.ts';
 import { ApprovedLLMProvider } from './approved-provider.ts';
 import { loadConfig } from '../lib/config/app-config.ts';
+import { getSemanticCatalog } from '../semantic/runtime.ts';
 
 export interface UserContext {
   organizationId: string;
@@ -73,11 +74,26 @@ export class IntentService {
       };
     }
 
-    // 2. Execute bounded LLM completion loop with retry for malformed output
-    const rawOutput = await this._callLLMWithRetry(trimmed);
+    // 2. Deterministic glossary resolution BEFORE any model call (G2-01).
+    //    The model never decides what "sales" means; known-but-unsupported terms are refused.
+    const catalog = getSemanticCatalog();
+    const tier = loadConfig().tier;
+    const executable = catalog.listExecutable(tier, userCtx.organizationId);
+    const scan = catalog.scanText(trimmed, userCtx.organizationId);
+    if (scan.unsupported.length > 0) {
+      return {
+        status: 'REJECTED',
+        reason: `${scan.unsupported.map((t) => `"${t.toUpperCase()}"`).join(', ')} ${scan.unsupported.length > 1 ? 'are' : 'is'} not an approved metric. Available metrics: ${executable.join(', ')}.`,
+        supportedMetrics: executable,
+        rawPrompt: trimmed
+      };
+    }
 
-    // 3. Process the parsed model output
-    return this._interpretModelOutput(rawOutput, trimmed, userCtx);
+    // 3. Execute bounded LLM completion loop with retry for malformed output
+    const rawOutput = await this._callLLMWithRetry(trimmed, executable, scan.metricIds);
+
+    // 4. Process the parsed model output against the deterministic resolution
+    return this._interpretModelOutput(rawOutput, trimmed, userCtx, scan.metricIds, executable);
   }
 
   /**
@@ -108,13 +124,16 @@ export class IntentService {
 
   // ─── Private Orchestration Methods ──────────────────────────────────────────
 
-  private async _callLLMWithRetry(prompt: string): Promise<RawIntentOutput> {
+  private async _callLLMWithRetry(prompt: string, executable: string[], resolved: string[]): Promise<RawIntentOutput> {
+    const catalog = getSemanticCatalog();
+    const metricLines = executable.map((id) => `${id} (${catalog.definition(id)?.label ?? id}; also called: ${catalog.aliases(id).join(', ')})`).join('; ');
     const messages: LLMMessage[] = [
       {
         role: 'system',
         content:
           'You are the Sria Info Tech Finance AI Assistant. Extract structured intent JSON conforming to specification. ' +
-          'Only allowed metrics: total_revenue, total_expenses, net_profit, profit_margin. ' +
+          `Only allowed metrics (from the governed semantic layer): ${metricLines}. ` +
+          (resolved.length ? `Metrics already resolved deterministically from the request: ${resolved.join(', ')}. ` : '') +
           'Only allowed dimensions: fiscal_period, month, company_code, business_unit. ' +
           'Never compute numbers. Output JSON only.'
       },
@@ -166,7 +185,9 @@ export class IntentService {
   private _interpretModelOutput(
     output: RawIntentOutput,
     rawPrompt: string,
-    _userCtx: UserContext
+    _userCtx: UserContext,
+    resolvedMetrics: string[] = [],
+    executable: string[] = Object.keys(BASELINE_METRIC_CATALOG)
   ): IntentProcessingResult {
     // Branch 1: Model flagged an unsupported request
     if (output.intentType === 'unsupported_request') {
@@ -187,8 +208,15 @@ export class IntentService {
       };
     }
 
-    // Branch 3: Model attempted to create a dashboard -> Validate allowlists & required params
-    const allowedMetrics = Object.keys(BASELINE_METRIC_CATALOG) as MetricId[];
+    // Branch 3: Model attempted to create a dashboard -> Validate allowlists & required params.
+    // G2-01: the metric set comes from the deterministic glossary resolution. If the glossary found
+    // nothing, the model's metric choice is a guess, so we ask instead of accepting it.
+    if (resolvedMetrics.length === 0 && output.metricIds.length > 0) {
+      output = { ...output, metricIds: [] };
+    } else if (resolvedMetrics.length > 0) {
+      output = { ...output, metricIds: resolvedMetrics };
+    }
+    const allowedMetrics = executable as MetricId[];
     const validMetricIds: MetricId[] = [];
     const invalidMetrics: string[] = [];
 
@@ -204,7 +232,7 @@ export class IntentService {
     if (invalidMetrics.length > 0) {
       return {
         status: 'REJECTED',
-        reason: `Metric(s) [${invalidMetrics.join(', ')}] are not in the approved Finance Metric Registry.`,
+        reason: `Metric(s) [${invalidMetrics.join(', ')}] are not approved and effective in this environment.`,
         supportedMetrics: allowedMetrics,
         rawPrompt
       };
@@ -220,8 +248,8 @@ export class IntentService {
             parameterName: 'metric',
             prompt: 'Please select one or more approved financial metrics for your dashboard.',
             reason: 'At least one approved metric is required to generate a dashboard.',
-            options: ['Total Revenue', 'Total Expenses', 'Net Profit', 'Profit Margin'],
-            suggestedDefault: 'Total Revenue'
+            options: executable.map((id) => getSemanticCatalog().definition(id)?.label ?? id),
+            suggestedDefault: getSemanticCatalog().definition(executable[0] ?? '')?.label ?? 'Total Revenue'
           }
         ],
         rawPrompt

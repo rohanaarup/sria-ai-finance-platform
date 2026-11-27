@@ -12,6 +12,7 @@ import { AuthGuard } from './lib/auth/auth-guard.ts';
 import { DashboardRequestSchema } from '@sria/contracts';
 import { Planner } from './ai/planner.ts';
 import { Orchestrator } from './ai/orchestrator.ts';
+import { ensureSemanticLoaded } from './semantic/runtime.ts';
 import type { ExecutionContext } from './ai/tool-registry.ts';
 
 export default class OrchestrationServiceHandler extends cds.ApplicationService {
@@ -28,6 +29,7 @@ export default class OrchestrationServiceHandler extends cds.ApplicationService 
   }
 
   private async handlePlanRequest(req: Request) {
+    await ensureSemanticLoaded();
     const ctx = AuthGuard.tenantContext(req, 'FinanceAnalyst');
     const { requestJson } = req.data as { requestJson: string };
 
@@ -55,6 +57,7 @@ export default class OrchestrationServiceHandler extends cds.ApplicationService 
   }
 
   private async handleExecutePlan(req: Request) {
+    await ensureSemanticLoaded();
     const verified = AuthGuard.tenantContext(req, 'FinanceAnalyst');
     const { requestJson } = req.data as { requestJson: string };
 

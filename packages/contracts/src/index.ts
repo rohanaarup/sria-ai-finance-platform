@@ -23,3 +23,6 @@ export * from './dashboard-spec.js';
 
 // Synthetic Golden Fixtures
 export * from './fixtures/synthetic-fixtures.js';
+
+// Semantic layer (G2-01): metric versions, formulas, lineage, glossary
+export * from './semantic.js';

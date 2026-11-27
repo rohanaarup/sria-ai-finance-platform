@@ -1,0 +1,8 @@
+ID;dimension_dimensionId;memberId;label;parentMemberId;tenantId
+33c7420f-61aa-559d-8c63-fda252a6ac15;company_code;1000;Company code 1000 (synthetic);;GLOBAL
+0924229f-1357-5176-9d46-4cff98239e46;company_code;2000;Company code 2000 (synthetic);;GLOBAL
+6ba3b5ca-f9a3-5093-9c42-376ad6937370;business_unit;BU_COMMERCIAL;Commercial;;GLOBAL
+6d816889-79b1-5ef3-8694-bcc71496a6a8;business_unit;BU_OPERATIONS;Operations;;GLOBAL
+5145581b-092b-5461-95f7-d54047143569;business_unit;BU_ADMIN;Admin;;GLOBAL
+ab15b2ce-527f-5851-a135-7d3495c5f1dc;business_unit;BU_MARKETING;Marketing;;GLOBAL
+43d734a2-96b3-54ab-9bf7-7a1e7d0959b8;business_unit;BU_SHARED_SERVICES;Shared Services;;GLOBAL

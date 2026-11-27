@@ -46,6 +46,10 @@ export class AuthGuard {
         scopes.push('FinanceAnalyst');
       }
     }
+    if (req.user.is('MetricApprover') || req.user.is('SriaMetricApprover')) {
+      roles.push('MetricApprover');
+      scopes.push('MetricApprover');
+    }
     if (req.user.is('TenantAdmin') || req.user.is('SriaTenantAdministrator') || req.user.is('admin')) {
       roles.push('TenantAdmin');
       scopes.push('TenantAdmin');
@@ -71,7 +75,7 @@ export class AuthGuard {
   /**
    * Asserts that the authenticated user possesses the required scope; throws 403 if missing
    */
-  public static assertScope(req: any, requiredScope: 'FinanceAnalyst' | 'FinanceManager' | 'TenantAdmin'): AuthenticatedUser {
+  public static assertScope(req: any, requiredScope: 'FinanceAnalyst' | 'FinanceManager' | 'TenantAdmin' | 'MetricApprover'): AuthenticatedUser {
     const user = this.assertAuthenticated(req);
     if (!user.scopes.includes(requiredScope) && !user.roles.includes('TenantAdmin')) {
       return deny(req, 403, `Forbidden: Missing required scope '${requiredScope}'`);
@@ -86,7 +90,7 @@ export class AuthGuard {
    */
   public static tenantContext(
     req: any,
-    requiredScope: 'FinanceAnalyst' | 'FinanceManager' | 'TenantAdmin' = 'FinanceAnalyst'
+    requiredScope: 'FinanceAnalyst' | 'FinanceManager' | 'TenantAdmin' | 'MetricApprover' = 'FinanceAnalyst'
   ): { organizationId: string; userId: string; roles: string[] } {
     const user = this.assertScope(req, requiredScope);
     return { organizationId: user.tenant, userId: user.id, roles: user.roles };

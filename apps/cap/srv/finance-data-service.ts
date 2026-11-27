@@ -22,6 +22,10 @@ import {
   inspectAndCalculate,
   DataQualityError
 } from './lib/finance/calculation-engine.ts';
+import { loadConfig } from './lib/config/app-config.ts';
+import { dec, toApiNumber, toFixedString } from './lib/finance/decimal.ts';
+import { evaluateMetrics } from './semantic/evaluate.ts';
+import { getSemanticCatalog, ensureSemanticLoaded } from './semantic/runtime.ts';
 
 // ─── Service Registration ──────────────────────────────────────────────────────
 
@@ -78,59 +82,43 @@ export default class FinanceDataServiceHandler extends cds.ApplicationService {
     }
 
     // --- Deterministic calculation (LLM never involved) ---
-    let metrics;
+    await ensureSemanticLoaded();
+    // --- Deterministic, Decimal-only calculation (LLM never involved) ---
+    const isSynthetic = provider.getSourceType() === 'mock';
+    const calculatedAt = new Date().toISOString();
+    const cfg = loadConfig();
+    let metricPayload;
     try {
-      metrics = inspectAndCalculate(records).metrics;
+      if (cfg.semanticLayer) {
+        // G2-01: every metric that is executable in this tier for this tenant, computed from semantic formulas
+        const catalog = getSemanticCatalog();
+        const ids = catalog.listExecutable(cfg.tier, verified.organizationId);
+        const ev = evaluateMetrics(records, catalog, ids, { tier: cfg.tier, tenant: verified.organizationId });
+        const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: ev.currency });
+        metricPayload = ids.map((id) => {
+          const r = ev.results.get(id)!;
+          const pct = r.unit === 'PERCENT';
+          return {
+            metricId: id, label: r.label, value: toApiNumber(r.value),
+            formattedValue: pct ? `${toFixedString(r.value, r.decimals)}%` : fmt.format(toApiNumber(r.value)),
+            currency: pct ? 'PCT' : ev.currency, isZeroDenominator: r.isZeroDenominator,
+            metricVersion: r.metricVersion, dataState: r.dataState
+          };
+        });
+      } else {
+        const { metrics, quality } = inspectAndCalculate(records);
+        const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: quality.currency });
+        metricPayload = [
+          { metricId: 'total_revenue', label: 'Total Revenue', value: metrics.totalRevenue.value, formattedValue: fmt.format(metrics.totalRevenue.value), currency: quality.currency, isZeroDenominator: false, metricVersion: 'total_revenue@legacy', dataState: quality.revenueState },
+          { metricId: 'total_expenses', label: 'Total Expenses', value: metrics.totalExpenses.value, formattedValue: fmt.format(metrics.totalExpenses.value), currency: quality.currency, isZeroDenominator: false, metricVersion: 'total_expenses@legacy', dataState: quality.expensesState },
+          { metricId: 'net_profit', label: 'Net Profit', value: metrics.netProfit.value, formattedValue: fmt.format(metrics.netProfit.value), currency: quality.currency, isZeroDenominator: false, metricVersion: 'net_profit@legacy', dataState: null },
+          { metricId: 'profit_margin', label: 'Profit Margin', value: metrics.profitMargin.value, formattedValue: `${toFixedString(dec(metrics.profitMargin.value), 2)}%`, currency: 'PCT', isZeroDenominator: metrics.profitMargin.isZeroDenominator, metricVersion: 'profit_margin@legacy', dataState: null }
+        ];
+      }
     } catch (err) {
       if (err instanceof DataQualityError) return req.error(422, err.message);
       throw err;
     }
-
-    // --- Build provenance ---
-    const isSynthetic = provider.getSourceType() === 'mock';
-    const calculatedAt = new Date().toISOString();
-
-    // --- Currency from records (defaults to USD when no records) ---
-    const currency = records.length > 0 ? (records[0]?.currency ?? 'USD') : 'USD';
-
-    // --- Format value helper ---
-    const fmt = (value: number) =>
-      new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
-
-    const metricPayload = [
-      {
-        metricId: 'total_revenue',
-        label: 'Total Revenue',
-        value: metrics.totalRevenue.value,
-        formattedValue: fmt(metrics.totalRevenue.value),
-        currency,
-        isZeroDenominator: false
-      },
-      {
-        metricId: 'total_expenses',
-        label: 'Total Expenses',
-        value: metrics.totalExpenses.value,
-        formattedValue: fmt(metrics.totalExpenses.value),
-        currency,
-        isZeroDenominator: false
-      },
-      {
-        metricId: 'net_profit',
-        label: 'Net Profit',
-        value: metrics.netProfit.value,
-        formattedValue: fmt(metrics.netProfit.value),
-        currency,
-        isZeroDenominator: false
-      },
-      {
-        metricId: 'profit_margin',
-        label: 'Profit Margin',
-        value: metrics.profitMargin.value,
-        formattedValue: `${metrics.profitMargin.value.toFixed(2)}%`,
-        currency: 'PCT',
-        isZeroDenominator: metrics.profitMargin.isZeroDenominator
-      }
-    ];
 
     return {
       companyCode: companyCode.trim(),

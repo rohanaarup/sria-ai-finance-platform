@@ -1,0 +1,5 @@
+metricId;tenantId;label;category;description;owner
+total_revenue;GLOBAL;Total Revenue;REVENUE;Gross recognised revenue in the accounting period from sales and services.;Finance Subject-Matter Reviewer (to be named, D-04)
+total_expenses;GLOBAL;Total Expenses;EXPENSE;Operating and administrative expenses incurred during the accounting period.;Finance Subject-Matter Reviewer (to be named, D-04)
+net_profit;GLOBAL;Net Profit;PROFIT;Profit derived deterministically as total revenue minus total expenses.;Finance Subject-Matter Reviewer (to be named, D-04)
+profit_margin;GLOBAL;Profit Margin (%);RATIO;Net profit as a percentage of total revenue. Zero revenue gives 0.00 with a zero-denominator flag.;Finance Subject-Matter Reviewer (to be named, D-04)

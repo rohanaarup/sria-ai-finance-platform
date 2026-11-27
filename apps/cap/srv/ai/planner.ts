@@ -13,8 +13,8 @@
 import { randomUUID } from 'node:crypto';
 import { loadConfig } from '../lib/config/app-config.ts';
 import type { EnvironmentTier } from '../lib/config/app-config.ts';
-import { defaultMetricRegistry } from '../finance-metric-registry.ts';
-import type { FinanceMetricRegistry } from '../finance-metric-registry.ts';
+import { defaultGate } from '../semantic/gate.ts';
+import type { MetricGate } from '../semantic/gate.ts';
 import {
   DataPlanSchema,
   BASELINE_METRIC_CATALOG
@@ -30,19 +30,19 @@ export interface PlannerConfig {
   maxSteps?: number;
   resolvedSource?: 'mock' | 's4hana';
   tier?: EnvironmentTier;
-  registry?: FinanceMetricRegistry;
+  registry?: MetricGate;
 }
 
 export class Planner {
   private readonly _maxSteps: number;
   private readonly _resolvedSource: 'mock' | 's4hana';
   private readonly _tier: EnvironmentTier;
-  private readonly _registry: FinanceMetricRegistry;
+  private readonly _registry: MetricGate;
 
   constructor(config?: PlannerConfig) {
     this._maxSteps = config?.maxSteps ?? 3;
     this._tier = config?.tier ?? loadConfig().tier;
-    this._registry = config?.registry ?? defaultMetricRegistry;
+    this._registry = config?.registry ?? defaultGate();
     this._resolvedSource =
       config?.resolvedSource ??
       loadConfig().financeProvider;
@@ -60,7 +60,7 @@ export class Planner {
     }
 
     // 1b. Approval gate: the metric must be executable in the active environment tier
-    this._registry.assertExecutable(request.metricIds, this._tier);
+    this._registry.assertExecutable(request.metricIds, this._tier, request.organizationId);
 
     // 2. Validate filters
     if (!request.filters?.companyCode) {

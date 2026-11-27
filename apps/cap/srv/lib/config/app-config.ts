@@ -35,7 +35,8 @@ const EnvSchema = z.object({
   AI_RUNTIME_API_KEY: z.string().min(1).optional(),
   AI_RUNTIME_ENDPOINT: z.string().url().optional(),
   AI_RUNTIME_MODEL: z.string().min(1).optional(),
-  CORS_ALLOWED_ORIGINS: z.string().optional()
+  CORS_ALLOWED_ORIGINS: z.string().optional(),
+  SEMANTIC_LAYER: z.enum(['on', 'off']).default('on')
 });
 
 export interface AppConfig {
@@ -48,6 +49,8 @@ export interface AppConfig {
   aiEndpoint?: string;
   aiModel?: string;
   corsAllowedOrigins: string[];
+  /** G2-01: semantic layer drives gate and formulas; 'off' = legacy hard-coded catalog (rollback). */
+  semanticLayer: boolean;
   /** true when answers are built from synthetic data or the mock model */
   isSynthetic: boolean;
 }
@@ -107,6 +110,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     aiEndpoint: e.AI_RUNTIME_ENDPOINT,
     aiModel: e.AI_RUNTIME_MODEL,
     corsAllowedOrigins,
+    semanticLayer: e.SEMANTIC_LAYER === 'on',
     isSynthetic: e.FINANCE_DATA_PROVIDER === 'mock' || e.AI_RUNTIME_PROVIDER === 'mock'
   };
 }

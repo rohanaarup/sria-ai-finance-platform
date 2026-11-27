@@ -1,0 +1,2 @@
+calendarId;description;periodsPerYear;specialPeriods;startMonth
+K4;Calendar year with 12 posting periods and 4 special periods (synthetic model - the real fiscal year variant is confirmed with SAP in G2-03);12;4;1

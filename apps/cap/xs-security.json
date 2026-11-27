@@ -14,6 +14,10 @@
     {
       "name": "$XSAPPNAME.TenantAdmin",
       "description": "Administer workspaces, data source references, and audit logs"
+    },
+    {
+      "name": "$XSAPPNAME.MetricApprover",
+      "description": "Approve or reject finance metric definitions (four-eyes: never their own proposal)"
     }
   ],
   "role-templates": [
@@ -47,6 +51,17 @@
       "attribute-references": [
         "tenantid"
       ]
+    },
+    {
+      "name": "MetricApprover",
+      "description": "Finance metric approver",
+      "scope-references": [
+        "$XSAPPNAME.MetricApprover",
+        "$XSAPPNAME.FinanceAnalyst"
+      ],
+      "attribute-references": [
+        "tenantid"
+      ]
     }
   ],
   "role-collections": [
@@ -69,6 +84,13 @@
       "description": "Full administrative access to Sria Finance workspaces and connections",
       "role-template-references": [
         "$XSAPPNAME.TenantAdmin"
+      ]
+    },
+    {
+      "name": "SriaMetricApprover",
+      "description": "Approve Sria finance metric definitions",
+      "role-template-references": [
+        "$XSAPPNAME.MetricApprover"
       ]
     }
   ],

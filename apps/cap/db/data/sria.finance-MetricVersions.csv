@@ -1,0 +1,5 @@
+ID;metricId;tenantId;version;status;kind;accountType;signRule;expression;unit;decimals;effectiveFrom;proposedBy;approvedBy;approvedAt
+96556b4b-432c-5a90-9304-3d82c79bd146;total_revenue;GLOBAL;1;PENDING_REVIEW;BASE;REVENUE;CREDIT_POSITIVE;;CURRENCY;2;2020-01-01;Repository seed G2-01 (reproduces Cycle 1 definitions);;
+ca11297b-0c35-535b-a9af-1a0d1ff53586;total_expenses;GLOBAL;1;PENDING_REVIEW;BASE;EXPENSE;DEBIT_POSITIVE;;CURRENCY;2;2020-01-01;Repository seed G2-01 (reproduces Cycle 1 definitions);;
+c0c8f885-6854-57fa-aab8-f46eae0ac320;net_profit;GLOBAL;1;PENDING_REVIEW;DERIVED;;;total_revenue - total_expenses;CURRENCY;2;2020-01-01;Repository seed G2-01 (reproduces Cycle 1 definitions);;
+425b7b7b-567b-515f-97d2-40af604694a9;profit_margin;GLOBAL;1;PENDING_REVIEW;DERIVED;;;net_profit / total_revenue * 100;PERCENT;2;2020-01-01;Repository seed G2-01 (reproduces Cycle 1 definitions);;

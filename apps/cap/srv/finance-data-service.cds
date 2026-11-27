@@ -41,6 +41,8 @@ service FinanceDataService @(path: '/api/finance', requires: ['FinanceAnalyst','
       formattedValue : String;
       currency       : String;
       isZeroDenominator : Boolean;
+      metricVersion  : String;   // semantic version used, e.g. total_revenue@v1 (G2-01)
+      dataState      : String;   // AVAILABLE | ZERO_VALUE | MISSING_DATA
     };
   };
 

@@ -3,21 +3,7 @@ namespace sria.finance;
 using { cuid, managed } from '@sap/cds/common';
 using { sria.finance.Workspaces } from './tenant';
 
-/**
- * Versioned metric governance configurations in application database
- */
-entity MetricConfigurations : cuid, managed {
-  metricId            : String(50) not null;
-  label               : String(100) not null;
-  category            : String(20) not null; // REVENUE, EXPENSE, PROFIT, RATIO
-  formulaOrAggregation: String(500) not null;
-  supportedDimensions : String(255) not null;
-  approvalStatus      : String(20) default 'PENDING_REVIEW';
-  sourceMappingStatus : String(20) default 'UNCONFIRMED';
-  owner               : String(100) not null;
-  enabled             : Boolean default false;
-  version             : Integer default 1;
-}
+// MetricConfigurations was removed in G2-01 (finding F-13): metric governance now lives in semantic.cds.
 
 /**
  * Reference to S/4HANA destination configured in BTP Destination Service

@@ -1154,6 +1154,166 @@
   border-color: var(--accent-border);
 }
 
+/* Metric Catalog & Glossary Drawer (G2-01) */
+.sr-only-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 10, 7, 0.52);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 900;
+}
+
+.drawer-panel {
+  width: 100%;
+  max-width: 620px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-elevated);
+  border-left: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
+  animation: sria-fade-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.drawer-toolbar {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 24px;
+}
+
+.catalog-search {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px 0 32px;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-subtle);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.catalog-search:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.catalog-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.catalog-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.catalog-card--open { border-color: var(--accent-border); }
+
+.catalog-card__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.catalog-card__head:hover { background: var(--surface-subtle); }
+.catalog-card__head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.catalog-card__body {
+  padding: 4px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.catalog-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+  margin: 10px 0 0;
+  font-size: 12px;
+}
+
+.catalog-facts dt { color: var(--text-tertiary); }
+.catalog-facts dd { margin: 0; color: var(--text-primary); }
+
+.catalog-section-label {
+  font-size: 10.5px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: 5px;
+}
+
+.catalog-formula {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.catalog-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.catalog-chip {
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-size: 11.5px;
+}
+
+.catalog-lineage { font-size: 11.5px; }
+.catalog-lineage th { padding: 8px 10px; }
+.catalog-lineage td { padding: 8px 10px; vertical-align: top; }
+
 /* ── Responsive Breakpoints ───────────────────────────────────────────────── */
 
 @media (max-width: 1200px) {

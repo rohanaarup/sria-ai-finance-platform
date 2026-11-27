@@ -43,7 +43,6 @@ const ENDPOINTS: Ep[] = [
   { name: 'FinanceDataService.GetFinanceMetrics', method: 'POST', url: '/api/finance/GetFinanceMetrics', body: { companyCode: '1000', fiscalYear: 2026 }, min: 'analyst' },
   { name: 'FinanceDataService.GetProviderStatus', method: 'GET', url: '/api/finance/GetProviderStatus()', min: 'analyst' },
   { name: 'MetricCatalogService.getApprovedMetrics', method: 'GET', url: '/api/v1/metrics/getApprovedMetrics()', min: 'analyst' },
-  { name: 'MetricCatalogService.MetricConfigurations', method: 'GET', url: '/api/v1/metrics/MetricConfigurations', min: 'analyst' },
   { name: 'Lifecycle.ListDashboards', method: 'GET', url: '/api/v1/lifecycle/ListDashboards()', min: 'analyst' },
   { name: 'Lifecycle.Dashboards (entity)', method: 'GET', url: '/api/v1/lifecycle/Dashboards', min: 'analyst' },
   { name: 'Lifecycle.ReopenDashboard', method: 'POST', url: '/api/v1/lifecycle/ReopenDashboard', body: { dashboardId: '00000000-0000-4000-8000-000000000000' }, min: 'analyst' },

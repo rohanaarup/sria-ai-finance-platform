@@ -10,6 +10,7 @@ import cds from '@sap/cds';
 import type { Request } from '@sap/cds';
 import { AuthGuard } from './lib/auth/auth-guard.ts';
 import { IntentService } from './ai/intent-service.ts';
+import { ensureSemanticLoaded } from './semantic/runtime.ts';
 
 export default class AiServiceHandler extends cds.ApplicationService {
   private _intentService!: IntentService;
@@ -21,6 +22,7 @@ export default class AiServiceHandler extends cds.ApplicationService {
   }
 
   private async handleUnderstandRequest(req: Request) {
+    await ensureSemanticLoaded();
     // 1. Verified identity from the token (fail closed: no defaults)
     const verified = AuthGuard.tenantContext(req, 'FinanceAnalyst');
     const userCtx = { organizationId: verified.organizationId, userId: verified.userId };

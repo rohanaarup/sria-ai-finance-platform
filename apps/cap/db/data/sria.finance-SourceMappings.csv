@@ -1,0 +1,7 @@
+ID;metricId;tenantId;sourceSystem;entitySet;field;mappingStatus;evidence
+372184bf-7bd5-526a-b8f9-80edd93c5cc3;total_revenue;GLOBAL;S4HANA;I_JournalEntryItemBasic (candidate);AmountInCompanyCodeCurrency;UNCONFIRMED;
+445c297d-506a-5bcc-a90b-7b9cc24ee88a;total_revenue;GLOBAL;S4HANA;I_JournalEntryItemBasic (candidate);DebitCreditCode;UNCONFIRMED;
+bfe219ff-d5a2-549e-aa06-bf610eef0936;total_revenue;GLOBAL;SYNTHETIC_FIXTURE;FinanceRecord;amount + debitCredit + accountType;MAPPED;By construction: packages/contracts/src/fixtures/synthetic-fixtures.ts defines these fields
+a4353cdc-05ec-51df-b932-67efa43dcb7b;total_expenses;GLOBAL;S4HANA;I_JournalEntryItemBasic (candidate);AmountInCompanyCodeCurrency;UNCONFIRMED;
+1a5d9a43-718f-5470-81b2-83c1455b90cb;total_expenses;GLOBAL;S4HANA;I_JournalEntryItemBasic (candidate);DebitCreditCode;UNCONFIRMED;
+fb41e002-8908-5354-b3a4-8b5c5410b673;total_expenses;GLOBAL;SYNTHETIC_FIXTURE;FinanceRecord;amount + debitCredit + accountType;MAPPED;By construction: packages/contracts/src/fixtures/synthetic-fixtures.ts defines these fields

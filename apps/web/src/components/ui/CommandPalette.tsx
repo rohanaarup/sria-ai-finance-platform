@@ -8,6 +8,7 @@ import {
   Moon,
   ArrowRight,
   GitCompareArrows,
+  BookMarked,
 } from 'lucide-react';
 import { Dialog } from './Dialog';
 import { Badge } from './Badge';
@@ -30,6 +31,7 @@ interface CommandPaletteProps {
   onGoCanvas: () => void;
   onGoSaved: () => void;
   onRunPrompt: (prompt: string, compare?: boolean) => void;
+  onOpenMetricCatalog?: () => void;
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
@@ -41,6 +43,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onGoCanvas,
   onGoSaved,
   onRunPrompt,
+  onOpenMetricCatalog,
 }) => {
   const [query, setQuery] = useState('');
 
@@ -100,6 +103,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         icon: <LayoutGrid size={14} />,
         run: onGoSaved,
       },
+      ...(onOpenMetricCatalog
+        ? [
+            {
+              id: 'open-metric-catalog',
+              label: 'Open Metric Catalog & Glossary',
+              category: 'Governance',
+              icon: <BookMarked size={14} />,
+              run: onOpenMetricCatalog,
+            },
+          ]
+        : []),
       {
         id: 'toggle-theme',
         label: `Switch to ${theme === 'light' ? 'Dark Espresso & Sunflower' : 'Warm Cream & Sunflower'} Mode`,
@@ -108,7 +122,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         run: onToggleTheme,
       },
     ],
-    [theme, onToggleTheme, onGoStudio, onGoCanvas, onGoSaved, onRunPrompt]
+    [theme, onToggleTheme, onGoStudio, onGoCanvas, onGoSaved, onRunPrompt, onOpenMetricCatalog]
   );
 
   const filtered = useMemo(() => {

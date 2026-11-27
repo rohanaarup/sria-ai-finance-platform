@@ -3,7 +3,6 @@ using { sria.finance as my } from '../db/schema';
 @path: '/api/v1/metrics'
 @requires: ['FinanceAnalyst','FinanceManager','TenantAdmin']
 service MetricCatalogService {
-  @readonly entity MetricConfigurations as projection on my.MetricConfigurations;
 
   type MetricSummary {
     metricId             : String(50);

@@ -16,11 +16,13 @@ import type { ToolDefinition, ExecutionContext } from '../tool-registry.ts';
 import type { FinanceDataProvider } from '../../lib/providers/finance-data-provider.ts';
 import { getFinanceDataProvider } from '../../lib/providers/provider-factory.ts';
 import { inspectAndCalculate } from '../../lib/finance/calculation-engine.ts';
-import type { DataQualityReport } from '../../lib/finance/calculation-engine.ts';
+import { dec, toApiNumber, toFixedString } from '../../lib/finance/decimal.ts';
+import { evaluateMetrics } from '../../semantic/evaluate.ts';
+import { getSemanticCatalog, ensureSemanticLoaded } from '../../semantic/runtime.ts';
 import { loadConfig } from '../../lib/config/app-config.ts';
 import type { EnvironmentTier } from '../../lib/config/app-config.ts';
-import { defaultMetricRegistry } from '../../finance-metric-registry.ts';
-import type { FinanceMetricRegistry } from '../../finance-metric-registry.ts';
+import { defaultGate } from '../../semantic/gate.ts';
+import type { MetricGate } from '../../semantic/gate.ts';
 
 // ─── Input Schema ─────────────────────────────────────────────────────────────
 
@@ -44,7 +46,11 @@ export interface ComputedMetricValue {
   isZeroDenominator?: boolean;
   /** AVAILABLE | ZERO_VALUE | MISSING_DATA — "no data" is never presented as 0.00 */
   dataState?: string;
+  /** Semantic metric version used, e.g. "total_revenue@v1" (G2-01) */
+  metricVersion?: string;
 }
+
+export interface ToolDataQuality { currency: string; recordCount: number; hasDuplicates: boolean; duplicateIds: string[] }
 
 export interface GetFinanceMetricsResult {
   companyCode: string;
@@ -55,22 +61,24 @@ export interface GetFinanceMetricsResult {
   recordCount: number;
   calculatedAt: string;
   metrics: ComputedMetricValue[];
-  dataQuality: DataQualityReport;
+  dataQuality: ToolDataQuality;
 }
 
 // ─── Tool Factory ─────────────────────────────────────────────────────────────
 
 export function createGetFinanceMetricsTool(
   customProvider?: FinanceDataProvider,
-  gate?: { tier?: EnvironmentTier; registry?: FinanceMetricRegistry }
+  gate?: { tier?: EnvironmentTier; registry?: MetricGate }
 ): ToolDefinition<GetFinanceMetricsParams, GetFinanceMetricsResult> {
   return {
     name: 'get_finance_metrics',
     description: 'Retrieves authorized financial records and calculates approved metrics deterministically.',
     paramSchema: GetFinanceMetricsParamsSchema,
     async execute(params: GetFinanceMetricsParams, ctx: ExecutionContext): Promise<GetFinanceMetricsResult> {
+      await ensureSemanticLoaded();
       // Approval gate (defence in depth: the planner checks too, the tool never trusts its caller)
-      (gate?.registry ?? defaultMetricRegistry).assertExecutable(params.metrics, gate?.tier ?? loadConfig().tier);
+      const tier = gate?.tier ?? loadConfig().tier;
+      (gate?.registry ?? defaultGate()).assertExecutable(params.metrics, tier, ctx.organizationId);
 
       const provider = customProvider ?? getFinanceDataProvider();
 
@@ -91,57 +99,43 @@ export function createGetFinanceMetricsTool(
         tenantCtx
       );
 
-      // 2. Deterministic calculations
-      const { metrics: calcs, quality } = inspectAndCalculate(records, params.companyCode, params.fiscalPeriod);
+      // 2. Deterministic calculations (Decimal only)
+      const currencyOf = (c: string) => new Intl.NumberFormat('en-US', { style: 'currency', currency: c });
+      let metricList: ComputedMetricValue[];
+      let dataQuality: ToolDataQuality;
 
-      const currency = records.length > 0 ? records[0]!.currency : 'USD';
-      const fmt = (v: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(v);
-
-      const metricList: ComputedMetricValue[] = [];
-
-      for (const mId of params.metrics) {
-        switch (mId) {
-          case 'total_revenue':
-            metricList.push({
-              metricId: 'total_revenue',
-              label: 'Total Revenue',
-              value: calcs.totalRevenue.value,
-              formattedValue: fmt(calcs.totalRevenue.value),
-              currency,
-              dataState: quality.revenueState
-            });
-            break;
-          case 'total_expenses':
-            metricList.push({
-              metricId: 'total_expenses',
-              label: 'Total Expenses',
-              value: calcs.totalExpenses.value,
-              formattedValue: fmt(calcs.totalExpenses.value),
-              currency,
-              dataState: quality.expensesState
-            });
-            break;
-          case 'net_profit':
-            metricList.push({
-              metricId: 'net_profit',
-              label: 'Net Profit',
-              value: calcs.netProfit.value,
-              formattedValue: fmt(calcs.netProfit.value),
-              currency
-            });
-            break;
-          case 'profit_margin':
-            metricList.push({
-              metricId: 'profit_margin',
-              label: 'Profit Margin',
-              value: calcs.profitMargin.value,
-              formattedValue: `${calcs.profitMargin.value.toFixed(2)}%`,
-              currency: 'PCT',
-              isZeroDenominator: calcs.profitMargin.isZeroDenominator
-            });
-            break;
-        }
+      if (loadConfig().semanticLayer) {
+        // G2-01: formulas, sign rules, rounding and versions come from the semantic layer
+        const ev = evaluateMetrics(records, getSemanticCatalog(), params.metrics, {
+          tier, tenant: ctx.organizationId, companyCode: params.companyCode, fiscalPeriod: params.fiscalPeriod
+        });
+        metricList = params.metrics.map((id) => {
+          const r = ev.results.get(id)!;
+          const isPct = r.unit === 'PERCENT';
+          return {
+            metricId: id,
+            label: r.label,
+            value: toApiNumber(r.value),
+            formattedValue: isPct ? `${toFixedString(r.value, r.decimals)}%` : currencyOf(ev.currency).format(toApiNumber(r.value)),
+            currency: isPct ? 'PCT' : ev.currency,
+            ...(isPct ? { isZeroDenominator: r.isZeroDenominator } : {}),
+            dataState: r.dataState,
+            metricVersion: r.metricVersion
+          };
+        });
+        dataQuality = { currency: ev.currency, recordCount: records.length, hasDuplicates: ev.hasDuplicates, duplicateIds: ev.duplicateIds };
+      } else {
+        // SEMANTIC_LAYER=off: legacy hard-coded formulas (rollback path)
+        const { metrics: calcs, quality } = inspectAndCalculate(records, params.companyCode, params.fiscalPeriod);
+        const fmt = (v: number) => currencyOf(quality.currency).format(v);
+        const legacy: Record<string, ComputedMetricValue> = {
+          total_revenue: { metricId: 'total_revenue', label: 'Total Revenue', value: calcs.totalRevenue.value, formattedValue: fmt(calcs.totalRevenue.value), currency: quality.currency, dataState: quality.revenueState, metricVersion: 'total_revenue@legacy' },
+          total_expenses: { metricId: 'total_expenses', label: 'Total Expenses', value: calcs.totalExpenses.value, formattedValue: fmt(calcs.totalExpenses.value), currency: quality.currency, dataState: quality.expensesState, metricVersion: 'total_expenses@legacy' },
+          net_profit: { metricId: 'net_profit', label: 'Net Profit', value: calcs.netProfit.value, formattedValue: fmt(calcs.netProfit.value), currency: quality.currency, metricVersion: 'net_profit@legacy' },
+          profit_margin: { metricId: 'profit_margin', label: 'Profit Margin', value: calcs.profitMargin.value, formattedValue: `${toFixedString(dec(calcs.profitMargin.value), 2)}%`, currency: 'PCT', isZeroDenominator: calcs.profitMargin.isZeroDenominator, metricVersion: 'profit_margin@legacy' }
+        };
+        metricList = params.metrics.map((id) => legacy[id]!);
+        dataQuality = { currency: quality.currency, recordCount: quality.recordCount, hasDuplicates: quality.hasDuplicates, duplicateIds: quality.duplicateIds };
       }
 
       return {
@@ -153,7 +147,7 @@ export function createGetFinanceMetricsTool(
         recordCount: records.length,
         calculatedAt: new Date().toISOString(),
         metrics: metricList,
-        dataQuality: quality
+        dataQuality
       };
     }
   };

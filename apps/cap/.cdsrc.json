@@ -58,6 +58,36 @@
           "roles": [
             "FinanceAnalyst"
           ]
+        },
+        "approver": {
+          "password": "dev",
+          "roles": [
+            "MetricApprover",
+            "FinanceAnalyst"
+          ],
+          "attr": {
+            "tenantid": "TENANT_A"
+          }
+        },
+        "approver2": {
+          "password": "dev",
+          "roles": [
+            "MetricApprover",
+            "FinanceAnalyst"
+          ],
+          "attr": {
+            "tenantid": "TENANT_A"
+          }
+        },
+        "approver_b": {
+          "password": "dev",
+          "roles": [
+            "MetricApprover",
+            "FinanceAnalyst"
+          ],
+          "attr": {
+            "tenantid": "TENANT_B"
+          }
         }
       }
     }

@@ -11,9 +11,12 @@
 
 import {
   BASELINE_METRIC_CATALOG,
+  MetricCatalogEntrySchema,
   SYNTHETIC_FINANCE_RECORDS,
 } from '@sria/contracts';
 import type {
+  MetricCatalogEntry,
+  MetricVersion,
   DashboardRequest,
   ClarificationQuestion,
   MetricResult,
@@ -221,6 +224,77 @@ function computeFromRecords(
   return all.filter((m) => metricIds.includes(m.metricId));
 }
 
+/**
+ * Demo-mode-only semantic catalog built from the contract baseline. Nothing is approved
+ * (activeVersion null, latest version PENDING_REVIEW); `executable` is true because the mock
+ * tier allows pending metrics to run. Never used when demo mode is off.
+ */
+const DEMO_FORMULAS: Record<
+  MetricId,
+  Pick<MetricVersion, 'kind' | 'accountType' | 'signRule' | 'expression' | 'unit' | 'dependsOn'>
+> = {
+  total_revenue: { kind: 'BASE', accountType: 'REVENUE', signRule: 'CREDIT_POSITIVE', expression: null, unit: 'CURRENCY', dependsOn: [] },
+  total_expenses: { kind: 'BASE', accountType: 'EXPENSE', signRule: 'DEBIT_POSITIVE', expression: null, unit: 'CURRENCY', dependsOn: [] },
+  net_profit: {
+    kind: 'DERIVED',
+    accountType: null,
+    signRule: null,
+    expression: 'total_revenue - total_expenses',
+    unit: 'CURRENCY',
+    dependsOn: ['total_revenue', 'total_expenses'],
+  },
+  profit_margin: {
+    kind: 'DERIVED',
+    accountType: null,
+    signRule: null,
+    expression: '(net_profit / total_revenue) * 100',
+    unit: 'PERCENT',
+    dependsOn: ['net_profit', 'total_revenue'],
+  },
+};
+
+export function buildDemoMetricCatalog(): MetricCatalogEntry[] {
+  return Object.values(BASELINE_METRIC_CATALOG).map((m) => {
+    const formula = DEMO_FORMULAS[m.id];
+    const map = m.sapFieldMapping;
+    return {
+      metricId: m.id,
+      label: m.label,
+      category: m.category,
+      description: m.description,
+      owner: m.owner,
+      tenantId: null,
+      activeVersion: null,
+      latestVersion: {
+        id: `${m.id}@v1`,
+        metricId: m.id,
+        version: 1,
+        status: 'PENDING_REVIEW',
+        ...formula,
+        decimals: 2,
+        effectiveFrom: '2026-01-01',
+        proposedBy: 'baseline-catalog',
+        approvedBy: null,
+        approvedAt: null,
+      },
+      executable: true,
+      aliases: [],
+      lineage: map
+        ? [
+            {
+              metricId: m.id,
+              sourceSystem: formula.kind === 'BASE' ? 'SAP S/4HANA (candidate)' : 'Derived (calculation engine)',
+              entitySet: map.suggestedEntitySet,
+              field: map.suggestedAmountField,
+              mappingStatus: m.sourceMappingStatus,
+              evidence: map.mappingEvidence,
+            },
+          ]
+        : [],
+    };
+  });
+}
+
 export class ApiClient {
   /** Enable/disable demo mode (null = revert to the VITE_DEMO_MODE build flag). */
   static setDemoMode(value: boolean | null): void {
@@ -337,6 +411,35 @@ export class ApiClient {
       enabled: m.enabled,
       approvalStatus: m.approvalStatus,
     }));
+  }
+
+  /**
+   * Semantic layer metric catalog & glossary (G2-01): versions, approval status,
+   * executability for the server's tier, aliases and lineage. The OData function returns
+   * `{ value: "<JSON string>" }`; the parsed array is validated against the shared contract.
+   */
+  static async getMetricCatalog(): Promise<MetricCatalogEntry[]> {
+    if (!localOnly()) {
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/v1/semantic/getCatalog()`, {
+          signal: AbortSignal.timeout(3000),
+        });
+        assertOk(res, 'Metric catalog');
+        const data = await res.json();
+        const raw = typeof data?.value === 'string' ? JSON.parse(data.value) : data?.value;
+        const parsed = MetricCatalogEntrySchema.array().safeParse(raw);
+        if (!parsed.success) {
+          const issue = parsed.error.issues[0];
+          throw new ApiUnavailableError(
+            `Metric catalog returned an invalid payload${issue ? ` (${issue.path.join('.') || 'root'}: ${issue.message})` : ''}.`
+          );
+        }
+        return parsed.data;
+      } catch (err) {
+        failOrFallback(err, 'Metric catalog');
+      }
+    }
+    return buildDemoMetricCatalog();
   }
 
   /**

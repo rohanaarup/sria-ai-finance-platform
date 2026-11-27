@@ -14,12 +14,16 @@
  * Zero-denominator protection:
  *  profit_margin returns 0.00 with isZeroDenominator=true when total_revenue === 0.
  *
- * All monetary values are rounded to 2 decimal places (ROUND_HALF_EVEN not available
- * in native JS; we use Math.round(x * 100) / 100 — acceptable for MVP with single
- * currency. Multi-currency requires a confirmed conversion table from Finance team).
+ * All arithmetic uses Decimal (decimal.js, see decimal.ts / ADR-013); values are rounded
+ * once to 2 decimal places with ROUND_HALF_UP. Multi-currency requires a confirmed
+ * conversion table from the Finance team and is refused until then.
+ *
+ * G2-01: this is the legacy path used only when SEMANTIC_LAYER=off; the default path is
+ * srv/semantic/evaluate.ts, which reads formulas from the semantic layer.
  */
 
 import type { FinanceRecord } from '@sria/contracts';
+import { Dec, ZERO, dec, roundTo, toApiNumber } from './decimal.ts';
 import { normalizeAndInspectRecords, evaluateDataState } from '../../finance/normalization.ts';
 import type { DataAvailabilityState } from '../../finance/normalization.ts';
 
@@ -60,8 +64,9 @@ function applyFilters(
   });
 }
 
-function round2(value: number): number {
-  return Math.round(value * 100) / 100;
+/** Round a decimal to 2 places (ROUND_HALF_UP) and cross the API boundary as a number. */
+function round2(value: Dec): number {
+  return toApiNumber(roundTo(value, 2));
 }
 
 // ─── Public Calculation Functions ─────────────────────────────────────────────
@@ -92,13 +97,10 @@ export function calculateTotalRevenue(
   }
 
   const currency = filtered[0]!.currency;
-  let total = 0;
+  let total: Dec = ZERO;
   for (const rec of filtered) {
-    if (rec.debitCredit === 'C') {
-      total += rec.amount;
-    } else {
-      total -= rec.amount; // Revenue return: Debit reduces revenue
-    }
+    // Credit adds; Debit (revenue return) reduces revenue. Decimal arithmetic only.
+    total = rec.debitCredit === 'C' ? total.plus(dec(rec.amount)) : total.minus(dec(rec.amount));
   }
 
   return { value: round2(total), currency, recordCount: filtered.length };
@@ -130,13 +132,10 @@ export function calculateTotalExpenses(
   }
 
   const currency = filtered[0]!.currency;
-  let total = 0;
+  let total: Dec = ZERO;
   for (const rec of filtered) {
-    if (rec.debitCredit === 'D') {
-      total += rec.amount;
-    } else {
-      total -= rec.amount; // Expense refund: Credit reduces expenses
-    }
+    // Debit adds; Credit (refund/reversal) reduces expenses. Decimal arithmetic only.
+    total = rec.debitCredit === 'D' ? total.plus(dec(rec.amount)) : total.minus(dec(rec.amount));
   }
 
   return { value: round2(total), currency, recordCount: filtered.length };
@@ -152,7 +151,7 @@ export function calculateTotalExpenses(
  * @param expenses - Output of calculateTotalExpenses().value
  */
 export function calculateNetProfit(revenue: number, expenses: number): NetProfitResult {
-  return { value: round2(revenue - expenses) };
+  return { value: round2(dec(revenue).minus(dec(expenses))) };
 }
 
 /**
@@ -171,10 +170,11 @@ export function calculateProfitMargin(
   netProfit: number,
   revenue: number
 ): ProfitMarginResult {
-  if (revenue === 0) {
-    return { value: 0.00, isZeroDenominator: true };
+  const rev = dec(revenue);
+  if (rev.isZero()) {
+    return { value: 0, isZeroDenominator: true };
   }
-  return { value: round2((netProfit / revenue) * 100), isZeroDenominator: false };
+  return { value: round2(dec(netProfit).dividedBy(rev).times(100)), isZeroDenominator: false };
 }
 
 // ─── Composite Helper ─────────────────────────────────────────────────────────
