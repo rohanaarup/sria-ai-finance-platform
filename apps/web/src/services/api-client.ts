@@ -12,6 +12,7 @@
 import {
   BASELINE_METRIC_CATALOG,
   MetricCatalogEntrySchema,
+  ProvenanceV2Schema,
   SYNTHETIC_FINANCE_RECORDS,
 } from '@sria/contracts';
 import type {
@@ -24,6 +25,8 @@ import type {
   MetricId,
   FinanceRecord,
   ProvenanceMetadata,
+  ProvenanceV2,
+  QualityFlag,
 } from '@sria/contracts';
 
 export type EnvironmentTier = 'mock' | 'local' | 'pilot' | 'production' | 'unknown';
@@ -295,6 +298,146 @@ export function buildDemoMetricCatalog(): MetricCatalogEntry[] {
   });
 }
 
+// ─── Provenance v2 (G2-02) ─────────────────────────────────────────────────────
+
+/** Outcome of ExecutePlan (or the demo-mode local engine). */
+export interface ExecutionOutcome {
+  results: MetricResult[];
+  sourceType: 'mock' | 's4hana';
+  isSynthetic: boolean;
+  /** Provenance v2 of the first tool result; absent for older backends (v1 only). */
+  provenanceV2?: ProvenanceV2;
+}
+
+/** Placeholder query hash for browser demo results (no server-side query was made). */
+export const DEMO_QUERY_HASH = '0'.repeat(64);
+
+interface RawToolMetric {
+  metricId: string;
+  metricVersion?: unknown;
+  dataState?: unknown;
+}
+
+/**
+ * Fold per-metric `metricVersion` / `dataState` from a tool result into its provenance v2:
+ * versions go into `metricVersions`; a MISSING_DATA / ZERO_VALUE state without a matching
+ * metric-scoped flag becomes one, so widgets can read a metric's state from provenance alone
+ * (MetricResult is a strict contract without a dataState field).
+ */
+export function mergeMetricStatesIntoV2(v2: ProvenanceV2, metrics: readonly RawToolMetric[]): ProvenanceV2 {
+  const metricVersions = { ...v2.metricVersions };
+  const qualityFlags: QualityFlag[] = [...v2.qualityFlags];
+  for (const m of metrics) {
+    if (!m || typeof m.metricId !== 'string') continue;
+    if (typeof m.metricVersion === 'string' && m.metricVersion) metricVersions[m.metricId] = m.metricVersion;
+    if (m.dataState === 'MISSING_DATA' || m.dataState === 'ZERO_VALUE') {
+      const code = m.dataState;
+      if (!qualityFlags.some((f) => f.code === code && f.metricId === m.metricId)) {
+        qualityFlags.push({
+          code,
+          severity: code === 'MISSING_DATA' ? 'warning' : 'info',
+          message:
+            code === 'MISSING_DATA'
+              ? `No source records for ${m.metricId} in the requested scope.`
+              : `Source records exist but ${m.metricId} is exactly zero.`,
+          metricId: m.metricId,
+        });
+      }
+    }
+  }
+  return { ...v2, metricVersions, qualityFlags };
+}
+
+/**
+ * Parse ExecutePlan `resultsJson` (array of tool results). Uses the first tool result; its
+ * optional `provenance` (v2) is validated and attached to the outcome and to every metric's
+ * provenance. Invalid or missing v2 degrades to v1 provenance, never an error.
+ */
+export function parseExecutePlanResults(resultsJson: string, request: DashboardRequest): ExecutionOutcome {
+  const rawResults = JSON.parse(resultsJson);
+  const firstBatch = Array.isArray(rawResults) ? rawResults[0] : undefined;
+  const sourceType: 'mock' | 's4hana' = firstBatch?.sourceType || 'mock';
+  const isSynthetic: boolean = firstBatch?.isSynthetic ?? true;
+  const rawMetrics: any[] = Array.isArray(firstBatch?.metrics) ? firstBatch.metrics : [];
+
+  let provenanceV2: ProvenanceV2 | undefined;
+  if (firstBatch?.provenance !== undefined && firstBatch?.provenance !== null) {
+    const parsed = ProvenanceV2Schema.safeParse(firstBatch.provenance);
+    if (parsed.success) {
+      provenanceV2 = mergeMetricStatesIntoV2(parsed.data, rawMetrics);
+    } else {
+      console.warn('[ApiClient] ExecutePlan provenance v2 is invalid; showing v1 provenance only.', parsed.error.issues[0]);
+    }
+  }
+
+  const provenance: ProvenanceMetadata = {
+    sourceType,
+    sourceSystem: isSynthetic ? 'SAP_SYNTHETIC_OFFLINE_FIXTURE' : 'SAP_S4HANA_LIVE',
+    retrievedAt: firstBatch?.calculatedAt || provenanceV2?.retrievedAt || new Date().toISOString(),
+    calculationVersion: '1.0.0',
+    isSynthetic,
+    appliedFilters: request.filters as Record<string, unknown>,
+  };
+
+  const results: MetricResult[] = rawMetrics.map((m: any) => {
+    const base: ProvenanceMetadata = m.provenance || provenance;
+    return {
+      metricId: m.metricId as MetricId,
+      label: m.label,
+      value: Number(m.value),
+      formattedValue: m.formattedValue,
+      currency: m.currency,
+      isZeroDenominator: m.isZeroDenominator,
+      provenance: provenanceV2 ? { ...base, v2: provenanceV2 } : base,
+    };
+  });
+
+  return { results, sourceType, isSynthetic, ...(provenanceV2 ? { provenanceV2 } : {}) };
+}
+
+/** Dashboard-level provenance for a spec built from an execution outcome (carries v2 when present). */
+export function buildSpecDataProvenance(
+  exec: Pick<ExecutionOutcome, 'sourceType' | 'isSynthetic' | 'provenanceV2'>,
+  appliedFilters?: Record<string, unknown>
+): ProvenanceMetadata {
+  return {
+    sourceType: exec.sourceType,
+    sourceSystem: exec.isSynthetic ? 'SAP_SYNTHETIC_OFFLINE_FIXTURE' : 'SAP_S4HANA_LIVE',
+    retrievedAt: exec.provenanceV2?.retrievedAt ?? new Date().toISOString(),
+    calculationVersion: '1.0.0',
+    isSynthetic: exec.isSynthetic,
+    ...(appliedFilters ? { appliedFilters } : {}),
+    ...(exec.provenanceV2 ? { v2: exec.provenanceV2 } : {}),
+  };
+}
+
+/** Provenance v2 for results computed in the browser in demo mode. */
+export function buildDemoProvenanceV2(
+  metricIds: readonly string[],
+  opts: { recordCount?: number; retrievedAt?: string; extraFlags?: QualityFlag[] } = {}
+): ProvenanceV2 {
+  return {
+    provenanceVersion: '2',
+    sourceType: 'mock',
+    sourceSystem: 'BROWSER_DEMO',
+    apiName: 'local-demo',
+    apiVersion: '0',
+    queryHash: DEMO_QUERY_HASH,
+    retrievedAt: opts.retrievedAt ?? new Date().toISOString(),
+    freshness: { ttlSeconds: 0, ageSeconds: 0, stale: false },
+    recordCount: opts.recordCount ?? 0,
+    qualityFlags: [
+      { code: 'SYNTHETIC_DATA', severity: 'info', message: 'Demo mode: synthetic data computed in the browser' },
+      ...(opts.extraFlags ?? []),
+    ],
+    metricVersions: Object.fromEntries(metricIds.map((id) => [id, `${id}@demo`])),
+    environmentTier: 'mock',
+    isSynthetic: true,
+    truncated: false,
+    reusedFromRunCache: false,
+  };
+}
+
 export class ApiClient {
   /** Enable/disable demo mode (null = revert to the VITE_DEMO_MODE build flag). */
   static setDemoMode(value: boolean | null): void {
@@ -486,11 +629,7 @@ export class ApiClient {
   /**
    * Execute Plan & Retrieve Calculated Metrics
    */
-  static async executeRequest(request: DashboardRequest): Promise<{
-    results: MetricResult[];
-    sourceType: 'mock' | 's4hana';
-    isSynthetic: boolean;
-  }> {
+  static async executeRequest(request: DashboardRequest): Promise<ExecutionOutcome> {
     if (localOnly()) {
       return this._localMockExecution(request);
     }
@@ -508,36 +647,7 @@ export class ApiClient {
         if (data.status !== 'SUCCESS' || !data.resultsJson) {
           throw new ApiUnavailableError(data.error || 'ExecutePlan did not return results.');
         }
-        {
-          const rawResults = JSON.parse(data.resultsJson);
-          const firstBatch = rawResults[0];
-          const sourceType: 'mock' | 's4hana' = firstBatch?.sourceType || 'mock';
-          const isSynthetic: boolean = firstBatch?.isSynthetic ?? true;
-          const provenance: ProvenanceMetadata = {
-            sourceType,
-            sourceSystem: isSynthetic ? 'SAP_SYNTHETIC_OFFLINE_FIXTURE' : 'SAP_S4HANA_LIVE',
-            retrievedAt: firstBatch?.calculatedAt || new Date().toISOString(),
-            calculationVersion: '1.0.0',
-            isSynthetic,
-            appliedFilters: request.filters as Record<string, unknown>,
-          };
-
-          const metrics: MetricResult[] = (firstBatch?.metrics || []).map((m: any) => ({
-            metricId: m.metricId as MetricId,
-            label: m.label,
-            value: Number(m.value),
-            formattedValue: m.formattedValue,
-            currency: m.currency,
-            isZeroDenominator: m.isZeroDenominator,
-            provenance: m.provenance || provenance,
-          }));
-
-          return {
-            results: metrics,
-            sourceType,
-            isSynthetic,
-          };
-        }
+        return parseExecutePlanResults(data.resultsJson, request);
       }
     } catch (err) {
       failOrFallback(err, 'ExecutePlan');
@@ -1172,7 +1282,7 @@ export class ApiClient {
     };
   }
 
-  private static _localMockExecution(request: DashboardRequest) {
+  private static _localMockExecution(request: DashboardRequest): ExecutionOutcome {
     const companyCode = request.filters?.companyCode || '1000';
     const fiscalYear = request.filters?.fiscalYear || 2026;
     const periodFrom = request.filters?.periodFrom;
@@ -1184,21 +1294,53 @@ export class ApiClient {
       return true;
     });
 
+    const retrievedAt = new Date().toISOString();
     const provenance: ProvenanceMetadata = {
       sourceType: 'mock',
       sourceSystem: 'SAP_SYNTHETIC_OFFLINE_FIXTURE',
-      retrievedAt: new Date().toISOString(),
+      retrievedAt,
       calculationVersion: '1.0.0',
       isSynthetic: true,
       appliedFilters: request.filters as Record<string, unknown>,
     };
 
-    const results = computeFromRecords(matched, request.metricIds, provenance);
+    const computed = computeFromRecords(matched, request.metricIds, provenance);
+
+    // Same quality semantics as the data product: no records → MISSING_DATA per metric
+    // (shown as "No data", never 0); zero revenue → ZERO_DENOMINATOR on the margin.
+    const extraFlags: QualityFlag[] = [];
+    if (matched.length === 0) {
+      for (const id of request.metricIds) {
+        extraFlags.push({
+          code: 'MISSING_DATA',
+          severity: 'warning',
+          message: `No synthetic postings for company ${companyCode} in FY ${fiscalYear}${periodFrom ? ` P${periodFrom}` : ''}.`,
+          companyCode,
+          metricId: id,
+        });
+      }
+    } else if (computed.some((m) => m.metricId === 'profit_margin' && m.isZeroDenominator)) {
+      extraFlags.push({
+        code: 'ZERO_DENOMINATOR',
+        severity: 'warning',
+        message: 'Revenue is zero, so profit margin is not meaningful (reported as 0).',
+        companyCode,
+        metricId: 'profit_margin',
+      });
+    }
+
+    const provenanceV2 = buildDemoProvenanceV2(request.metricIds, {
+      recordCount: matched.length,
+      retrievedAt,
+      extraFlags,
+    });
+    const results = computed.map((m) => ({ ...m, provenance: { ...m.provenance, v2: provenanceV2 } }));
 
     return {
       results,
       sourceType: 'mock' as const,
       isSynthetic: true,
+      provenanceV2,
     };
   }
 }

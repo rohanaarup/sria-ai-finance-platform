@@ -10,7 +10,9 @@ export default class AdminService extends cds.ApplicationService {
     const filters: Record<string, (tenant: string) => Record<string, string>> = {
       Organizations: (t) => ({ ID: t }),
       Workspaces: (t) => ({ organization_ID: t }),
-      AuditEvents: (t) => ({ organizationId: t })
+      AuditEvents: (t) => ({ organizationId: t }),
+      EntityAccess: (t) => ({ tenantId: t }),
+      DataSourceReferences: (t) => ({ 'workspace.organization_ID': t })
     };
     for (const [entity, where] of Object.entries(filters)) {
       this.on('READ', entity, async (req: any, next: any) => {

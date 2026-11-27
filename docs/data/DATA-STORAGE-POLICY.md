@@ -39,3 +39,7 @@ To prevent cross-tenant data leakage:
 2. **Server-Side Enforcement**: All database queries executed through `DashboardRepository` explicitly enforce `.where({ organization_ID: ctx.organizationId })`.
 3. **No UI-Only Security**: Even if a malicious client supplies a foreign dashboard UUID, the backend query resolves to zero rows (`null`), completely blocking cross-organization access.
 
+## Update (G2-02)
+- Source records read through the FinancialPerformance data product remain **transient**: held in memory for the call, never persisted, never logged. The optional run cache lives only for one agent run and is discarded with it.
+- Persisted: audit events (including `ENTITY_ACCESS_DENIED`), the `EntityAccess` policy table and `DataSourceReferences` (destination aliases only, never credentials).
+- Provenance v2 (query hash, flags, versions) may be stored inside saved dashboard specs; it contains no source rows.

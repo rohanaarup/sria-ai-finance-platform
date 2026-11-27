@@ -10,6 +10,7 @@
 - **ADR-006**: Tiered Application Persistence (Local SQLite & Conditional SAP HANA Cloud)
 - **ADR-007**: Schema-Constrained `DashboardSpec` vs. Dynamic Code/HTML Generation
 - **ADR-011**: Finance semantic layer as versioned data (G2-01)
+- **ADR-012**: FinancialPerformance data product between tools and sources (G2-02)
 - **ADR-013**: Decimal arithmetic for money (G2-01)
 
 ---
@@ -100,3 +101,10 @@
 - **Decision:** decimal.js (arbitrary-precision decimal) instead of integer minor units, because ratios and percentages need division. Provider amounts are converted through their string form. Rounding is ROUND_HALF_UP to each metric's declared decimals, once per metric; derived metrics use their dependencies' rounded values.
 - **Enforcement:** a test scans calculation code for binary floating-point money operations (`Math.round`, `parseFloat`, arithmetic on `.amount`).
 - **Revisit when:** a Finance policy requires banker's rounding or currency-specific minor units.
+
+### ADR-012: FinancialPerformance data product between tools and sources (G2-02)
+- **Status:** Accepted (2026-11-27)
+- **Context:** Tools called the single-entity provider interface directly (no multi-entity queries, paging, cancellation, freshness or quality flags), and nothing stopped a handler from reading any company.
+- **Decision:** A domain-level data product (`getPerformance`) is the only path to figures. It validates business queries against the semantic layer, enforces bounds (rejecting rather than truncating), applies entity-level authorization from the `EntityAccess` table (D-17), reads through a v2 source adapter (paged, abortable, capability-described), checks quality, reports per currency without FX conversion, and returns provenance v2. An import-boundary test forbids tools and handlers from importing providers; an adapter conformance suite gates every adapter.
+- **Consequences:** SAP names stay inside adapters; S/4HANA (G2-03) must pass the conformance suite. Duplicate posting keys are flagged, not silently removed.
+- **Revisit when:** an approved FX rate source exists (then converted views can be added alongside per-currency ones) or result sizes need push-down aggregation instead of row retrieval.

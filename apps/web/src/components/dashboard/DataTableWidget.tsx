@@ -7,12 +7,15 @@ import { formatUsd } from '../../services/dashboard-intelligence';
 import { Badge } from '../ui/Badge';
 import { Tabs } from '../ui/Tabs';
 import { Tooltip } from '../ui/Tooltip';
+import { displayMetricValue, metricDataState, metricVersionOf } from './provenance-format';
 
 interface DataTableWidgetProps {
   title: string;
   subtitle?: string;
   metrics: MetricResult[];
   periodSeries?: PeriodSeriesPoint[];
+  /** Provenance badge for the figures in this table (G2-02). */
+  badge?: React.ReactNode;
 }
 
 function getStatusBadge(metricId: string, value: number, isZeroDenom?: boolean) {
@@ -29,6 +32,7 @@ export const DataTableWidget: React.FC<DataTableWidgetProps> = ({
   subtitle,
   metrics,
   periodSeries = [],
+  badge,
 }) => {
   const [tab, setTab] = useState<'metrics' | 'periods'>('metrics');
   const [search, setSearch] = useState('');
@@ -62,6 +66,7 @@ export const DataTableWidget: React.FC<DataTableWidgetProps> = ({
               {subtitle}
             </p>
           )}
+          {badge && <div className="widget-provenance">{badge}</div>}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -146,7 +151,11 @@ export const DataTableWidget: React.FC<DataTableWidgetProps> = ({
             <tbody>
               {filteredMetrics.map((m) => {
                 const glossary = METRIC_GLOSSARY[m.metricId];
-                const status = getStatusBadge(m.metricId, m.value, m.isZeroDenominator);
+                const missing = metricDataState(m) === 'MISSING_DATA';
+                const status = missing
+                  ? { label: 'No data', tone: 'warning' as const }
+                  : getStatusBadge(m.metricId, m.value, m.isZeroDenominator);
+                const version = metricVersionOf(m);
                 return (
                   <tr key={m.metricId}>
                     <td>
@@ -169,10 +178,10 @@ export const DataTableWidget: React.FC<DataTableWidgetProps> = ({
                       style={{
                         fontWeight: 700,
                         fontSize: 13.5,
-                        color: m.value < 0 ? 'var(--negative)' : 'var(--text-primary)',
+                        color: missing ? 'var(--text-tertiary)' : m.value < 0 ? 'var(--negative)' : 'var(--text-primary)',
                       }}
                     >
-                      {m.isZeroDenominator ? 'N/A' : m.formattedValue}
+                      {displayMetricValue(m)}
                     </td>
                     <td className="font-mono" style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
                       {m.currency}
@@ -192,7 +201,7 @@ export const DataTableWidget: React.FC<DataTableWidgetProps> = ({
                           borderRadius: 5,
                         }}
                       >
-                        TS v{m.provenance?.calculationVersion || '1.0.0'}
+                        {version ?? `TS v${m.provenance?.calculationVersion || '1.0.0'}`}
                       </span>
                     </td>
                   </tr>

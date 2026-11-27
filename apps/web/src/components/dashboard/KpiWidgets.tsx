@@ -8,12 +8,14 @@ import {
   Info,
   Minus,
 } from 'lucide-react';
-import type { MetricResult } from '@sria/contracts';
+import type { MetricResult, ProvenanceMetadata } from '@sria/contracts';
 import { METRIC_GLOSSARY } from '../../design-system/tokens';
 import { Badge } from '../ui/Badge';
 import { Tooltip } from '../ui/Tooltip';
 import type { PeriodSeriesPoint } from '../../services/api-client';
 import { formatUsd } from '../../services/dashboard-intelligence';
+import { ProvenanceBadge } from './ProvenanceBadge';
+import { NO_DATA_TEXT, displayMetricValue, metricDataState } from './provenance-format';
 
 function getMetricAccent(metricId: string, value: number) {
   switch (metricId) {
@@ -122,7 +124,8 @@ export const HeroKpiCard: React.FC<KpiProps> = ({
   subtitle,
 }) => {
   const accent = getMetricAccent(metric.metricId, metric.value);
-  const delta = getPeriodDelta(metric.metricId, periodSeries);
+  const missing = metricDataState(metric) === 'MISSING_DATA';
+  const delta = missing ? null : getPeriodDelta(metric.metricId, periodSeries);
   const glossary = METRIC_GLOSSARY[metric.metricId];
 
   return (
@@ -163,10 +166,12 @@ export const HeroKpiCard: React.FC<KpiProps> = ({
         <div
           className="kpi-value-hero tabular-nums"
           style={{
-            color: metric.value < 0 ? 'var(--negative)' : 'var(--text-primary)',
+            color: missing ? 'var(--text-tertiary)' : metric.value < 0 ? 'var(--negative)' : 'var(--text-primary)',
           }}
         >
-          {metric.isZeroDenominator ? (
+          {missing ? (
+            NO_DATA_TEXT
+          ) : metric.isZeroDenominator ? (
             <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--warning)' }}>
               N/A (Zero Revenue)
             </span>
@@ -209,8 +214,11 @@ export const HeroKpiCard: React.FC<KpiProps> = ({
           </span>
         )}
 
-        <span className="font-mono" style={{ fontSize: 10.5, color: 'var(--text-tertiary)' }}>
-          {metric.currency}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <ProvenanceBadge provenance={metric.provenance} metricIds={[metric.metricId]} contextLabel={metric.label} />
+          <span className="font-mono" style={{ fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+            {metric.currency}
+          </span>
         </span>
       </div>
     </div>
@@ -219,7 +227,8 @@ export const HeroKpiCard: React.FC<KpiProps> = ({
 
 export const CompactKpiCard: React.FC<KpiProps> = ({ metric, periodSeries }) => {
   const accent = getMetricAccent(metric.metricId, metric.value);
-  const delta = getPeriodDelta(metric.metricId, periodSeries);
+  const missing = metricDataState(metric) === 'MISSING_DATA';
+  const delta = missing ? null : getPeriodDelta(metric.metricId, periodSeries);
 
   return (
     <div className="kpi-compact">
@@ -240,15 +249,18 @@ export const CompactKpiCard: React.FC<KpiProps> = ({ metric, periodSeries }) => 
         </div>
         <div
           className="kpi-value-compact tabular-nums"
-          style={{ color: metric.value < 0 ? 'var(--negative)' : 'var(--text-primary)' }}
+          style={{ color: missing ? 'var(--text-tertiary)' : metric.value < 0 ? 'var(--negative)' : 'var(--text-primary)' }}
         >
-          {metric.isZeroDenominator ? '0.00% (N/A)' : metric.formattedValue}
+          {displayMetricValue(metric, '0.00% (N/A)')}
         </div>
         {delta && (
           <div style={{ marginTop: 5 }}>
             <Badge tone={delta.tone}>{delta.label}</Badge>
           </div>
         )}
+        <div className="widget-provenance">
+          <ProvenanceBadge provenance={metric.provenance} metricIds={[metric.metricId]} contextLabel={metric.label} align="left" />
+        </div>
       </div>
 
       <div
@@ -270,7 +282,8 @@ export const CompactKpiCard: React.FC<KpiProps> = ({ metric, periodSeries }) => 
 };
 
 export const MarginRatioCard: React.FC<{ metric: MetricResult }> = ({ metric }) => {
-  const clamped = Math.max(0, Math.min(100, metric.value));
+  const missing = metricDataState(metric) === 'MISSING_DATA';
+  const clamped = missing ? 0 : Math.max(0, Math.min(100, metric.value));
   const isHealthy = metric.value >= 25;
   const isNeg = metric.value < 0;
 
@@ -291,17 +304,17 @@ export const MarginRatioCard: React.FC<{ metric: MetricResult }> = ({ metric }) 
           </span>
           <MetricTooltipIcon metricId={metric.metricId} />
         </div>
-        <Badge tone={metric.isZeroDenominator ? 'warning' : isNeg ? 'negative' : isHealthy ? 'positive' : 'neutral'}>
-          {metric.isZeroDenominator ? 'Zero Denom' : isNeg ? 'Deficit' : isHealthy ? 'Healthy' : 'Moderate'}
+        <Badge tone={missing || metric.isZeroDenominator ? 'warning' : isNeg ? 'negative' : isHealthy ? 'positive' : 'neutral'}>
+          {missing ? NO_DATA_TEXT : metric.isZeroDenominator ? 'Zero Denom' : isNeg ? 'Deficit' : isHealthy ? 'Healthy' : 'Moderate'}
         </Badge>
       </div>
 
       <div>
         <div
           className="kpi-value-hero tabular-nums"
-          style={{ color: isNeg ? 'var(--negative)' : 'var(--text-primary)' }}
+          style={{ color: missing ? 'var(--text-tertiary)' : isNeg ? 'var(--negative)' : 'var(--text-primary)' }}
         >
-          {metric.isZeroDenominator ? 'N/A' : metric.formattedValue}
+          {displayMetricValue(metric)}
         </div>
         <div style={{ marginTop: 10 }}>
           <div
@@ -328,6 +341,9 @@ export const MarginRatioCard: React.FC<{ metric: MetricResult }> = ({ metric }) 
             <span>100%</span>
           </div>
         </div>
+        <div className="widget-provenance" style={{ marginTop: 8 }}>
+          <ProvenanceBadge provenance={metric.provenance} metricIds={[metric.metricId]} contextLabel={metric.label} align="left" />
+        </div>
       </div>
     </div>
   );
@@ -340,7 +356,11 @@ export const ComparisonKpiCard: React.FC<{
   formatted1000: string;
   formatted2000: string;
   isPercent?: boolean;
-}> = ({ label, co1000Value, co2000Value, formatted1000, formatted2000, isPercent }) => {
+  /** Metric shown, used to scope the provenance badge's quality flags. */
+  metricId?: string;
+  provenance1000?: ProvenanceMetadata;
+  provenance2000?: ProvenanceMetadata;
+}> = ({ label, co1000Value, co2000Value, formatted1000, formatted2000, isPercent, metricId, provenance1000, provenance2000 }) => {
   const diff = co1000Value - co2000Value;
   const diffLabel = isPercent
     ? `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}pp`
@@ -380,6 +400,28 @@ export const ComparisonKpiCard: React.FC<{
           </div>
         </div>
       </div>
+      {(provenance1000 || provenance2000) && (
+        <div className="widget-provenance" style={{ marginTop: 0, gap: 6, flexWrap: 'wrap' }}>
+          {provenance1000 && (
+            <ProvenanceBadge
+              provenance={provenance1000}
+              metricIds={metricId ? [metricId] : undefined}
+              contextLabel={`${label}, Company 1000`}
+              prefix="1000"
+              align="left"
+            />
+          )}
+          {provenance2000 && (
+            <ProvenanceBadge
+              provenance={provenance2000}
+              metricIds={metricId ? [metricId] : undefined}
+              contextLabel={`${label}, Company 2000`}
+              prefix="2000"
+              align="left"
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

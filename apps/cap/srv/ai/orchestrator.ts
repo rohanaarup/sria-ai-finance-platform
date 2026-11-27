@@ -87,6 +87,8 @@ export class Orchestrator {
     request: DashboardRequest,
     ctx: ExecutionContext
   ): Promise<OrchestratorResult> {
+    // G2-02: one in-memory cache per run so repeated identical data-product queries are reused (never persisted)
+    ctx = { ...ctx, runCache: ctx.runCache ?? new Map() };
     const fsm = new WorkflowStateMachine();
     const traceId = randomUUID();
     const startTime = Date.now();

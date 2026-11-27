@@ -2,7 +2,7 @@
  * Approved Tool: get_finance_metrics
  * Phase 7 — AI Planning, Tool Orchestration & Controlled Execution
  *
- * Typed tool backed by FinanceDataProvider and CalculationEngine.
+ * G2-02: a thin client of the FinancialPerformance data product (srv/dataproduct).
  *
  * RULES:
  *  - Only retrieves records on-demand using server-verified tenant context.
@@ -13,10 +13,11 @@
 import { z } from 'zod';
 import { MetricIdEnum } from '@sria/contracts';
 import type { ToolDefinition, ExecutionContext } from '../tool-registry.ts';
-import type { FinanceDataProvider } from '../../lib/providers/finance-data-provider.ts';
-import { getFinanceDataProvider } from '../../lib/providers/provider-factory.ts';
-import { inspectAndCalculate } from '../../lib/finance/calculation-engine.ts';
-import { dec, toApiNumber, toFixedString } from '../../lib/finance/decimal.ts';
+import { DataQualityError } from '../../lib/finance/calculation-engine.ts';
+import { getPerformance, legacyFetchRecords } from '../../dataproduct/financial-performance.ts';
+import type { DataSourceOverride } from '../../dataproduct/financial-performance.ts';
+import type { ProvenanceV2 } from '@sria/contracts';
+import { toApiNumber, toFixedString } from '../../lib/finance/decimal.ts';
 import { evaluateMetrics } from '../../semantic/evaluate.ts';
 import { getSemanticCatalog, ensureSemanticLoaded } from '../../semantic/runtime.ts';
 import { loadConfig } from '../../lib/config/app-config.ts';
@@ -62,12 +63,14 @@ export interface GetFinanceMetricsResult {
   calculatedAt: string;
   metrics: ComputedMetricValue[];
   dataQuality: ToolDataQuality;
+  /** G2-02 provenance v2 (absent only on the DATA_PRODUCT=off rollback path) */
+  provenance?: ProvenanceV2;
 }
 
 // ─── Tool Factory ─────────────────────────────────────────────────────────────
 
 export function createGetFinanceMetricsTool(
-  customProvider?: FinanceDataProvider,
+  source?: DataSourceOverride,
   gate?: { tier?: EnvironmentTier; registry?: MetricGate }
 ): ToolDefinition<GetFinanceMetricsParams, GetFinanceMetricsResult> {
   return {
@@ -79,76 +82,61 @@ export function createGetFinanceMetricsTool(
       // Approval gate (defence in depth: the planner checks too, the tool never trusts its caller)
       const tier = gate?.tier ?? loadConfig().tier;
       (gate?.registry ?? defaultGate()).assertExecutable(params.metrics, tier, ctx.organizationId);
+      const period = params.fiscalPeriod ? params.fiscalPeriod.slice(-2) : undefined;
+      const currencyOf = (c: string) => new Intl.NumberFormat('en-US', { style: 'currency', currency: c === 'XXX' ? 'USD' : c });
 
-      const provider = customProvider ?? getFinanceDataProvider();
+      if (!loadConfig().dataProduct) return legacyExecute(params, ctx, tier, period, source);
 
-      // Enforce server-side tenant context (never rely on client parameters for tenant)
-      const tenantCtx = {
-        organizationId: ctx.organizationId,
-        userId: ctx.userId,
-        destinationName: ctx.destinationName
-      };
-
-      // 1. Fetch records (TRANSIENT: never persisted)
-      const records = await provider.fetchRecords(
-        {
-          companyCode: params.companyCode,
-          fiscalYear: params.fiscalYear,
-          fiscalPeriod: params.fiscalPeriod
-        },
-        tenantCtx
+      // G2-02: the tool is a thin client of the FinancialPerformance data product. It never
+      // touches a provider or adapter; bounds, entity access, quality and provenance live there.
+      const result = await getPerformance(
+        { entities: [params.companyCode], fiscalYear: params.fiscalYear, periodFrom: period ?? '01', periodTo: period ?? '16', metrics: params.metrics, groupBy: ['company_code'] },
+        { tenant: ctx.organizationId, userId: ctx.userId, roles: ctx.userRoles, runCache: ctx.runCache, signal: ctx.signal },
+        { source, tier }
       );
-
-      // 2. Deterministic calculations (Decimal only)
-      const currencyOf = (c: string) => new Intl.NumberFormat('en-US', { style: 'currency', currency: c });
-      let metricList: ComputedMetricValue[];
-      let dataQuality: ToolDataQuality;
-
-      if (loadConfig().semanticLayer) {
-        // G2-01: formulas, sign rules, rounding and versions come from the semantic layer
-        const ev = evaluateMetrics(records, getSemanticCatalog(), params.metrics, {
-          tier, tenant: ctx.organizationId, companyCode: params.companyCode, fiscalPeriod: params.fiscalPeriod
-        });
-        metricList = params.metrics.map((id) => {
-          const r = ev.results.get(id)!;
-          const isPct = r.unit === 'PERCENT';
-          return {
-            metricId: id,
-            label: r.label,
-            value: toApiNumber(r.value),
-            formattedValue: isPct ? `${toFixedString(r.value, r.decimals)}%` : currencyOf(ev.currency).format(toApiNumber(r.value)),
-            currency: isPct ? 'PCT' : ev.currency,
-            ...(isPct ? { isZeroDenominator: r.isZeroDenominator } : {}),
-            dataState: r.dataState,
-            metricVersion: r.metricVersion
-          };
-        });
-        dataQuality = { currency: ev.currency, recordCount: records.length, hasDuplicates: ev.hasDuplicates, duplicateIds: ev.duplicateIds };
-      } else {
-        // SEMANTIC_LAYER=off: legacy hard-coded formulas (rollback path)
-        const { metrics: calcs, quality } = inspectAndCalculate(records, params.companyCode, params.fiscalPeriod);
-        const fmt = (v: number) => currencyOf(quality.currency).format(v);
-        const legacy: Record<string, ComputedMetricValue> = {
-          total_revenue: { metricId: 'total_revenue', label: 'Total Revenue', value: calcs.totalRevenue.value, formattedValue: fmt(calcs.totalRevenue.value), currency: quality.currency, dataState: quality.revenueState, metricVersion: 'total_revenue@legacy' },
-          total_expenses: { metricId: 'total_expenses', label: 'Total Expenses', value: calcs.totalExpenses.value, formattedValue: fmt(calcs.totalExpenses.value), currency: quality.currency, dataState: quality.expensesState, metricVersion: 'total_expenses@legacy' },
-          net_profit: { metricId: 'net_profit', label: 'Net Profit', value: calcs.netProfit.value, formattedValue: fmt(calcs.netProfit.value), currency: quality.currency, metricVersion: 'net_profit@legacy' },
-          profit_margin: { metricId: 'profit_margin', label: 'Profit Margin', value: calcs.profitMargin.value, formattedValue: `${toFixedString(dec(calcs.profitMargin.value), 2)}%`, currency: 'PCT', isZeroDenominator: calcs.profitMargin.isZeroDenominator, metricVersion: 'profit_margin@legacy' }
-        };
-        metricList = params.metrics.map((id) => legacy[id]!);
-        dataQuality = { currency: quality.currency, recordCount: quality.recordCount, hasDuplicates: quality.hasDuplicates, duplicateIds: quality.duplicateIds };
+      if (result.groups.length > 1) {
+        throw new DataQualityError('MIXED_CURRENCIES',
+          `Company ${params.companyCode} has postings in ${result.currencies.join(', ')}. Figures are available per currency but are not converted into one total.`);
       }
-
+      const group = result.groups[0]!;
+      const metricList: ComputedMetricValue[] = group.metrics.map((m) => {
+        const pct = m.unit === 'PERCENT';
+        return {
+          metricId: m.metricId, label: m.label, value: m.value,
+          formattedValue: pct ? `${m.valueText}%` : currencyOf(group.currency).format(m.value),
+          currency: pct ? 'PCT' : (group.currency === 'XXX' ? 'USD' : group.currency),
+          ...(pct ? { isZeroDenominator: m.isZeroDenominator } : {}),
+          dataState: m.dataState, metricVersion: m.metricVersion
+        };
+      });
+      const flags = result.provenance.qualityFlags;
       return {
-        companyCode: params.companyCode,
-        fiscalYear: params.fiscalYear,
-        ...(params.fiscalPeriod ? { fiscalPeriod: params.fiscalPeriod } : {}),
-        sourceType: provider.getSourceType(),
-        isSynthetic: provider.getSourceType() === 'mock',
-        recordCount: records.length,
-        calculatedAt: new Date().toISOString(),
-        metrics: metricList,
-        dataQuality
+        companyCode: params.companyCode, fiscalYear: params.fiscalYear, ...(params.fiscalPeriod ? { fiscalPeriod: params.fiscalPeriod } : {}),
+        sourceType: result.provenance.sourceType, isSynthetic: result.provenance.isSynthetic, recordCount: result.provenance.recordCount,
+        calculatedAt: result.provenance.retrievedAt, metrics: metricList,
+        dataQuality: {
+          currency: group.currency === 'XXX' ? 'USD' : group.currency, recordCount: result.provenance.recordCount,
+          hasDuplicates: flags.some((f) => f.code === 'DUPLICATE_POSTING_KEY'),
+          duplicateIds: flags.filter((f) => f.code === 'DUPLICATE_POSTING_KEY').map((f) => f.message.split(' ')[2]!)
+        },
+        provenance: result.provenance
       };
     }
+  };
+}
+
+/** DATA_PRODUCT=off rollback path: fetch through the data-product module's legacy helper, calculate as in G2-01. */
+async function legacyExecute(params: GetFinanceMetricsParams, ctx: ExecutionContext, tier: EnvironmentTier, period: string | undefined, source?: DataSourceOverride): Promise<GetFinanceMetricsResult> {
+  const { records, caps } = await legacyFetchRecords({ companyCode: params.companyCode, fiscalYear: params.fiscalYear, fiscalPeriod: period }, { tenant: ctx.organizationId, userId: ctx.userId }, source);
+  const ev = evaluateMetrics(records, getSemanticCatalog(), params.metrics, { tier, tenant: ctx.organizationId, companyCode: params.companyCode, fiscalPeriod: period });
+  const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: ev.currency });
+  return {
+    companyCode: params.companyCode, fiscalYear: params.fiscalYear, ...(params.fiscalPeriod ? { fiscalPeriod: params.fiscalPeriod } : {}),
+    sourceType: caps.sourceType, isSynthetic: caps.isSynthetic, recordCount: records.length, calculatedAt: new Date().toISOString(),
+    metrics: params.metrics.map((id) => {
+      const r = ev.results.get(id)!; const pct = r.unit === 'PERCENT';
+      return { metricId: id, label: r.label, value: toApiNumber(r.value), formattedValue: pct ? `${toFixedString(r.value, r.decimals)}%` : fmt.format(toApiNumber(r.value)), currency: pct ? 'PCT' : ev.currency, ...(pct ? { isZeroDenominator: r.isZeroDenominator } : {}), dataState: r.dataState, metricVersion: r.metricVersion };
+    }),
+    dataQuality: { currency: ev.currency, recordCount: records.length, hasDuplicates: ev.hasDuplicates, duplicateIds: ev.duplicateIds }
   };
 }

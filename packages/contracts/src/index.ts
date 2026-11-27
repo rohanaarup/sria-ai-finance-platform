@@ -23,6 +23,10 @@ export * from './dashboard-spec.js';
 
 // Synthetic Golden Fixtures
 export * from './fixtures/synthetic-fixtures.js';
+export * from './fixtures/synthetic-fixtures-v2.js';
 
 // Semantic layer (G2-01): metric versions, formulas, lineage, glossary
 export * from './semantic.js';
+
+// Data product (G2-02): FinancialPerformance query/result, provenance v2, quality flags, adapter capabilities
+export * from './data-product.js';

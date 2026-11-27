@@ -2,4 +2,5 @@ dimensionId;label;description
 fiscal_period;Fiscal period;Posting period of the fiscal year (01–12, special periods 13–16).
 month;Month;Calendar month of the posting date.
 company_code;Company code;SAP legal reporting entity.
-business_unit;Business unit;Internal organisational unit (synthetic model).
+business_unit;Business unit;Internal organisational unit with a two-level hierarchy (synthetic model).
+gl_group;GL account group;Grouping of general-ledger accounts into a P&L hierarchy (synthetic model).

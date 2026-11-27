@@ -14,6 +14,10 @@ export interface ExecutionContext {
   userId: string;
   userRoles: string[];
   destinationName?: string;
+  /** G2-02: per-run reuse of data-product results keyed by query hash (memory only). */
+  runCache?: Map<string, any>;
+  /** G2-02: cancellation for in-flight retrieval. */
+  signal?: AbortSignal;
 }
 
 export interface ToolDefinition<TParams = unknown, TResult = unknown> {

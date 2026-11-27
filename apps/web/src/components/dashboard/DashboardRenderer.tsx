@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import {
   Building2,
   Calendar,
-  Database,
-  Clock,
+  Coins,
   Sparkles,
   AlertTriangle,
   Layers,
@@ -22,7 +21,6 @@ import {
   getLayoutDisplayName,
 } from '../../services/dashboard-intelligence';
 import { Badge } from '../ui/Badge';
-import { Popover } from '../ui/Popover';
 import { Dialog } from '../ui/Dialog';
 import { EmptyState } from '../ui/EmptyState';
 import {
@@ -39,6 +37,8 @@ import {
 } from './ChartWidgets';
 import { InsightPanel } from './InsightPanel';
 import { DataTableWidget } from './DataTableWidget';
+import { ProvenanceBadge } from './ProvenanceBadge';
+import { displayMetricValue } from './provenance-format';
 import type { VisibleSections } from './DashboardToolbar';
 
 interface DashboardRendererProps {
@@ -78,7 +78,6 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
   const companyCode = String(filters['companyCode'] || '1000');
   const fiscalYear = String(filters['fiscalYear'] || '2026');
   const periodFrom = filters['periodFrom'] ? String(filters['periodFrom']) : null;
-  const isSynthetic = spec.dataProvenance?.isSynthetic || spec.dataProvenance?.sourceType === 'mock';
   const currency = results.find((r) => r.currency !== 'PCT')?.currency || 'USD';
 
   const findMetric = (id: string): MetricResult | undefined =>
@@ -95,6 +94,26 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
       : preferredChartMode === 'bar'
       ? 'bar'
       : 'line';
+
+  // Per-widget provenance (G2-02): flags scoped to the widget's metrics plus global flags.
+  const TREND_METRICS = ['total_revenue', 'total_expenses', 'net_profit'];
+  const monetaryIds = results.filter((r) => r.metricId !== 'profit_margin').map((r) => r.metricId);
+  const chartBadge = (metricIds: readonly string[], label: string) => (
+    <ProvenanceBadge provenance={spec.dataProvenance} metricIds={metricIds} contextLabel={label} />
+  );
+  const comparisonBadges = comparisonData ? (
+    <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap' }}>
+      {comparisonData.map((c) => (
+        <ProvenanceBadge
+          key={c.companyCode}
+          provenance={c.results[0]?.provenance}
+          metricIds={TREND_METRICS}
+          contextLabel={`comparison, Company ${c.companyCode}`}
+          prefix={c.companyCode}
+        />
+      ))}
+    </span>
+  ) : null;
 
   const hasAnyData = results.some((r) => r.value !== 0) || comparisonMode;
 
@@ -117,6 +136,10 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
                 <Calendar size={11} />
                 <span>FY {fiscalYear}{periodFrom ? ` · Period ${periodFrom}` : ' · Full Year'}</span>
               </Badge>
+              <Badge tone="neutral">
+                <Coins size={11} />
+                <span className="font-mono">{currency}</span>
+              </Badge>
               {isStale && (
                 <Badge tone="warning" dot>
                   <AlertTriangle size={11} />
@@ -129,68 +152,13 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
             {spec.description && <p className="dash-subtitle">{spec.description}</p>}
           </div>
 
-          {/* Compact Data Provenance Popover */}
-          <Popover
-            wide
-            trigger={({ toggle }) => (
-              <button
-                type="button"
-                onClick={toggle}
-                className="btn btn--secondary btn--sm"
-                style={{ gap: 7 }}
-              >
-                <Database
-                  size={13}
-                  style={{ color: isStale ? 'var(--warning)' : isSynthetic ? 'var(--warning)' : 'var(--positive)' }}
-                />
-                <span>{isStale ? 'Stale Snapshot' : isSynthetic ? 'Mock Fixtures' : 'Live SAP'}</span>
-                <span style={{ color: 'var(--text-tertiary)' }}>·</span>
-                <span className="font-mono" style={{ fontSize: 11 }}>{currency}</span>
-              </button>
-            )}
-          >
-            {() => (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 12.5, fontWeight: 650 }}>Data Provenance &amp; Audit</span>
-                  <Badge tone={isSynthetic ? 'warning' : 'positive'}>
-                    {isSynthetic ? 'Synthetic Mock' : 'Live S/4HANA'}
-                  </Badge>
-                </div>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr',
-                    gap: '6px 12px',
-                    fontSize: 11.5,
-                    background: 'var(--surface-subtle)',
-                    padding: 10,
-                    borderRadius: 8,
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-tertiary)' }}>System</span>
-                  <span className="font-mono" style={{ fontSize: 11 }}>{spec.dataProvenance.sourceSystem}</span>
-                  <span style={{ color: 'var(--text-tertiary)' }}>Period</span>
-                  <span>FY {fiscalYear}{periodFrom ? ` P${periodFrom}` : ' (P01–P02)'}</span>
-                  <span style={{ color: 'var(--text-tertiary)' }}>Currency</span>
-                  <span>{currency}</span>
-                  <span style={{ color: 'var(--text-tertiary)' }}>Retrieved</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                    <Clock size={11} />
-                    {new Date(spec.dataProvenance.retrievedAt).toLocaleTimeString()}
-                  </span>
-                  <span style={{ color: 'var(--text-tertiary)' }}>Engine</span>
-                  <span className="font-mono" style={{ fontSize: 11 }}>v{spec.dataProvenance.calculationVersion}</span>
-                </div>
-                {spec.freshnessNotice && (
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                    {spec.freshnessNotice}
-                  </div>
-                )}
-              </div>
-            )}
-          </Popover>
+          {/* Data provenance (G2-02): source, freshness and quality for the whole dashboard */}
+          <ProvenanceBadge
+            provenance={spec.dataProvenance}
+            variant="full"
+            staleSnapshot={isStale}
+            contextLabel="this dashboard"
+          />
         </div>
       </div>
 
@@ -236,9 +204,12 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
                       label={m1.label}
                       co1000Value={m1.value}
                       co2000Value={m2.value}
-                      formatted1000={m1.formattedValue}
-                      formatted2000={m2.formattedValue}
+                      formatted1000={displayMetricValue(m1)}
+                      formatted2000={displayMetricValue(m2)}
                       isPercent={id === 'profit_margin'}
+                      metricId={id}
+                      provenance1000={m1.provenance}
+                      provenance2000={m2.provenance}
                     />
                   );
                 })}
@@ -247,12 +218,14 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
               {visibleSections.charts && (
                 <div className="layout-grid-7-5">
                   <EntityComparisonChart
+                    badge={comparisonBadges}
                     title="Company 1000 vs Company 2000 — Monetary Performance"
                     subtitle={`FY ${fiscalYear}${periodFrom ? ` Period ${periodFrom}` : ''} side-by-side deterministic aggregates`}
                     data={comparisonData}
                     onExpand={() => setExpandedChart('comparison')}
                   />
                   <PeriodTrendChart
+                    badge={chartBadge(TREND_METRICS, 'period trend')}
                     title={`Company ${companyCode} Period Trajectory`}
                     subtitle="Verified period-over-period revenue, expenses & profit"
                     series={periodSeries}
@@ -297,6 +270,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
               {visibleSections.charts && (
                 <div className="layout-grid-8-4">
                   <PeriodTrendChart
+                    badge={chartBadge(['total_revenue'], 'period trend')}
                     title="Revenue Period Trajectory"
                     subtitle="Period 01 to Period 02 recognized revenue movement"
                     series={periodSeries}
@@ -305,6 +279,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
                     onExpand={() => setExpandedChart('trend')}
                   />
                   <BusinessUnitChart
+                    badge={chartBadge(['total_revenue'], 'business unit breakdown')}
                     title="Revenue by Business Unit"
                     subtitle="Contribution by organizational unit"
                     slices={buSlices}
@@ -349,6 +324,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
               {visibleSections.charts && (
                 <div className="layout-grid-6-6">
                   <BusinessUnitChart
+                    badge={chartBadge(['total_expenses'], 'business unit breakdown')}
                     title="Expense Composition by Business Unit"
                     subtitle="Share of operating spend across cost centers"
                     slices={buSlices}
@@ -357,6 +333,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
                     onExpand={() => setExpandedChart('bu_expense')}
                   />
                   <PeriodTrendChart
+                    badge={chartBadge(['total_expenses'], 'period trend')}
                     title="Period Expense Trajectory"
                     subtitle="Operating cost movement across posted periods"
                     series={periodSeries}
@@ -389,6 +366,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
               {visibleSections.charts && (
                 <div className="layout-grid-6-6">
                   <PeriodTrendChart
+                    badge={chartBadge(TREND_METRICS, 'period trend')}
                     title="Profitability & Cost Trajectory"
                     subtitle="Net profit relative to revenue and expenses"
                     series={periodSeries}
@@ -396,6 +374,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
                     onExpand={() => setExpandedChart('trend')}
                   />
                   <AggregatesBarChart
+                    badge={chartBadge(monetaryIds, 'aggregates')}
                     title="Income Bridge Summary"
                     subtitle="Horizontal monetary comparison"
                     metrics={results}
@@ -434,6 +413,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
               {visibleSections.charts && (
                 <div className="layout-grid-7-5">
                   <PeriodTrendChart
+                    badge={chartBadge(TREND_METRICS, 'period trend')}
                     title="Period Performance Trajectory"
                     subtitle="Verified period-by-period revenue, expenses & net profit"
                     series={periodSeries}
@@ -441,6 +421,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
                     onExpand={() => setExpandedChart('trend')}
                   />
                   <AggregatesBarChart
+                    badge={chartBadge(monetaryIds, 'aggregates')}
                     title="Comparative Aggregates"
                     subtitle="Monetary totals for active reporting scope"
                     metrics={results}
@@ -459,6 +440,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
           {/* 5. Ledger Table */}
           {visibleSections.table && (
             <DataTableWidget
+              badge={chartBadge(results.map((r) => r.metricId), 'ledger table')}
               title="Accounting Ledger Breakdown"
               subtitle="Deterministic calculation outputs with SAP formula governance and period drilldown"
               metrics={results}
@@ -478,6 +460,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
       >
         {expandedChart === 'aggregates' && (
           <AggregatesBarChart
+            badge={chartBadge(monetaryIds, 'aggregates')}
             title="Comparative Aggregates"
             metrics={results}
             height={380}
@@ -485,6 +468,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
         )}
         {expandedChart === 'trend' && (
           <PeriodTrendChart
+            badge={chartBadge(TREND_METRICS, 'period trend')}
             title="Period Performance Trajectory"
             series={periodSeries}
             defaultMode={chartDefaultTrend}
@@ -493,6 +477,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
         )}
         {expandedChart === 'bu_expense' && (
           <BusinessUnitChart
+            badge={chartBadge(['total_expenses'], 'business unit breakdown')}
             title="Expense Composition by Business Unit"
             slices={buSlices}
             metricKey="total_expenses"
@@ -502,6 +487,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
         )}
         {expandedChart === 'bu_revenue' && (
           <BusinessUnitChart
+            badge={chartBadge(['total_revenue'], 'business unit breakdown')}
             title="Revenue by Business Unit"
             slices={buSlices}
             metricKey="total_revenue"
@@ -511,6 +497,7 @@ export const DashboardRenderer: React.FC<DashboardRendererProps> = ({
         )}
         {expandedChart === 'comparison' && comparisonData && (
           <EntityComparisonChart
+            badge={comparisonBadges}
             title="Company 1000 vs Company 2000"
             data={comparisonData}
             height={380}

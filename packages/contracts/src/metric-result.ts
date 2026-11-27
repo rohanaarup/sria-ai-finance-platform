@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ProvenanceV2Schema } from './data-product.js';
 import { MetricIdEnum, SupportedDimensionEnum } from './finance-metrics.js';
 
 /**
@@ -11,7 +12,9 @@ export const ProvenanceMetadataSchema = z.object({
   calculationVersion: z.string().min(1),
   appliedFilters: z.record(z.string(), z.unknown()).optional(),
   isSynthetic: z.boolean(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  /** G2-02: full provenance v2 (freshness, query hash, quality flags, metric versions, tier) */
+  v2: ProvenanceV2Schema.optional()
 }).strict();
 export type ProvenanceMetadata = z.infer<typeof ProvenanceMetadataSchema>;
 

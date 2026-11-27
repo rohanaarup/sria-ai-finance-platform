@@ -99,3 +99,29 @@ describe('SemanticService over HTTP', () => {
     assert.match(rev.metricVersion, /^total_revenue@v\d+$/);
   });
 });
+
+describe('FinanceDataService over HTTP (G2-02: data product)', () => {
+  it('returns provenance v2 with quality flags, and enforces entity access with an audited denial', async () => {
+    const ok = await post('analyst', '/api/finance/GetFinanceMetrics', { companyCode: '1000', fiscalYear: 2026, fiscalPeriod: '01' });
+    assert.equal(ok.status, 200, JSON.stringify(ok.data));
+    const prov = JSON.parse(ok.data.provenanceJson);
+    assert.equal(prov.provenanceVersion, '2');
+    assert.match(prov.queryHash, /^[a-f0-9]{64}$/);
+    assert.ok(prov.qualityFlags.some((f: any) => f.code === 'SYNTHETIC_DATA'));
+
+    // tenant B may only query company 2000
+    const denied = await post('analyst_b', '/api/finance/GetFinanceMetrics', { companyCode: '1000', fiscalYear: 2026 });
+    assert.equal(denied.status, 403);
+    const allowedB = await post('analyst_b', '/api/finance/GetFinanceMetrics', { companyCode: '2000', fiscalYear: 2026 });
+    assert.equal(allowedB.status, 200);
+
+    const db = await cds.connect.to('db');
+    const rows = await db.run(SELECT.from('sria.finance.AuditEvents').where({ action: 'ENTITY_ACCESS_DENIED' }));
+    assert.ok(rows.some((r: any) => r.organizationId === 'TENANT_B' && /1000/.test(r.details)));
+  });
+  it('multi-currency entity: figures per currency with a visible not-converted flag', async () => {
+    const r = await post('analyst', '/api/finance/GetFinanceMetrics', { companyCode: '3000', fiscalYear: 2025 });
+    assert.equal(r.status, 200, JSON.stringify(r.data));
+    assert.ok(r.data.metrics.every((m: any) => m.currency === 'EUR' || m.currency === 'PCT'));
+  });
+});

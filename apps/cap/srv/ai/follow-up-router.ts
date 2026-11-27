@@ -330,7 +330,9 @@ export class FollowUpRouter {
           retrievedAt: new Date().toISOString(),
           calculationVersion: '1.0.0',
           isSynthetic: firstBatch.isSynthetic,
-          appliedFilters: request.filters
+          appliedFilters: request.filters,
+          // G2-02: keep the data product's provenance v2 (freshness, query hash, quality flags, versions)
+          ...((firstBatch as any).provenance ? { v2: (firstBatch as any).provenance } : {})
         };
 
         const results = firstBatch.metrics.map(m => ({

@@ -238,7 +238,9 @@ test('Phase 11 — Complete End-to-End Workflow & Reliability Suite', async (t) 
     assert.ok(profit.value < 0, 'Net profit should reflect operating loss');
   });
 
-  await t.test('7. Edge Case: Non-existent company code returns empty graceful fallback', async () => {
+  // G2-02: an unknown or unpermitted company code is refused by the data product's entity-access
+  // check (no silent zero and no existence leak); the run fails with a clear reason.
+  await t.test('7. Edge Case: Non-existent company code is refused, not reported as zero', async () => {
     const outcome = await orchestrator.executeRequest({
       version: '1.0',
       rawPrompt: 'Non-existent company',
@@ -253,9 +255,7 @@ test('Phase 11 — Complete End-to-End Workflow & Reliability Suite', async (t) 
       userRoles: ['FinanceAnalyst']
     });
 
-    assert.equal(outcome.status, 'SUCCESS');
-    const rev = outcome.results[0]?.metrics.find(m => m.metricId === 'total_revenue');
-    assert.ok(rev);
-    assert.equal(rev.value, 0);
+    assert.notEqual(outcome.status, 'SUCCESS');
+    assert.match(String(outcome.error), /Not permitted to query company code\(s\): 9999/);
   });
 });

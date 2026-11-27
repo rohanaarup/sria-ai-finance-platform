@@ -36,7 +36,12 @@ const EnvSchema = z.object({
   AI_RUNTIME_ENDPOINT: z.string().url().optional(),
   AI_RUNTIME_MODEL: z.string().min(1).optional(),
   CORS_ALLOWED_ORIGINS: z.string().optional(),
-  SEMANTIC_LAYER: z.enum(['on', 'off']).default('on')
+  SEMANTIC_LAYER: z.enum(['on', 'off']).default('on'),
+  DATA_PRODUCT: z.enum(['on', 'off']).default('on'),
+  DP_MAX_ENTITIES: z.coerce.number().int().min(1).max(100).default(10),
+  DP_MAX_PERIODS: z.coerce.number().int().min(1).max(16).default(16),
+  DP_MAX_ROWS: z.coerce.number().int().min(1).max(1_000_000).default(50_000),
+  DP_TIMEOUT_MS: z.coerce.number().int().min(100).max(120_000).default(10_000)
 });
 
 export interface AppConfig {
@@ -51,6 +56,10 @@ export interface AppConfig {
   corsAllowedOrigins: string[];
   /** G2-01: semantic layer drives gate and formulas; 'off' = legacy hard-coded catalog (rollback). */
   semanticLayer: boolean;
+  /** G2-02: tools read through the FinancialPerformance data product; 'off' = legacy provider path (rollback). */
+  dataProduct: boolean;
+  /** G2-02 retrieval bounds: queries beyond them are rejected, never silently cut short. */
+  bounds: { maxEntities: number; maxPeriods: number; maxRows: number; timeoutMs: number };
   /** true when answers are built from synthetic data or the mock model */
   isSynthetic: boolean;
 }
@@ -111,6 +120,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     aiModel: e.AI_RUNTIME_MODEL,
     corsAllowedOrigins,
     semanticLayer: e.SEMANTIC_LAYER === 'on',
+    dataProduct: e.DATA_PRODUCT === 'on',
+    bounds: { maxEntities: e.DP_MAX_ENTITIES, maxPeriods: e.DP_MAX_PERIODS, maxRows: e.DP_MAX_ROWS, timeoutMs: e.DP_TIMEOUT_MS },
     isSynthetic: e.FINANCE_DATA_PROVIDER === 'mock' || e.AI_RUNTIME_PROVIDER === 'mock'
   };
 }

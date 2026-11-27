@@ -1,8 +1,17 @@
 ID;dimension_dimensionId;memberId;label;parentMemberId;tenantId
-33c7420f-61aa-559d-8c63-fda252a6ac15;company_code;1000;Company code 1000 (synthetic);;GLOBAL
-0924229f-1357-5176-9d46-4cff98239e46;company_code;2000;Company code 2000 (synthetic);;GLOBAL
-6ba3b5ca-f9a3-5093-9c42-376ad6937370;business_unit;BU_COMMERCIAL;Commercial;;GLOBAL
-6d816889-79b1-5ef3-8694-bcc71496a6a8;business_unit;BU_OPERATIONS;Operations;;GLOBAL
-5145581b-092b-5461-95f7-d54047143569;business_unit;BU_ADMIN;Admin;;GLOBAL
-ab15b2ce-527f-5851-a135-7d3495c5f1dc;business_unit;BU_MARKETING;Marketing;;GLOBAL
-43d734a2-96b3-54ab-9bf7-7a1e7d0959b8;business_unit;BU_SHARED_SERVICES;Shared Services;;GLOBAL
+33c7420f-61aa-559d-8c63-fda252a6ac15;company_code;1000;Company code 1000 - US (synthetic);;GLOBAL
+0924229f-1357-5176-9d46-4cff98239e46;company_code;2000;Company code 2000 - US (synthetic);;GLOBAL
+39d7dfbf-216d-5989-9283-65458fd4ea42;company_code;3000;Company code 3000 - Europe, EUR (synthetic);;GLOBAL
+cb2cb3c5-f2d7-5e69-84a8-58fe053d1aa1;company_code;4000;Company code 4000 - defect fixture (synthetic);;GLOBAL
+963e60f0-62c5-5341-a2ee-a90b5d080d01;business_unit;BU_FRONT_OFFICE;Front Office;;GLOBAL
+8c31c2f3-e512-528f-9878-070d0ea969b3;business_unit;BU_BACK_OFFICE;Back Office;;GLOBAL
+6ba3b5ca-f9a3-5093-9c42-376ad6937370;business_unit;BU_COMMERCIAL;Commercial;BU_FRONT_OFFICE;GLOBAL
+ab15b2ce-527f-5851-a135-7d3495c5f1dc;business_unit;BU_MARKETING;Marketing;BU_FRONT_OFFICE;GLOBAL
+6d816889-79b1-5ef3-8694-bcc71496a6a8;business_unit;BU_OPERATIONS;Operations;BU_BACK_OFFICE;GLOBAL
+5145581b-092b-5461-95f7-d54047143569;business_unit;BU_ADMIN;Admin;BU_BACK_OFFICE;GLOBAL
+43d734a2-96b3-54ab-9bf7-7a1e7d0959b8;business_unit;BU_SHARED_SERVICES;Shared Services;BU_BACK_OFFICE;GLOBAL
+b29585ff-752f-58ad-8825-bef274a5b242;gl_group;PL;Profit and loss;;GLOBAL
+d257a242-ec91-54bf-b3b3-0e9b47f78761;gl_group;REV_SALES;Sales revenue (410000);PL;GLOBAL
+9ca70825-c310-54bf-8b9f-d01504dbb6c3;gl_group;OPEX;Operating expenses;PL;GLOBAL
+cedb5067-9a0a-5f08-b41d-cc073436445f;gl_group;OPEX_OPS;Operations costs (610000);OPEX;GLOBAL
+c062fcb5-9221-50c3-b3f9-52fc95876b3c;gl_group;OPEX_ADMIN;Administrative costs (620000);OPEX;GLOBAL

@@ -4,9 +4,11 @@ interface PopoverProps {
   trigger: (props: { open: boolean; toggle: () => void }) => React.ReactNode;
   children: (close: () => void) => React.ReactNode;
   wide?: boolean;
+  /** Which edge of the trigger the surface aligns to (default: right). */
+  align?: 'left' | 'right';
 }
 
-export const Popover: React.FC<PopoverProps> = ({ trigger, children, wide = false }) => {
+export const Popover: React.FC<PopoverProps> = ({ trigger, children, wide = false, align = 'right' }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -32,7 +34,7 @@ export const Popover: React.FC<PopoverProps> = ({ trigger, children, wide = fals
     <div className="popover-anchor" ref={ref}>
       {trigger({ open, toggle: () => setOpen((v) => !v) })}
       {open && (
-        <div className={`popover-surface ${wide ? 'popover-surface--wide' : ''}`}>
+        <div className={`popover-surface ${wide ? 'popover-surface--wide' : ''} ${align === 'left' ? 'popover-surface--left' : ''}`}>
           {children(() => setOpen(false))}
         </div>
       )}

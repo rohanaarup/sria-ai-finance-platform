@@ -1,0 +1,15 @@
+ID;tenantId;principalType;principalId;companyCode
+aec9096d-667a-5429-aabb-9a7a032a7334;TENANT_A;ROLE;FinanceAnalyst;1000
+9c1e562c-bed2-51b7-9e89-a7cc35112cef;TENANT_A;ROLE;FinanceAnalyst;2000
+c18276d1-7040-57bb-a0ef-34f9185bdfff;TENANT_A;ROLE;FinanceAnalyst;3000
+a0146f23-11e6-5913-b599-769d3c43f7c9;TENANT_A;ROLE;FinanceAnalyst;4000
+07d4a54a-23ae-5506-9d7c-b950beda8313;TENANT_A;ROLE;FinanceManager;1000
+d78af5f8-1833-5aec-8fc6-199d38b5b3e4;TENANT_A;ROLE;FinanceManager;2000
+a5ac707b-6818-5931-a4ba-83526bf56b87;TENANT_A;ROLE;FinanceManager;3000
+26d93e4c-58d9-5741-a161-e5fb3b5e672e;TENANT_A;ROLE;FinanceManager;4000
+ba713c09-ec37-5ec4-92c1-1656c7e79de1;TENANT_A;ROLE;TenantAdmin;1000
+5f9c76f0-f1a2-5e45-bb2e-86e77aefd850;TENANT_A;ROLE;TenantAdmin;2000
+617c60eb-5320-5d7c-abbc-0909b73a9705;TENANT_A;ROLE;TenantAdmin;3000
+73bcfa07-158d-5400-a890-945357a34d2c;TENANT_A;ROLE;TenantAdmin;4000
+14440ab4-6c6e-5f6c-8a6e-d6fdb0fb1b60;TENANT_A;ROLE;MetricApprover;1000
+4f0efd5b-6d0b-5d4c-b1fa-08fc26258d85;TENANT_B;ROLE;FinanceAnalyst;2000

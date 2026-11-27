@@ -8,6 +8,7 @@ import type { VisibleSections } from '../components/dashboard/DashboardToolbar';
 import type { SavedDashboardSummary } from '../pages/MyDashboardsPage';
 import {
   ApiClient,
+  buildSpecDataProvenance,
   type ApprovedMetricSummary,
   type BusinessUnitSlice,
   type CompanyComparisonPoint,
@@ -342,14 +343,7 @@ export function useFinanceWorkspace() {
         generatedBy: resolved.userId || 'finance_analyst',
         widgets,
         results: execResult.results,
-        dataProvenance: {
-          sourceType: execResult.sourceType,
-          sourceSystem: execResult.isSynthetic ? 'SAP_SYNTHETIC_OFFLINE_FIXTURE' : 'SAP_S4HANA_LIVE',
-          retrievedAt: new Date().toISOString(),
-          calculationVersion: '1.0.0',
-          isSynthetic: execResult.isSynthetic,
-          appliedFilters: resolved.filters as Record<string, unknown>,
-        },
+        dataProvenance: buildSpecDataProvenance(execResult, resolved.filters as Record<string, unknown>),
         freshnessNotice: execResult.isSynthetic
           ? 'Source: Synthetic Test Fixtures [Mock Dev Mode] · Deterministic Math'
           : 'Source: SAP S/4HANA OData [Live System] · Deterministic Math',
@@ -429,15 +423,11 @@ export function useFinanceWorkspace() {
         ...currentSpec,
         title: buildTitleForMetrics(metricIds, companyCode, fiscalYear, nextCompare),
         results: exec.results,
-        dataProvenance: {
-          ...currentSpec.dataProvenance,
-          retrievedAt: new Date().toISOString(),
-          appliedFilters: {
-            companyCode,
-            fiscalYear,
-            ...(fiscalPeriod ? { periodFrom: fiscalPeriod, periodTo: fiscalPeriod } : {}),
-          },
-        },
+        dataProvenance: buildSpecDataProvenance(exec, {
+          companyCode,
+          fiscalYear,
+          ...(fiscalPeriod ? { periodFrom: fiscalPeriod, periodTo: fiscalPeriod } : {}),
+        }),
       };
 
       setCurrentSpec(updatedSpec);

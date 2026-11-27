@@ -26,6 +26,7 @@ import type {
 import { formatCompactCurrency, formatUsd } from '../../services/dashboard-intelligence';
 import { Tabs } from '../ui/Tabs';
 import { EmptyState } from '../ui/EmptyState';
+import { metricDataState } from './provenance-format';
 
 export type ChartVisualMode = 'bar' | 'line' | 'area' | 'donut';
 
@@ -108,6 +109,8 @@ interface AggregatesBarChartProps {
   horizontal?: boolean;
   onExpand?: () => void;
   height?: number;
+  /** Provenance badge for the figures in this chart (G2-02). */
+  badge?: React.ReactNode;
 }
 
 export const AggregatesBarChart: React.FC<AggregatesBarChartProps> = ({
@@ -116,9 +119,13 @@ export const AggregatesBarChart: React.FC<AggregatesBarChartProps> = ({
   metrics,
   horizontal = false,
   onExpand,
+  badge,
   height = 270,
 }) => {
-  const monetary = metrics.filter((m) => m.metricId !== 'profit_margin');
+  // Metrics without source data are left out rather than drawn as a misleading zero bar.
+  const monetary = metrics.filter(
+    (m) => m.metricId !== 'profit_margin' && metricDataState(m) !== 'MISSING_DATA'
+  );
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
 
   const visibleData = monetary
@@ -145,6 +152,7 @@ export const AggregatesBarChart: React.FC<AggregatesBarChartProps> = ({
         <div>
           <h3 className="chart-panel__title">{title}</h3>
           {subtitle && <p className="chart-panel__subtitle">{subtitle}</p>}
+          {badge && <div className="widget-provenance">{badge}</div>}
         </div>
         {onExpand && (
           <button
@@ -294,6 +302,8 @@ interface PeriodTrendChartProps {
   defaultMode?: 'line' | 'area' | 'bar';
   onExpand?: () => void;
   height?: number;
+  /** Provenance badge for the figures in this chart (G2-02). */
+  badge?: React.ReactNode;
 }
 
 export const PeriodTrendChart: React.FC<PeriodTrendChartProps> = ({
@@ -303,6 +313,7 @@ export const PeriodTrendChart: React.FC<PeriodTrendChartProps> = ({
   focusMetrics = ['total_revenue', 'total_expenses', 'net_profit'],
   defaultMode = 'line',
   onExpand,
+  badge,
   height = 270,
 }) => {
   const [mode, setMode] = useState<'line' | 'area' | 'bar'>(defaultMode);
@@ -330,6 +341,7 @@ export const PeriodTrendChart: React.FC<PeriodTrendChartProps> = ({
         <div>
           <h3 className="chart-panel__title">{title}</h3>
           {subtitle && <p className="chart-panel__subtitle">{subtitle}</p>}
+          {badge && <div className="widget-provenance">{badge}</div>}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -490,6 +502,8 @@ interface BusinessUnitChartProps {
   defaultMode?: 'donut' | 'bar';
   onExpand?: () => void;
   height?: number;
+  /** Provenance badge for the figures in this chart (G2-02). */
+  badge?: React.ReactNode;
 }
 
 export const BusinessUnitChart: React.FC<BusinessUnitChartProps> = ({
@@ -499,6 +513,7 @@ export const BusinessUnitChart: React.FC<BusinessUnitChartProps> = ({
   metricKey,
   defaultMode = 'donut',
   onExpand,
+  badge,
   height = 270,
 }) => {
   const [mode, setMode] = useState<'donut' | 'bar'>(defaultMode);
@@ -518,6 +533,7 @@ export const BusinessUnitChart: React.FC<BusinessUnitChartProps> = ({
         <div>
           <h3 className="chart-panel__title">{title}</h3>
           {subtitle && <p className="chart-panel__subtitle">{subtitle}</p>}
+          {badge && <div className="widget-provenance">{badge}</div>}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Tabs
@@ -607,6 +623,8 @@ interface EntityComparisonChartProps {
   data: CompanyComparisonPoint[];
   onExpand?: () => void;
   height?: number;
+  /** Provenance badge for the figures in this chart (G2-02). */
+  badge?: React.ReactNode;
 }
 
 export const EntityComparisonChart: React.FC<EntityComparisonChartProps> = ({
@@ -614,6 +632,7 @@ export const EntityComparisonChart: React.FC<EntityComparisonChartProps> = ({
   subtitle,
   data,
   onExpand,
+  badge,
   height = 280,
 }) => {
   const c1 = data[0];
@@ -640,6 +659,7 @@ export const EntityComparisonChart: React.FC<EntityComparisonChartProps> = ({
         <div>
           <h3 className="chart-panel__title">{title}</h3>
           {subtitle && <p className="chart-panel__subtitle">{subtitle}</p>}
+          {badge && <div className="widget-provenance">{badge}</div>}
         </div>
         {onExpand && (
           <button type="button" className="btn btn--ghost btn--xs" onClick={onExpand} aria-label={`Expand ${title}`}>
